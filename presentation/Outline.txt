@@ -1,0 +1,12 @@
+Intro and motivation for problem (recycling, replacing tedious jobs for human workers, incentivizing recycling through efficiency). 
+
+General summary of what we plan to do (have QR codes taped to pucks sliding along a conveyor belt, to be grabbed with maximum efficiency by a Scara robot). 
+
+Decision making algorithm theory
+
+Minimum time robot path theory
+
+Implementation of MATLAB with fmincon. 
+--> How we plan to improve our existing computer code in the future
+
+Potential future work: Temporal goal planning, a synthesis of decision making & minimum time. 

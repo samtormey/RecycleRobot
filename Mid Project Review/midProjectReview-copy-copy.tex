@@ -1,0 +1,111 @@
+\documentclass [11pt ]{ report}
+
+\usepackage{graphicx} % Allows including images
+\usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
+\usepackage{hyperref}
+\usepackage{color}
+
+
+
+\newcommand{\ut}[1]{\ensuremath{\tilde{#1}}}
+
+\title{Recycling Robotics: Optimal Motion Planning and Object Ordering}
+
+\author{Nicholas Link
+\and Samuel Tormey
+\and Ricky Levan}
+
+\renewcommand{\b}{\textbf}
+\newcommand{\ie}{{\it i.e.}}
+\newcommand{\eg}{{\it e.g.}}
+
+\begin{document}
+\maketitle
+
+
+\begin{abstract}
+Begin with a cover page that includes your names and an ?executive summary? that concisely
+describes the problem, motivation, your intended solution strategy, and any concerns you
+have about realizing the objectives. This summary must be 200 words or less and it should
+be carefully crafted.
+This is the most important single component of a report, as it is the only one that busy people
+(like your supervisors) may read. Do not hide critical details or concerns from this summary.
+\end{abstract}
+
+\section{Problem Statement}
+
+\b{What are your project objectives? What need does your project address?
+Who cares about your results? Which objectives take highest priority? Please also identify
+the ?applications expert? that is advising you.} 
+
+Our team is aiming to improve the efficiency of sorting in single stream recycling by creating a robotic movement algorithm to pick items off of a moving conveyor belt. We were inspired to work with recycling because of its positive effect on the environment, and after visiting the a Waste Management Materials Recovery Center (MRF) we found an area that we could address using robotics. Here, we will design an algorithm for a robotic arm to take the maximum number of moving objects off of a moving conveyor belt, which includes solving the optimal path of motion for the arm and the optimal ordering of objects to be grabbed.
+
+The MRF sorts materials in single stream recycling, and in one section employees sort clear and colored plastics. Even though sorting colors of plastics generates more revenue for the MRF, often these plastics are not sorted because of the necessary manual labor. We believe that parts of the sorting process such as this one can and should be automated for the sake of the reduced labor costs and economic gains for the MRF . Making recycling more economically efficient is important because recycling saves energy and is therefore important for the environment. 
+
+In the MRF, the plastics move on conveyor belt with the other recycling materials, and there already exists devices that can detect the location of colored and non-colored plastics. Therefore, our robotic arm will take as input the objects' locations on the belt and then grab the maximum number of objects and place them above or off the belt. This consists of solving the optimal path for the robotic arm to take to reach an object as well as solving the optimal ordering of objects to be picked so as to maximize objects grabbed and minimize time used. We will use a 3-degree of freedom arm, with 2 revolute joints in the plane and one prismatic joint for the z-axis. This will allow the robot to reach anywhere in it?s reachable workspace on the belt and reach down in between objects in order to grab the plastics that need to be taken off the belt. If we create a successful algorithm for a single robotic arm then we will look into algorithms for multiple robotic arms. We are hoping that our robotic arm algorithm could be implemented in the Houston MRF and other MRFs to improve the efficiency of recycling.
+
+
+\b{Applications expert?}
+
+
+\section{Literature Review}
+How have others approached this problem? Include bibliographic citations.
+This should be a bit more concise than the literature reviews in Tech Memo 2; you
+should also add sources that you have discovered since writing that memo. Please use citations
+and include them in a bibliography at the end of the document.
+
+\section{Design Criteria}
+Clearly explain your design criteria, and how each is quantified. In addition
+to the material from Tech Memo 3, include here the criteria weighting used in Tech Memo 5.
+
+\section{Candidate Design Solutions}
+Highlight the main strategies that you described in Tech Memo 4.
+If you included substantial mathematical content in that memo, scale that back here, especially
+for designs that you have since ruled out as not viable. (It is appropriate to give mathematical
+content for the main solutions that you intend to implement, including a description
+of numerical methods and software required.)
+
+\section{Design Evaluations}
+Include your scoring matrices from Tech Memo 5, along with your
+supporting rationale. Clearly specify the approach that you intend to implement. Specify the
+mathematical experts you have identified to advise you in implementing this solution.
+
+\section{Preliminary Prototyping/Results}
+All teams should now have begun prototyping solutions.
+Please describe your progress. If you have preliminary results from basic models, please
+include those results.
+
+\section{Project Plan for Spring Semester}
+This is a vital new component of the report. You should
+provide a detailed time-line that breaks your project into smaller subtasks, showing the period
+of time over which you intend to tackle each subtask. Please illustrate this graphically
+using a Gantt chart broken into weekly time intervals covering the Spring semester. (It would
+also be helpful if you sketch out how you plan to break up the work among your group members.)
+Your final project presentations will be made mid April 2014 in the CAAM Lunch seminar;
+your final project reports are due end of April 2014. (Exact dates will be determined in
+Spring 2014).
+You can draw Gantt charts using a variety of online tools (e.g., tomsplanner.com).
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
