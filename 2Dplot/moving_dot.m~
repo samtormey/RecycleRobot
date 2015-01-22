@@ -11,18 +11,28 @@ global circsize len1 len2 width
     width = .1;
     numofCircles = 5;
     
-    goalregion = [0;0;-1];    
+    goalregion = [pi/2;0];
+    
+    
+    %CirclePositions(1,:) = [.1:.1:.5, 0, .2];
+    %CirclePositions(2,:) = [.1:.1:.5, 0, -.1];
+    
     
      CirclePositions(1,:) = len1*rand(1,numofCircles) + len2;
      CirclePositions(2,:) = rand(1,numofCircles)*pi;
      CirclePositions(3,:) = zeros(numofCircles,1);
 
+%     CirclePositions(1,:) = len1*.5 + len2;
+%     CirclePositions(2,:) = -.5:numofCircles:.5;
     
-    [CirclePositions(1,:) CirclePositions(2,:)] = pol2cart(CirclePositions(2,:),CirclePositions(1,:));    
-     
+    [CirclePositions(1,:) CirclePositions(2,:)] = pol2cart(CirclePositions(2,:),CirclePositions(1,:));
+    
+%     CirclePositions(1,:) = linspace(-.5,.5,numofCircles); 
+%     CirclePositions(2,:) = ones(1,numofCircles)*1.5;
+  
+
+    
     [the1p, the2p, the1n, the2n] = inverseThe1_2([CirclePositions(1,:); CirclePositions(2,:)])
-    d3p = -1 + CirclePositions(3,:);
-    d3n = d3p;
     
     axislength = 2*(len1 + len2 + .5);
 
@@ -37,12 +47,12 @@ global circsize len1 len2 width
    
     options.init = 1;
     for i = 1:numofCircles
-        statePath = RealOptimalPathFind([goalregion' zeros(1,3)]',...
-            [the1p(i) the2p(i) d3p(i) zeros(1,3)]',options);
+        statePath = RealOptimalPathFind([goalregion' zeros(1,4)]',...
+            [the1p(i) the2p(i) zeros(1,4)]',options);
         n = size(statePath,1);
         for j = 1:n
             hold off
-            plot3D_SCARA(statePath(j,1:3));
+            plot2D_SCARA(statePath(j,1),statePath(j,2),j/n);
             plotcircle(CirclePositions);         
             axis([-axislength/2 axislength/2 -axislength/2 axislength])
             axis square

@@ -20,12 +20,13 @@ draw_arm_2;
 draw_arm_3;
 
 hand(1) = gcf;
-set(hand(1),'Position',[100 200 560 420])
-hand(2) = figure;
-objects = allchild(hand(1));
-copyobj(get(hand(1),'children'),hand(2));
-set(hand(2),'Position',[1000 200 560 420])
-view([46 14])
+hand
+
+
+new_handle = copyobj(h);
+
+
+
 
 
     function draw_base
@@ -39,7 +40,7 @@ view([46 14])
         top_verts = bottom_verts;
         for i = 1:n
             bottom_verts(i,:) = [r*cos(theta), r*sin(theta), 0];
-            top_verts(i,:) = [r*cos(theta), r*sin(theta), h-2*t];
+            top_verts(i,:) = [r*cos(theta), r*sin(theta), h];
             
             theta = theta + dtheta;
         end
@@ -86,8 +87,8 @@ view([46 14])
         
         % first joint vertices
         for i = 1:(n/2+1)
-            bottom_verts(i,:) = [r*cos(theta), r*sin(theta), h-2*t];
-            top_verts(i,:) = [r*cos(theta), r*sin(theta), h-t];
+            bottom_verts(i,:) = [r*cos(theta), r*sin(theta), h];
+            top_verts(i,:) = [r*cos(theta), r*sin(theta), h+t];
             
             theta = theta + dtheta;
         end
@@ -95,8 +96,8 @@ view([46 14])
         theta = 3*pi/2;
         % second joint vertices
         for i = (n/2)+2:n+2
-            bottom_verts(i,:) = [r*cos(theta) + len1, r*sin(theta), h-2*t];
-            top_verts(i,:) = [r*cos(theta) + len1, r*sin(theta), h-t];
+            bottom_verts(i,:) = [r*cos(theta) + len1, r*sin(theta), h];
+            top_verts(i,:) = [r*cos(theta) + len1, r*sin(theta), h+t];
             
             theta = theta + dtheta;
         end
@@ -145,8 +146,8 @@ view([46 14])
         
         % first joint vertices
         for i = 1:(n/2+1)
-            bottom_verts(i,:) = [r*cos(theta), r*sin(theta), h-t];
-            top_verts(i,:) = [r*cos(theta), r*sin(theta), h];
+            bottom_verts(i,:) = [r*cos(theta), r*sin(theta), h+t];
+            top_verts(i,:) = [r*cos(theta), r*sin(theta), h+2*t];
             
             theta = theta + dtheta;
         end
@@ -154,8 +155,8 @@ view([46 14])
         theta = 3*pi/2;
         % second joint vertices
         for i = (n/2)+2:n+2
-            bottom_verts(i,:) = [r*cos(theta) + len2, r*sin(theta), h-t];
-            top_verts(i,:) = [r*cos(theta) + len2, r*sin(theta), h];
+            bottom_verts(i,:) = [r*cos(theta) + len2, r*sin(theta), h+t];
+            top_verts(i,:) = [r*cos(theta) + len2, r*sin(theta), h+2*t];
             
             theta = theta + dtheta;
         end
@@ -208,8 +209,8 @@ view([46 14])
         bottom_verts = zeros(n,3);
         top_verts = bottom_verts;
         for i = 1:n
-            bottom_verts(i,:) = [r*cos(theta) , r*sin(theta), h-d3];
-            top_verts(i,:) = [r*cos(theta) , r*sin(theta), h+len3-d3];
+            bottom_verts(i,:) = [r*cos(theta) , r*sin(theta), h+t-d3];
+            top_verts(i,:) = [r*cos(theta) , r*sin(theta), h+t+len3-d3];
             
             theta = theta + dtheta;
         end
