@@ -4,14 +4,15 @@ function plot3D_SCARA (the1,the2,d3)
 % the1: The angle of the first scara arm
 % the2: The angle of the second scara arm
 % d3: The distance of the third scara arm.
-global len1 len2 width
+robot = ScaraInit;
+
 n = 10;
-base_radius = width/2; 
+base_radius = 0.1; 
 h = 2;
 t = 0.2;
-length_1 = len1;
-length_2 = len2;
-len3 = 2;
+len1 = robot.l_1;
+len2 = robot.l_2;
+len3 = robot.l_3;
 
 draw_base;
 draw_arm_1;
@@ -178,8 +179,8 @@ draw_arm_3;
         
         translate = [ones(num_verts,1)*(len1 - 2*r), zeros(num_verts,2)];
         translate = zeros(num_verts,3);
-        % vertices2 = (R1*((R2*vertices')'+ translate)')';
-        vertices2 = (R2*(vertices-translate)')';
+        vertices2 = (R1*(R2*vertices'))';
+%         vertices2 = (R2*(vertices-translate)')';
         
         patch('Vertices',vertices2,'Faces',faces,'facecolor','b')
         
