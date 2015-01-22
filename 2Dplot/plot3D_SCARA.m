@@ -8,7 +8,7 @@ robot = ScaraInit;
 
 n = 10;
 base_radius = 0.1; 
-h = 2;
+h = 1;
 t = 0.2;
 len1 = robot.l_1;
 len2 = robot.l_2;
@@ -18,7 +18,6 @@ draw_base;
 draw_arm_1;
 draw_arm_2;
 draw_arm_3;
-
 
     function draw_base
         r = base_radius;
@@ -54,7 +53,7 @@ draw_arm_3;
         
         patch('Vertices',vertices,'Faces',faces,'facecolor','b')
         view([45 45])
-        axis([-2 2 -2 2 0 5])
+        axis([-2 2 -2 2 0 3])
         
     end
 
@@ -63,7 +62,7 @@ draw_arm_3;
         % t = thickness of arm
         % r = end radius
         % the1 = theta 1
-        l = len1; r = base_radius;
+        r = base_radius;
         
         n = round(n/2)*2; % make n even
         
@@ -87,8 +86,8 @@ draw_arm_3;
         theta = 3*pi/2;
         % second joint vertices
         for i = (n/2)+2:n+2
-            bottom_verts(i,:) = [r*cos(theta) + l - 2*r, r*sin(theta), h];
-            top_verts(i,:) = [r*cos(theta) + l - 2*r, r*sin(theta), h+t];
+            bottom_verts(i,:) = [r*cos(theta) + len1, r*sin(theta), h];
+            top_verts(i,:) = [r*cos(theta) + len1, r*sin(theta), h+t];
             
             theta = theta + dtheta;
         end
@@ -137,8 +136,8 @@ draw_arm_3;
         
         % first joint vertices
         for i = 1:(n/2+1)
-            bottom_verts(i,:) = [r*cos(theta) + len1 - 2*r, r*sin(theta), h+t];
-            top_verts(i,:) = [r*cos(theta) + len1 - 2*r, r*sin(theta), h+2*t];
+            bottom_verts(i,:) = [r*cos(theta), r*sin(theta), h+t];
+            top_verts(i,:) = [r*cos(theta), r*sin(theta), h+2*t];
             
             theta = theta + dtheta;
         end
@@ -146,8 +145,8 @@ draw_arm_3;
         theta = 3*pi/2;
         % second joint vertices
         for i = (n/2)+2:n+2
-            bottom_verts(i,:) = [r*cos(theta) + len1 + len2 - 4*r, r*sin(theta), h+t];
-            top_verts(i,:) = [r*cos(theta) + len1 + len2 - 4*r, r*sin(theta), h+2*t];
+            bottom_verts(i,:) = [r*cos(theta) + len2, r*sin(theta), h+t];
+            top_verts(i,:) = [r*cos(theta) + len2, r*sin(theta), h+2*t];
             
             theta = theta + dtheta;
         end
@@ -167,8 +166,7 @@ draw_arm_3;
         side_faces(end,5:num_verts) = ones(1,2*n)*(n+1);
         
         faces = [bottom_face; top_face; side_faces];
-        
-        
+          
         % rotate vertices
         R1 = [cos(the1), -sin(the1), 0;
             sin(the1), cos(the1), 0;
@@ -177,9 +175,12 @@ draw_arm_3;
             sin(the2), cos(the2), 0;
             0        , 0        , 1];
         
-        translate = [ones(num_verts,1)*(len1 - 2*r), zeros(num_verts,2)];
-        translate = zeros(num_verts,3);
+        % rotation
         vertices2 = (R1*(R2*vertices'))';
+        
+        % translation
+        translate = [ones(num_verts,1)*(len1*cos(the1)),ones(num_verts,1)*(len1*sin(the1)), zeros(num_verts,1)];
+        vertices2 = vertices2 + translate;
 %         vertices2 = (R2*(vertices-translate)')';
         
         patch('Vertices',vertices2,'Faces',faces,'facecolor','b')
@@ -198,8 +199,8 @@ draw_arm_3;
         bottom_verts = zeros(n,3);
         top_verts = bottom_verts;
         for i = 1:n
-            bottom_verts(i,:) = [r*cos(theta) + len1+len2 - 4*base_radius, r*sin(theta), h+2*t-d3];
-            top_verts(i,:) = [r*cos(theta) + len1+len2 - 4*base_radius, r*sin(theta), h+2*t+len3-d3];
+            bottom_verts(i,:) = [r*cos(theta) , r*sin(theta), h+t-d3];
+            top_verts(i,:) = [r*cos(theta) , r*sin(theta), h+t+len3-d3];
             
             theta = theta + dtheta;
         end
@@ -218,6 +219,12 @@ draw_arm_3;
         side_faces(n,5:n) = ones(1,n-4)*n;
         
         faces = [top_face; bottom_face; side_faces];
+        
+        % translation;
+        xtrans = len1*cos(the1) + len2*cos(the1+the2)
+        ytrans = len1*sin(the1) + len2*sin(the1+the2)
+        
+        vertices = vertices + [ones(2*n,1)*xtrans, ones(2*n,1)*ytrans, zeros(2*n,1)];
         
         patch('Vertices',vertices,'Faces',faces,'facecolor','b')
         
