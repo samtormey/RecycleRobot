@@ -60,7 +60,7 @@ draw_arm_3;
         faces = [top_face; bottom_face; side_faces];
         figure(1); clf;
         
-        patch('Vertices',vertices,'Faces',faces,'facecolor','b');
+        patch('Vertices',vertices,'Faces',faces,'facecolor','r');
         view([45 45])
         axis([-2 2 -2 2 0 3])
         
@@ -124,7 +124,7 @@ draw_arm_3;
             0        , 0        , 1];
         vertices2 = (R*vertices')';
         
-        patch('Vertices',vertices2,'Faces',faces,'facecolor','b')
+        patch('Vertices',vertices2,'Faces',faces,'facecolor','c')
         
         
     end
@@ -192,7 +192,7 @@ draw_arm_3;
         vertices2 = vertices2 + translate;
 %         vertices2 = (R2*(vertices-translate)')';
         
-        patch('Vertices',vertices2,'Faces',faces,'facecolor','b')
+        patch('Vertices',vertices2,'Faces',faces,'facecolor','g')
         
         
     end

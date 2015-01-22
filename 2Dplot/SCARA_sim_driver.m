@@ -9,10 +9,6 @@ global len1 len2
 
     robot = ScaraInit;
 
-    n = 10;
-    base_radius = 0.1; 
-    h = 1;
-    t = 0.2;
     len1 = robot.l_1;
     len2 = robot.l_2;
     len3 = robot.l_3;
@@ -33,13 +29,10 @@ global len1 len2
     
     oct = Octo_Center;    
     axislength = 2*(len1 + len2 + .5);
-
     figure
-    hold on
-    
+    hold on  
     axis([-axislength/2 axislength/2 -axislength/2 axislength])
     axis square
-            
    
     
     %%% The plots need to change velocity according to T!!!! 
@@ -52,31 +45,50 @@ global len1 len2
     
     
     options.init = 1;
+    
+    %%% may have options.n for RealOptimalPathFind
+    
+    loops = 20*numofCircles;
+    M(loops) = struct('cdata',[],'colormap',[]);
+    cnt = 1;
+    
     for i = 1:numofCircles
-        statePath = RealOptimalPathFind([goalregion' zeros(1,3)]',...
+        [statePath stateVelocity d_delta] = RealOptimalPathFind([goalregion' zeros(1,3)]',...
             [the1p(i) the2p(i) d3p(i) zeros(1,3)]',options);
         n = size(statePath,1);
         for j = 1:n
             hold off
-            plot3D_SCARA(statePath(j,1),statePath(j,2),statePath(j,3));            
+            plot3D_SCARA(statePath(j,1),statePath(j,2),statePath(j,3));     
             for k = 1:numofCircles
                 plot3D_OCTO(oct(1,k),oct(2,k),oct(3,k),0);
             end
-            pause(.2)
+            grid on
+            text(1,1,2,'Real Time Optimization')
+%             pause(d_delta)
+            M(cnt) = getframe;
+            cnt = cnt + 1;
         end
         for j = 1:n
             hold off
             plot3D_SCARA(statePath(n-j+1,1),statePath(n-j+1,2),statePath(n-j+1,3)); 
             oct(1,i) = len1*cos(statePath(n-j+1,1)) + len2*cos(statePath(n-j+1,1) + statePath(n-j+1,2));
             oct(2,i) = len1*sin(statePath(n-j+1,1)) + len2*sin(statePath(n-j+1,1) + statePath(n-j+1,2));
-            oct(3,i) = 1 + statePath(n-j+1,3)
+            oct(3,i) = 1 + statePath(n-j+1,3);
             for k = 1:numofCircles
                 plot3D_OCTO(oct(1,k),oct(2,k),oct(3,k),0);  % is is possible to only plot changing oct positions, on the belt, they will always be changing
-            end                     
-            pause(.2)
+            end       
+            grid on
+%              pause(d_delta)
+            text(1,1,2,'Real Time Optimization')
+            M(cnt) = getframe;
+            cnt = cnt + 1;
         end
         options.init = 0;
     end
+    
+    
+    keyboard
+    
 
 end
 
