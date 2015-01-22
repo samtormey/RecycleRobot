@@ -18,16 +18,16 @@ global circsize len1 len2 width
     %CirclePositions(2,:) = [.1:.1:.5, 0, -.1];
     
     
-%      CirclePositions(1,:) = len1*rand(1,numofCircles) + len2;
-%      CirclePositions(2,:) = rand(1,numofCircles)*pi;
+     CirclePositions(1,:) = len1*rand(1,numofCircles) + len2;
+     CirclePositions(2,:) = rand(1,numofCircles)*pi;
 
 %     CirclePositions(1,:) = len1*.5 + len2;
 %     CirclePositions(2,:) = -.5:numofCircles:.5;
     
-%     [CirclePositions(1,:) CirclePositions(2,:)] = pol2cart(CirclePositions(2,:),CirclePositions(1,:));
+    [CirclePositions(1,:) CirclePositions(2,:)] = pol2cart(CirclePositions(2,:),CirclePositions(1,:));
     
-    CirclePositions(1,:) = linspace(-.5,.5,numofCircles); 
-    CirclePositions(2,:) = ones(1,numofCircles)*1.5;
+%     CirclePositions(1,:) = linspace(-.5,.5,numofCircles); 
+%     CirclePositions(2,:) = ones(1,numofCircles)*1.5;
   
 
     
@@ -44,9 +44,10 @@ global circsize len1 len2 width
     time = numel(the1);   
     
    
-    
+    options.init = 1;
     for i = 1:numofCircles
-        statePath = RealOptimalPathFind([goalregion' zeros(1,4)]',[the1p(i) the2p(i) zeros(1,4)]');
+        statePath = RealOptimalPathFind([goalregion' zeros(1,4)]',...
+            [the1p(i) the2p(i) zeros(1,4)]',options);
         n = size(statePath,1);
         for j = 1:n
             hold off
@@ -65,7 +66,7 @@ global circsize len1 len2 width
             axis square
             pause(.2)
         end
-        
+        options.init = 0;
     end
 
 end

@@ -12,7 +12,7 @@ ocs = octocenters;
 all_vertices = zeros(16,3,num_octos);
 for j = 1:num_octos
     verticesbottom = cat(2,cos(t)+ocs(j,1),sin(t)+ocs(j,2),ones(n,1)*(ocs(j,3) - (1/2)));
-    verticestop = cat(2,cos(t)+ocs(j,1),sin(t)+ocs(j,2),ones(n,1)*(ocs(j,3) + (1/2)));
+    verticestop = cat(2,cos(t)+ocs(j,1),sin(t)+ocs(j,2),ones(n,1)*(1/2)*ocs(j,3));
     all_vertices(:,:,j) = cat(1,verticesbottom,verticestop);
 end
 
