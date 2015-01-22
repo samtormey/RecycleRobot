@@ -5,8 +5,11 @@ n = 8;
 t = linspace(0,2*pi,n)' + theta;
 octocenter = [x y z];
 oc = octocenter;
-verticesbottom = cat(2,cos(t)+oc(1),sin(t)+oc(2),ones(n,1)*(oc(3)-1/2));
-verticestop = cat(2,cos(t)+oc(1),sin(t)+oc(2),ones(n,1)*(oc(3)+1/2));
+
+scale = 5;
+
+verticesbottom = cat(2,cos(t)/scale+oc(1),sin(t)/scale+oc(2),ones(n,1)*(oc(3)-1/scale));
+verticestop = cat(2,cos(t)/scale+oc(1),sin(t)/scale+oc(2),ones(n,1)*(oc(3)+1/scale));
 vertices = cat(1,verticesbottom,verticestop);
 
 top_bottom_faces = [1 2 3 4 5 6 7 8; 9 10 11 12 13 14 15 16];

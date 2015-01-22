@@ -19,13 +19,13 @@ draw_arm_1;
 draw_arm_2;
 draw_arm_3;
 
-hand(1) = gcf;
-set(hand(1),'Position',[100 200 560 420])
-hand(2) = figure;
-objects = allchild(hand(1));
-copyobj(get(hand(1),'children'),hand(2));
-set(hand(2),'Position',[1000 200 560 420])
-view([46 14])
+% hand(1) = gcf;
+% set(hand(1),'Position',[100 200 560 420])
+% hand(2) = figure;
+% objects = allchild(hand(1));
+% copyobj(get(hand(1),'children'),hand(2));
+% set(hand(2),'Position',[1000 200 560 420])
+% view([46 14])
 
 
     function draw_base
@@ -60,7 +60,7 @@ view([46 14])
         faces = [top_face; bottom_face; side_faces];
         figure(1); clf;
         
-        patch('Vertices',vertices,'Faces',faces,'facecolor','b')
+        patch('Vertices',vertices,'Faces',faces,'facecolor','b');
         view([45 45])
         axis([-2 2 -2 2 0 3])
         
@@ -208,8 +208,8 @@ view([46 14])
         bottom_verts = zeros(n,3);
         top_verts = bottom_verts;
         for i = 1:n
-            bottom_verts(i,:) = [r*cos(theta) , r*sin(theta), h-d3];
-            top_verts(i,:) = [r*cos(theta) , r*sin(theta), h+len3-d3];
+            bottom_verts(i,:) = [r*cos(theta) , r*sin(theta), h+d3];
+            top_verts(i,:) = [r*cos(theta) , r*sin(theta), h+len3+d3];
             
             theta = theta + dtheta;
         end
@@ -230,8 +230,8 @@ view([46 14])
         faces = [top_face; bottom_face; side_faces];
         
         % translation;
-        xtrans = len1*cos(the1) + len2*cos(the1+the2)
-        ytrans = len1*sin(the1) + len2*sin(the1+the2)
+        xtrans = len1*cos(the1) + len2*cos(the1+the2);
+        ytrans = len1*sin(the1) + len2*sin(the1+the2);
         
         vertices = vertices + [ones(2*n,1)*xtrans, ones(2*n,1)*ytrans, zeros(2*n,1)];
         
