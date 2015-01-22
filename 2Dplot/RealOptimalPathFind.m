@@ -1,4 +1,4 @@
-function statePath = RealOptimalPathFind(start,finish)
+function statePath = RealOptimalPathFind(start,finish,options)
 
 % takes advantage of scopes in Matlab in order to reduce 
 % number of inputs required for auxillary functions.
@@ -8,36 +8,37 @@ clc;
 startState = start;
 finishState = finish;
 
-n = 20;  
-SZ = 9*n+1;
-X0 = zeros(SZ,1);
+n = 20;    % number of time steps
+SZ = 9*n+1;   
+X0 = zeros(SZ,1);  
 
-temp = load('CurrentX0.mat');
-X0_temp = temp.X;
-
-if numel(X0_temp) == numel(X0)
-    X0 = X0_temp;
-end
-    
-X0(1:6) = start;
-X0((6*(n-1) + 1):6*n) = finish;
-
-back = 0;   %  Backwards or Forward Euler
-yessave = 1;
-
-% if nold ~= n    % just for size
-
-% end
-dtau = 1/(n-1);
+dtau = 1/(n-1);   
 dt = 1e-8;  % for finite difference in Jacobian
 M = 10;
-J = sparse((n+1)*6,SZ);
+J = sparse((n+1)*6,SZ);  % pre-allocation for own Jacobian
 I = computeMoments;  % compute moments to be used in F and f, all constants
 
 
-% startState = [0 0 -.3 0 0 0]';
+% loads the previous solution X to test as new initial guess
+
+temp = load('CurrentX0.mat');
+X0_temp = temp.X;                   
+if numel(X0_temp) == numel(X0)
+    X0 = X0_temp;
+end
+   
+% boundary conditions
+X0(1:6) = start;  
+X0((6*(n-1) + 1):6*n) = finish;
+
+back = 0;   %  Backwards or Forward Euler, own Jacobian only implemented for Forwards currently
+yessave = 1;
+
+
+% startState = [0 0 -.3 0 0 0]';  % Example states
 % finishState = [2 2 -.8 0 0 0]';
 
+        
     function b = f(X,u)
 
         th1 = X(1);  th2 = X(2); d3  = X(3); 
@@ -48,12 +49,16 @@ I = computeMoments;  % compute moments to be used in F and f, all constants
             0, 0, I(19)];
         h = [-2*I(15)*sin(th2)*th1d*th2d - .5*I(18)*sin(th2)*th2d^2;
             I(15)*sin(th2)*th1d^2 - .25*I(13)*sin(th2)*th2d^2;
-            0];
+            0];     
         b = [th1d; th2d; d3d; H\(h - u)];
 
     end  % robot dynamics
 
-    function b = F(X)             
+    % discretizied optimization function without computing Jacobian,
+    % F_ownJacobian is more fully commented
+
+    function b = F(X)   
+        
         
         b = zeros((n+1)*6,1);               
 
@@ -82,10 +87,7 @@ I = computeMoments;  % compute moments to be used in F and f, all constants
     end   
 
     function [Cout,Ceq, Coutgrad, Ceqgrad] = F_ownJacobian(X)  % this has our hand structured Jacobian, not currently working.    
-         
-        % J(4,5) = 0 and J(5,4) = 0, but built-in Matlab has small values
-        % there.  This breaks the symmetry.  Im going to ignore for now.
-        
+                 
         b = zeros((n+1)*6,1);               
 
         for i = 1:n-1            
@@ -93,35 +95,44 @@ I = computeMoments;  % compute moments to be used in F and f, all constants
             cti = (6*n + 3*(i-1) + 1):(6*n + 3*i);  % indices of the 3 control variables at time step i
             jvip1 = (6*(i) + 1):6*(i+1);  % 6 state variables at time step i+1              
             ctip1 = (6*n + 3*(i) + 1):(6*n + 3*(i+1));  % control variables at time step i+1  (used for backwards Euler)        
+            
+            % Forward Euler 
             if back == 0        
-                evald_f = f(X(jvi),X(cti));
-                b(jvi) = (X(jvip1) - X(jvi))/dtau - ... 
+                evald_f = f(X(jvi),X(cti));   % save the value of f to reduce redundancy
+                b(jvi) = (X(jvip1) - X(jvi))/dtau - ...  % x' = f  constraint, this is just F
                     X(end)*evald_f;    
                 
-        % Compute the Jacobian        
+            % Compute the Jacobian        
                 
+            
+                % how much would vectorizing increase performance?
+            
                 % differentiate F(jvi) wrt to jvi
                 for j = jvi
+                    
+                    % this is for computing finite differences
                     dtej = zeros(6,1);  % directional infinitesimal
                     bjvi_dtej = zeros(6,1);                    
                     k = mod(j,6); if k == 0, k = 6; end  % iterating through the 6 state variables, could be replaced with a counter 1:6
                     dtej(k) = dt; % creating directional infinitesimal
                     Xjvi_dtej = X(jvi) + dtej; % adding directional infinitesimal to THETA(i) 
-                                
+                              
+                    % derivative of b(i) wrt theta(i)
                     bjvi_dtej = - X(end)*(f(Xjvi_dtej,X(cti)) - evald_f)/dt;
-                    bjvi_dtej(k) = bjvi_dtej(k) - 1/dtau;
-                            
+                    bjvi_dtej(k) = bjvi_dtej(k) - 1/dtau;                                                
                     J(jvi,j) = bjvi_dtej;
+                    
+                    % derivative of b(i) wrt theta(i+1)
                     J(j,jvip1(k)) = 1/dtau;
                 end
-
-%                 for j = jvip1
-%                     J(jvi,j) = 0; %1/dtau;
-%                 end
                 for j = cti
+                    
+                    % prepare finite difference for the control variables
                     dtej = zeros(3,1);
                     k = mod(j,3); if k == 0, k = 3; end
-                    dtej(k) = dt;                    
+                    dtej(k) = dt;           
+                    
+                    % 
                     Ucti_dtej = X(cti) + dtej;
                     bjvi_dtej = -X(end)*(f(X(jvi),Ucti_dtej) - evald_f)/dt;  
                     J(jvi,j) = bjvi_dtej; 
@@ -132,6 +143,7 @@ I = computeMoments;  % compute moments to be used in F and f, all constants
                                 
             end            
 
+            % Backwards Euler
             if back == 1
                 b(jvi) = (X(jvip1) - X(jvi))/dtau - ... 
                     X(end)*f(X(jvip1),X(ctip1));
@@ -139,48 +151,38 @@ I = computeMoments;  % compute moments to be used in F and f, all constants
             
         end
         
+        % Boundary conditions
         endstate = 6*(n+1); 
         J(endstate-11:endstate,:) = 0;
         J(endstate-11:endstate-6,1:6) = -1*eye(6,6);
         J(endstate-5:endstate,endstate-11:endstate-6) = -1*eye(6,6);
         b(end-11:end-6) = startState - X(1:6);
         jvn = (6*(n-1) + 1):6*n;        
-        b(end-5:end) = finishState - X(jvn);  
+        b(end-5:end) = finishState - X(jvn); 
+        
+        % Wrappers for fmincon
         Ceq = b;
         Ceqgrad = J';
         Cout = [];       
          Coutgrad = [];
         
     end   
-    
-    function [Cout,Ceq, Coutgrad, Ceqgrad] = Ftemp(X)  % Wrapper on Newton Optimization
- 
-         [Ceq, Ceqgrad] = F_ownJacobian(X);
-         Cout = [];       
-         Coutgrad = [];
-
-    end
-     
-    function [Cout,Ceq, Coutgrad, Ceqgrad] = Ftemp2(X)  % Wrapper on Newton Optimization
- 
-         Ceq = F(X);
-         Ceqgrad = [];
-         Cout = [];       
-         Coutgrad = [];
-
-    end
-
-    tic
-    while(sum(abs(F(X0))) > .1)   % could save an X0 that works, save a few seconds
-        X0 = rand(SZ,1);      
-        X0(1:6) = start;
-        X0((6*(n-1) + 1):6*n) = finish;
-        X0 = fsolve(@F,X0);      
-    end
-    toc
-    disp('Time it takes to find initial guess')
-
-    
+   
+    % Option to find random initial guess
+    if options.init == 1
+        tic
+        while(sum(abs(F(X0))) > .1)   % could save an X0 that works, save a few seconds
+            fprintf('\n Finding random initial guess for X \n');
+            X0 = rand(SZ,1);      
+            X0(1:6) = start;
+            X0((6*(n-1) + 1):6*n) = finish;
+            X0 = fsolve(@F,X0);      
+        end
+        toc
+        disp('Time it takes to find initial guess')
+    end 
+       
+    % Lower and upperbounds on state variables
     JointLB = -inf*ones(6*n,1); %      JointLB(5:3:end) = -3;
     JointLB(3:6:end) = -1;
     JointUB = inf*ones(6*n,1);
@@ -209,6 +211,7 @@ I = computeMoments;  % compute moments to be used in F and f, all constants
 
 end
 
+% Extract the total time variable (the objective)
 
 function b = Objective(x)
 
@@ -295,26 +298,6 @@ I(19) = 1;  % M3
 end
 
 
-
-%%%%%%%
-% Started coding for analytic Jacobian
-%%%%%%%
-
-
-
-%         for j = 1:numel(b)
-%                 for k = 1:SZ
-%                     if mod(j,2) == 0   % then b is dealing with a joint velocity
-%                         if mod(j,6) == 2    % 1st joint velocity
-%                             if mod(k,) == 341  % differenting wrt joint or velocity or control at this time step
-%                             J(j,k) = 
-%                         elseif mod(j,6) == 4  % 2nd joint velocity
-%                             J(j,k) = 
-%                         elseif mod(j,6) == 0 % 3rd joint velocity
-%                             J(j,k) =
-%                         end
-%                     elseif mod(j,2) == 1
-%                         if mod(j,6) == 1  % 1st joint position
 
 
 
