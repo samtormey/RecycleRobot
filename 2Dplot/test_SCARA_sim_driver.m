@@ -1,4 +1,4 @@
-function SCARA_sim_driver
+function test_SCARA_sim_driver
 
 close all
 
@@ -14,7 +14,7 @@ global len1 len2
     len3 = robot.l_3;
     numofCircles = 5;
     
-    goalregion = [0;0;-1;zeros(3,1)];    
+    goalregion = [0;0;-1];    
     
     Octo_Center(1,:) = len1*rand(1,numofCircles) + len2;
     Octo_Center(2,:) = rand(1,numofCircles)*pi;
@@ -44,44 +44,41 @@ global len1 len2
     
     
     
-    options.init = 0;
+    options.init = 1;
     
     %%% may have options.n for RealOptimalPathFind
     
     loops = 20*numofCircles;
     M(loops) = struct('cdata',[],'colormap',[]);
-    cnt = 1;    
-    n = 40;
-    
+    cnt = 1;
     
     for i = 1:numofCircles
-        % first try finding a test optimal path
-         [testPath testVelocity testTorque dummy3 X0] = approx_traj(n,16,goalregion,...
-             [the1p(i) the2p(i) d3p(i) zeros(1,3)]'); 
-         
-         X0(6*n+1:9*n) = X0(6*n+1:9*n)/10;
-         
-        [statePath stateVelocity d_delta T] = RealOptimalPathFind(goalregion,...
-            [the1p(i) the2p(i) d3p(i) zeros(1,3)]',options,X0,n);                
-        n = size(statePath,1);
-                keyboard
+        n = 40;
+                        
+        [testPath testVelocity dummy d_delta dummy2] = approx_traj(n,16,[goalregion' zeros(1,3)]',...
+            [the1p(i) the2p(i) d3p(i) zeros(1,3)]');
+
+        testPath = testPath';
         
         for j = 1:n
             hold off
-            plot3D_SCARA(statePath(j,1),statePath(j,2),statePath(j,3));     
+            plot3D_SCARA(testPath(j,1),testPath(j,2),testPath(j,3));     
             for k = 1:numofCircles
                 plot3D_OCTO(oct(1,k),oct(2,k),oct(3,k),0);
             end
             grid on
-            pause(d_delta)
+            pause(.03)
 
         end
+        
+        keyboard
+       
         for j = 1:n
             hold off
-            plot3D_SCARA(statePath(n-j+1,1),statePath(n-j+1,2),statePath(n-j+1,3)); 
-            oct(1,i) = len1*cos(statePath(n-j+1,1)) + len2*cos(statePath(n-j+1,1) + statePath(n-j+1,2));
-            oct(2,i) = len1*sin(statePath(n-j+1,1)) + len2*sin(statePath(n-j+1,1) + statePath(n-j+1,2));
-            oct(3,i) = 1 + statePath(n-j+1,3);
+            plot3D_SCARA(testPath(n-j+1,1),testPath(n-j+1,2),testPath(n-j+1,3)); 
+            oct(1,i) = len1*cos(testPath(n-j+1,1)) + len2*cos(testPath(n-j+1,1) + testPath(n-j+1,2));
+            oct(2,i) = len1*sin(testPath(n-j+1,1)) + len2*sin(testPath(n-j+1,1) + testPath(n-j+1,2));
+            oct(3,i) = 1 + testPath(n-j+1,3);
             for k = 1:numofCircles
                 plot3D_OCTO(oct(1,k),oct(2,k),oct(3,k),0);  % is is possible to only plot changing oct positions, on the belt, they will always be changing
             end       

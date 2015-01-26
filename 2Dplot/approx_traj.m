@@ -1,35 +1,46 @@
-function [  ] = simulateScara_controllers  %( startState, finishState, n )
+function [positions velocities torques tn X0] = approx_traj(n,T,start,finish)  % accepts start and finish as row vectors
 
+    positions = zeros(3,n);
+    velocities = zeros(3,n);
+    accelerations = zeros(3,n);
+    a_2 = zeros(3,n);
+    a_3 = zeros(3,n);
+    torques = zeros(3,n);
+    X0 = zeros(9*n+1,1);
 
-close all;
+    positions(:,1) = start(1:3);
+    positions(:,n) = finish(1:3);
+    velocities(:,1) = start(4:6);
+    velocities(:,n) = finish(4:6);
 
-% Do we have to start with 0 acceleration?
+    tn = T/(n-1);
 
-% Initialize robot
+    for i = 2:n-1
+        positions(:,i) = positions(:,i-1) + (finish(1:3) - start(1:3))/n;  
+    end
+    for i = 2:n-1
+        velocities(:,i) = (positions(:,i+1) - positions(:,i-1))/(2*tn);
+    end
+    for i = 1:n-1
+        a_2(:,i) =  3/(tn^2)*(positions(:,i+1) - positions(:,i)) - ...
+                        2/tn*velocities(:,i) - 1/tn*velocities(:,i+1);
+        a_3(:,i) = -2/(tn^3)*(positions(:,i+1) - positions(:,i)) + ...
+                        1/tn^2*(velocities(:,i+1) - velocities(:,i));
+    end
+    for i = 1:n-1
+        accelerations(:,i) = 2*a_2(:,i) + 6*a_3(:,i)*tn;
+    end
+    
+    accelerations(:,n) = zeros(3,1);  % could change this potentially
 
+    I = computeMoments;
+    
+    for i = 1:n
+        torques(:,i) = f_acc([positions(:,i); velocities(:,i)],accelerations(:,i));    
+    end
+    
 
-n = 40;
-
-startState = [0 0 -.3 0 0 0]';  % Example states
-finishState = [2 2 -.8 0 0 0]';
-
-
-robot = ScaraInit();
-state = zeros(6,n); 
-state(:,1) = startState;
-dt = 1/(n-1);
-
-u = zeros(3,1);
-
-Kp = 2;
-Kv = 2*sqrt(Kp);
-
-
-
-
-    I = computeMoments;  % compute moments to be used in F and f, all constants
-
-    function b = f(X,u)
+    function torque = f_acc(X,acc)
 
         th1 = X(1);  th2 = X(2); d3  = X(3); 
         th1d = X(4); th2d = X(5); d3d  = X(6);
@@ -39,39 +50,47 @@ Kv = 2*sqrt(Kp);
             0, 0, I(19)];
         h = [-2*I(15)*sin(th2)*th1d*th2d - .5*I(18)*sin(th2)*th2d^2;
             I(15)*sin(th2)*th1d^2 - .25*I(13)*sin(th2)*th2d^2;
-            0];
-        b = [th1d; th2d; d3d; H\(h - u)];
+            0];     
 
-    end  % robot dynamics
+        torque = -H*acc + h; 
 
+    end
 
-        for i = 1:n-1 % time                         
-            
-            u = -Kp*(state(1:3,i) - finishState(1:3)) - Kv*state(4:6,i);                                    
-%             u = [4;4;-2];
-            k1 = f(state(:,i),u);            
-            k2 = f(state(:,i)+.5*dt*k1,u);                
-            k3 = f(state(:,i)+.5*dt*k2,u);        
-            k4 = f(state(:,i)+dt*k3,u);     
-            state(:,i+1) = state(:,i) + (1/6)*dt*(k1+2*k2+2*k3+k4);       
-
-        end   
-        
-        keyboard
-        
-        statePath = state(1:3,:)';
-        
-        for i = 2:n
-            
-            plot3D_SCARA(statePath(i,1),statePath(i,2),statePath(i,3));            
-            pause(.1)
-            
-        end   
+    for i = 1:n  
+        jvi = (6*(i-1) + 1):6*i;  % indices of the 6 state variables at time step i
+        cti = (6*n + 3*(i-1) + 1):(6*n + 3*i);  %
+        X0(jvi,1) = [positions(:,i); velocities(:,i)];
+        X0(cti,1) = torques(:,i);
+    end
     
+        X0(end) = T;
+        
+        
+ Kv = 30;
+ Kp = 130;
+
+    th1 = X(1,i);
+    th2 = X(2,i);
+    
+    tau(1,1) = -Kp*(th1 - th1subd) - Kv*th1d;
+    tau(2,1) = -Kp*(th2 - th2subd) - Kv*th2d;
+
+    accel_prev = accel; 
+    accel = M\(tau - C - G);
+    
+    % Trapezoidal Integration
+    if i > 0
+      X_dot(:,i+1) = X_dot(:,i) + .5 * (accel_prev + accel) * dt;
+      X(:,i+1) = X(:,i) + .5 * (X_dot(:,i) + X_dot(:,i+1)) * dt;
+    end
+        
+
 end
 
 
-function I = computeMoments
+
+
+    function I = computeMoments
 
 % Initialize robot
 robot = ScaraInit();
@@ -146,6 +165,8 @@ I(17) = I(3) + I(11);
 I(18) = I(5) + 2*(I(12)+I(13));
 I(19) = 1;  % M3
 
-end
+    end
+
+
 
 
