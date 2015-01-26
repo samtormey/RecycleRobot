@@ -32,11 +32,11 @@
 \frametitle{Intro}
 \begin{itemize}
 \item We are building a simulated robot to manipulate objects on a conveyor belt
-\item The desire to improve recycling efficiency inspired our project
+\item We were motivated by the desire to improve recycling efficiency
 \end{itemize}
 \begin{centering}
-\includegraphics[width=0.55\linewidth,height=0.55\textheight,keepaspectratio]{/Users/nicklink/Documents/RecycleRobot/presentations/MidYearReport/scara.jpg}
-%\includegraphics[width=0.55\linewidth,height=0.55\textheight,keepaspectratio]{scara2.jpg}
+\includegraphics[width=0.55\linewidth,height=0.55\textheight,keepaspectratio]{scara.jpg}
+
 \end{centering}
 
 \end{frame}
@@ -45,21 +45,33 @@
 \begin{frame}
 \frametitle{Review: Last Semester's Work}
 \begin{itemize}
-\item The core CAAM in our project comes from optimization
-\item Last semester we studied the math behind this optimization
-\item Comes in two kinds: optimizing path and optimizing picking strategy
-\end{itemize}
+\item First we researched the robot dynamics for a SCARA arm.
 
+\item Next we formulated our optimization problem:
+\begin{align*}
+\min  & \: \:T \\
+\mbox{s.t. } & \frac{d\ut{x}(\tau)}{d\tau} = Tf(\ut{x}(\tau),\ut{u}(\tau))  &\tau \in [0,1] \\
+& -M \leq \ut{u}_j(\tau) \leq M  & 1 \leq j \leq 3 \\
+& \ut{x}(0) = x_0 \\
+& \ut{x}(1) = x_{\scriptsize\mbox{T}} 
+\end{align*}
+
+\end{itemize}
 
 \end{frame}
 
 
 \begin{frame}
-\frametitle{Current Progress Outline}
+\frametitle{Outline of current and future work}
+Current work:
 \begin{itemize}
 \item Custom Jacobian
-\item Initial guess optimizations
 \item 3D robot animation
+\end{itemize}
+Future work:
+\begin{itemize}
+\item Online optimal path finding
+\item Temporal goal planning
 \end{itemize}
 
 \end{frame}
@@ -68,61 +80,38 @@
 \frametitle{Custom Jacobian}
 Reminder: Our dynamics can be written in the following form:
 $$b = \frac{x_{i+1} - x_i}{d\tau} - Tf(x_i,u_i) = 0$$
-
-\end{frame}
-
-
-
-
-\begin{frame}
-\frametitle{Initial Guess Optimization}
+\includegraphics[width=0.75\linewidth,height=0.55\textheight]{Spy_Jacobian.jpg}
 
 \end{frame}
 
 
 \begin{frame}
 \frametitle{3-D Robot Animation}
+Here is a video of our current simulation
 
 \end{frame}
 
-
 \begin{frame}
-\frametitle{Semester Goals Outline}
+\frametitle{Online performance}
 \begin{itemize}
-\item Online optimal path finding
-\item Moving conveyor belt
-\item Temporal goal planning
+\item A key component is efficiently generating an initial guess
+\item We may consider pre-computing optimal paths
+\includegraphics[width=0.55\linewidth,height=0.55\textheight,keepaspectratio]{scara2.jpg}
+
+
 \end{itemize}
 
 \end{frame}
 
-
-\begin{frame}
-\frametitle{Online performance}
-
-\end{frame}
-
-
-\begin{frame}
-\frametitle{Moving Conveyor Belt}
-
-\end{frame}
-
-
 \begin{frame}
 \frametitle{Temporal Goal Planning}
+\begin{itemize}
+\item Currently, our system finds an optimal path, grabs and moves an object, then repeats.
+\item With temporal goal planning, we can search several steps in advance for a more 
+globally optimal solution
+\end{itemize}
 
 \end{frame}
-
-\begin{frame}
-\frametitle{End}
-
-\end{frame}
-
-
-
-
-
 
 
 
