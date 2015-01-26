@@ -56,7 +56,7 @@
 & \ut{x}(1) = x_{\scriptsize\mbox{T}} 
 \end{align*}
 
-\end{itemize}
+\end{itemize}Re
 
 \end{frame}
 
@@ -78,8 +78,8 @@ Future work:
 
 \begin{frame}
 \frametitle{Custom Jacobian}
-Reminder: Our dynamics can be written in the following form:
-$$b = \frac{x_{i+1} - x_i}{d\tau} - Tf(x_i,u_i) = 0$$
+Reminder: Our constraints can be written in the following form:
+$$c_i = \frac{\ut{x_{i+1}} -\ut{ x_i}}{d\tau} - Tf(\ut{x_i},\ut{u_i}) = 0$$
 \includegraphics[width=0.75\linewidth,height=0.55\textheight]{Spy_Jacobian.jpg}
 
 \end{frame}
