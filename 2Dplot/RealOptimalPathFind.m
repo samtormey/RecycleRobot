@@ -186,6 +186,7 @@ yessave = 1;
     if options.init == 2
         X0 = sigmoidInitialGuess(startState,finishState,n);
     end
+    
        
     % Lower and upperbounds on state variables
     JointLB = -inf*ones(6*n,1); %      JointLB(5:3:end) = -3;
@@ -200,7 +201,9 @@ yessave = 1;
  
     
     tic
-    X = fmincon(@Objective,X0,[],[],[],[],lb,ub,@F_ownJacobian,opt);
+    disp('About to start fmincon')
+    %X = fmincon(@Objective,X0,[],[],[],[],lb,ub,@F_ownJacobian,opt);
+    X = X0;
     toc
     d_delta = X(end) / (n-1);
     disp('Time it takes to find optimal path')
@@ -244,8 +247,9 @@ velocitySigmoid = @(x,alpha,beta) (beta-alpha).* ...
 for j = 1:3
     positionPathGuess(:,j) = positionSigmoid(linspace(-4,4,n)', ...
         startPosition(j),finishPosition(j));
+    % alpha & beta for velocity come from the position start & end
     velocityPathGuess(:,j) = velocitySigmoid(linspace(-4,4,n)', ...
-        startVelocity(j),finishVelocity(j));
+        startPosition(j),finishPosition(j));
     % assumption that torque shape may roughly follow velocity
     torquePathGuess(:,j) = velocityPathGuess(:,j);
 end
