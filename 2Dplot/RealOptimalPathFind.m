@@ -2,7 +2,7 @@ function [statePath stateVelocity d_delta T] = RealOptimalPathFind(start,finish,
 
 % takes advantage of scopes in Matlab in order to reduce 
 % number of inputs required for auxillary functions.
-
+%
 clc;
 
 startState = start;

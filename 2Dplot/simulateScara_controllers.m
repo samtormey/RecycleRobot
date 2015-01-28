@@ -12,7 +12,7 @@ n = 40;
 
 startState = [0 0 -.3 0 0 0]';  % Example states
 finishState = [2 2 -.8 0 0 0]';
-
+%
 
 robot = ScaraInit();
 state = zeros(6,n); 
