@@ -1,16 +1,18 @@
-function statePath = RealOptimalPathFind(start,finish,options)
+function [statePath d_delta T] = RealOptimalPathFind(start,finish,options,X0,n)
 
 % takes advantage of scopes in Matlab in order to reduce 
 % number of inputs required for auxillary functions.
-
+%
 clc;
 
 startState = start;
 finishState = finish;
 
-n = 20;    % number of time steps
 SZ = 9*n+1;   
-X0 = zeros(SZ,1);  
+X0 = zeros(SZ,1); 
+
+Q = 4;  % number of joints
+
 
 dtau = 1/(n-1);   
 dt = 1e-8;  % for finite difference in Jacobian
@@ -18,18 +20,28 @@ M = 10;
 J = sparse((n+1)*6,SZ);  % pre-allocation for own Jacobian
 I = computeMoments;  % compute moments to be used in F and f, all constants
 
-
-% loads the previous solution X to test as new initial guess
-
-temp = load('CurrentX0.mat');
-X0_temp = temp.X;                   
-if numel(X0_temp) == numel(X0)
-    X0 = X0_temp;
+if n ~= 20
+    disp('n is not 20')
+    return    
 end
-   
-% boundary conditions
-X0(1:6) = start;  
-X0((6*(n-1) + 1):6*n) = finish;
+    
+
+
+%% Vestiges of old X0 paradigm
+
+            % loads the previous solution X to test as new initial guess
+            % 
+            % temp = load('CurrentX0.mat');
+            % X0_temp = temp.X;                   
+            % if numel(X0_temp) == numel(X0)
+            %     X0 = X0_temp;
+            % end
+
+            % % boundary conditions
+            % X0(1:6) = start;  
+            % X0((6*(n-1) + 1):6*n) = finish;
+            
+%%
 
 back = 0;   %  Backwards or Forward Euler, own Jacobian only implemented for Forwards currently
 yessave = 1;
@@ -59,30 +71,31 @@ yessave = 1;
 
     function b = F(X)   
         
-        
-        b = zeros((n+1)*6,1);               
+            Q = 3;
 
-        for i = 1:n-1            
-            jvi = (6*(i-1) + 1):6*i;
-            cti = (6*n + 3*(i-1) + 1):(6*n + 3*i);
-            jvip1 = (6*(i) + 1):6*(i+1);                
-            ctip1 = (6*n + 3*(i) + 1):(6*n + 3*(i+1));           
-            if back == 0        
-                feval = f(X(jvi),X(cti));
-                b(jvi) = (X(jvip1) - X(jvi))/dtau - ... 
-                    X(end)*feval;                                                  
-            end            
+            b = zeros((n+1)*Q,1);               
 
-            if back == 1
-                b(jvi) = (X(jvip1) - X(jvi))/dtau - ... 
-                    X(end)*f(X(jvip1),X(ctip1));
-            end 
+            for i = 1:n-1            
+                jvi = (2*Q*(i-1) + 1):2*Q*i;
+                cti = (2*Q*n + Q*(i-1) + 1):(2*Q*n + Q*i);
+                jvip1 = (Q*2*(i) + 1):2*Q*(i+1);                
+                ctip1 = (2*Q*n + Q*(i) + 1):(2*Q*n + Q*(i+1));           
+                if back == 0        
+                    feval = f(X(jvi),X(cti));
+                    b(jvi) = (X(jvip1) - X(jvi))/dtau - ... 
+                        X(end)*feval;                                                  
+                end            
+
+                if back == 1
+                    b(jvi) = (X(jvip1) - X(jvi))/dtau - ... 
+                        X(end)*f(X(jvip1),X(ctip1));
+                end 
             
         end
 
-        jvn = (6*(n-1) + 1):6*n;  
-        b(end-11:end-6) = startState - X(1:6);
-        b(end-5:end) = finishState - X(jvn);                                         
+        jvn = (2*Q*(n-1) + 1):2*Q*n;
+        b(end-(4*Q-1):end-(2*Q)) = startState - X(1:2*Q);
+        b(end-2*Q+1:end) = finishState - X(jvn);                                         
         
     end   
 
@@ -171,6 +184,7 @@ yessave = 1;
     % Option to find random initial guess
     if options.init == 1
         tic
+        keyboard
         while(sum(abs(F(X0))) > .1)   % could save an X0 that works, save a few seconds
             fprintf('\n Finding random initial guess for X \n');
             X0 = rand(SZ,1);      
@@ -195,8 +209,14 @@ yessave = 1;
  
     
     tic
-    X = fmincon(@Objective,X0,[],[],[],[],lb,ub,@F_ownJacobian,opt);
+    if options.objective == 1
+        X = fmincon(@Objective1,X0,[],[],[],[],lb,ub,@F_ownJacobian,opt);
+    end
+    if options.objective == 0
+        X = fmincon(@Objective,X0,[],[],[],[],lb,ub,@F_ownJacobian,opt);
+    end
     toc
+    d_delta = X(end) / (n-1);
     disp('Time it takes to find optimal path')
     save('CurrentX0','X')
     
@@ -211,12 +231,23 @@ yessave = 1;
 
 end
 
-% 
+% Extract the total time variable (the objective)
+
+function b = Objective1(x)
+
+    T = x(end); 
+    n = 20;
+    ind = 6*n+3:3:9*n;
+    pris_torque = norm(x(ind))*(1/20)*.1;
+    b = T + pris_torque;
+    
+end
 
 function b = Objective(x)
 
     b = x(end); 
-
+    
+    
 end
 
 
@@ -298,26 +329,6 @@ I(19) = 1;  % M3
 end
 
 
-
-%%%%%%%
-% Started coding for analytic Jacobian
-%%%%%%%
-
-
-
-%         for j = 1:numel(b)
-%                 for k = 1:SZ
-%                     if mod(j,2) == 0   % then b is dealing with a joint velocity
-%                         if mod(j,6) == 2    % 1st joint velocity
-%                             if mod(k,) == 341  % differenting wrt joint or velocity or control at this time step
-%                             J(j,k) = 
-%                         elseif mod(j,6) == 4  % 2nd joint velocity
-%                             J(j,k) = 
-%                         elseif mod(j,6) == 0 % 3rd joint velocity
-%                             J(j,k) =
-%                         end
-%                     elseif mod(j,2) == 1
-%                         if mod(j,6) == 1  % 1st joint position
 
 
 

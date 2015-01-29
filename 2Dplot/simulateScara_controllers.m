@@ -1,5 +1,6 @@
-function [  ] = simulateScara_controllers  %( startState, finishState, n )
+function [ X0, torque, PD_Position, PD_Velocity ] = simulateScara_controllers  %( startState, finishState, n )
 
+ 
 
 close all;
 
@@ -7,22 +8,26 @@ close all;
 
 % Initialize robot
 
+M = 10;
 
-n = 40;
+n = 20;
+t_f = 4;
+dt = t_f/n;
 
-startState = [0 0 -.3 0 0 0]';  % Example states
+startState = [.2 .5 -.3 0 0 0]';  % Example states
 finishState = [2 2 -.8 0 0 0]';
-%
 
 robot = ScaraInit();
 state = zeros(6,n); 
+X0 = zeros(9*n+1,1);
 state(:,1) = startState;
-dt = 1/(n-1);
-
+torque = zeros(3,n);
 u = zeros(3,1);
 
-Kp = 2;
-Kv = 2*sqrt(Kp);
+Kp = -20;
+Kv = Kp;
+
+Mov(n-1) = struct('cdata',[],'colormap',[]);
 
 
 
@@ -45,10 +50,17 @@ Kv = 2*sqrt(Kp);
     end  % robot dynamics
 
 
-        for i = 1:n-1 % time                         
+        for i = 1:n % time                         
+                        
+            torque(:,i) = -Kp*(state(1:3,i) - finishState(1:3)) - Kv*state(4:6,i);                                    
             
-            u = -Kp*(state(1:3,i) - finishState(1:3)) - Kv*state(4:6,i);                                    
-%             u = [4;4;-2];
+            
+            for k = 1:numel(torque(:,i))
+                if abs(torque(k,i)) > M
+                    torque(k,i) = M*sign(torque(k,i));
+                end
+            end
+            u = torque(:,i);
             k1 = f(state(:,i),u);            
             k2 = f(state(:,i)+.5*dt*k1,u);                
             k3 = f(state(:,i)+.5*dt*k2,u);        
@@ -60,13 +72,28 @@ Kv = 2*sqrt(Kp);
         keyboard
         
         statePath = state(1:3,:)';
+        PD_Velocity = state(4:6,:)';
         
         for i = 2:n
             
             plot3D_SCARA(statePath(i,1),statePath(i,2),statePath(i,3));            
             pause(.1)
+            Mov(i-1) = getframe;
             
         end   
+        
+        for i = 1:n
+            jvi = (6*(i-1) + 1):6*i;  % indices of the 6 state variables at time step i
+            cti = (6*n + 3*(i-1) + 1):(6*n + 3*i);  %
+            X0(jvi) = state(:,i);
+            X0(cti) = torque(:,i);
+        end
+        
+        X0(end) = t_f;
+        
+        PD_Position = statePath;
+            
+        
     
 end
 
