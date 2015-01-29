@@ -5,7 +5,8 @@ close all
 global len1 len2
 
     %rng(180)  % one that breaks
-    rng(90)  % interesting, works
+    %rng(90)  % interesting, works
+    rng(180)
 
     robot = ScaraInit;
 
@@ -44,7 +45,8 @@ global len1 len2
     
     
     
-    options.init = 1;
+    % options.init = 1;
+    options.init = 2;
     
     %%% may have options.n for RealOptimalPathFind
     
@@ -83,7 +85,7 @@ global len1 len2
             M(cnt) = getframe;
             cnt = cnt + 1;
         end
-        options.init = 0;
+        %options.init = 0;
     end
     
     
