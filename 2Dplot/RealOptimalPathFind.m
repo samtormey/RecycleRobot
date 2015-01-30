@@ -17,11 +17,14 @@ Q = 2;  % number of joints
 % finishState = [2 2 -.8 0 0 0]';
 
 
-startState = [4 5 0 0]';
-finishState = [.2 3 0 0]';
+startState = [0 0 0 0]';
+finishState = [-pi+1 -pi+1 0 0]';   % need to specify from which direction it moves.
+% finishState = [.2 3 0 0]';
+
+
 
 n = 20;
-options.init = 1;
+options.init = 2;
 SZ = 3*Q*n+1;   
 X0 = zeros(SZ,1); 
 
@@ -76,7 +79,7 @@ yessave = 1;
     % discretizied optimization function without computing Jacobian,
     % F_ownJacobian is more fully commented
 
-    function [b Ceq] = F_dyn(X)
+    function b = F_dyn(X)
 
             b = zeros((n+1)*2*Q,1);               
 
@@ -101,7 +104,7 @@ yessave = 1;
         jvn = (2*Q*(n-1) + 1):2*Q*n;
         b(end-(4*Q-1):end-(2*Q)) = startState - X(1:2*Q);
         b(end-2*Q+1:end) = finishState - X(jvn);     
-        Ceq = [];
+        Cout = [];
         
     end   
 
@@ -183,40 +186,43 @@ yessave = 1;
     end   
    
     % Option to find random initial guess
-    if options.init == 1
-        tic
-        while(sum(abs(F_dyn(X0))) > .1)   % could save an X0 that works, save a few seconds
-            fprintf('\n Finding random initial guess for X \n');
-            X0 = rand(SZ,1);      
-            X0(1:2*Q) = startState;
-            X0((2*Q*(n-1) + 1):2*Q*n) = finishState;
-            X0 = fsolve(@F_dyn,X0);      
-        end
-        toc
-        disp('Time it takes to find initial guess')
-    end 
+%     if options.init == 1
+%         tic
+%         while(norm(F_dyn(X0)) > .1)   % could save an X0 that works, save a few seconds
+%             fprintf('\n Finding random initial guess for X \n');
+%             X0 = rand(SZ,1);      
+%             X0(1:2*Q) = startState;
+%             X0((2*Q*(n-1) + 1):2*Q*n) = finishState;
+%             X0 = fsolve(@F_dyn,X0);      
+%         end
+%         toc
+%         disp('Time it takes to find initial guess')
+%     end 
+    
+    if options.init == 2
+        [ X0,~,~,~ ] = simulateScara_controllers( startState, finishState, n, 4);
+    end
+%     if options.init == 3
+%         X0 = approx_traj(n,2)
+%     end
+    
     % Lower and upperbounds on state variables
     JointLB = -inf*ones(2*Q*n,1); %      JointLB(5:3:end) = -3;  
     JointUB =  inf*ones(2*Q*n,1);  
     lb = [JointLB; -M*ones(Q*n,1); 0];
     ub = [JointUB; M*ones(Q*n,1); inf];
-     opt = optimset('Algorithm','sqp','GradConstr','off');
+     opt = optimset('Algorithm','sqp','GradConstr','on');
      opt.MaxFunEvals = 100000;
      opt.TolFun = .3; %*ones(SZ,n+2)';   % maybe increasing the tolerance would help?, size of b = F(X)
- 
+      disp('Made it to fmincon!')
     
-%      tic
-%         X = fmincon(@Objective,X0,[],[],[],[],lb,ub,@F_ownJacobian,opt);
-%      toc
-
-tic
-    X = fmincon(@Objective,X0,[],[],[],[],lb,ub,@F_dyn,opt);
-toc
-
+     tic
+     X = fmincon(@Objective,X0,[],[],[],[],lb,ub,@F_ownJacobian,opt);
+     toc
     d_delta = X(end) / (n-1);
     disp('Time it takes to find optimal path')
     save('CurrentX0','X')
-    
+
     
     for i = 1:Q
       statePath(:,i) = X(i:2*Q:2*Q*n);
@@ -224,6 +230,14 @@ toc
       control(:,i) = X(2*Q*n+i:Q:end-1);
       T = X(end);
     end  % extract state variables
+    
+      for i = 1:Q
+      statePath_X0(:,i) = X0(i:2*Q:2*Q*n);
+      stateVelocity_X0(:,i) = X0((i+Q):2*Q:2*Q*n);
+      control_X0(:,i) = X0(2*Q*n+i:Q:end-1);
+      T_X0 = X(end);
+    end 
+    keyboard
     
     for i = 1:n
       plot3D_SCARA(statePath(i,1),statePath(i,2),0);
@@ -240,7 +254,7 @@ function b = Objective(x)
 
     b = x(end);     
     
-end
+end    
 
 
 function I = computeMoments
@@ -316,7 +330,7 @@ I(15) = I(5) + I(13);
 I(16) = I(6) + I(9) + .25*I(10);
 I(17) = I(3) + I(11);
 I(18) = I(5) + 2*(I(12)+I(13));
-I(19) = 1;  % M3
+I(19) = M3;  % M3
 
 end
 

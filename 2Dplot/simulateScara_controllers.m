@@ -1,4 +1,4 @@
-function [ X0, torque, PD_Position, PD_Velocity ] = simulateScara_controllers  %( startState, finishState, n )
+function [ X0, torque, PD_Position, PD_Velocity ] = simulateScara_controllers ( startState, finishState, n,t_f)
 
  
 
@@ -11,20 +11,21 @@ close all;
 M = 10;
 
 n = 20;
-t_f = 4;
+% t_f = 4;
 dt = t_f/n;
 
-startState = [.2 .5 -.3 0 0 0]';  % Example states
-finishState = [2 2 -.8 0 0 0]';
+% startState = [.2 .5 -.3 0 0 0]';  % Example states
+% finishState = [2 2 -.8 0 0 0]';
 
 robot = ScaraInit();
-state = zeros(6,n); 
-X0 = zeros(9*n+1,1);
+state = zeros(4,n); 
+X0 = zeros(6*n+1,1);
 state(:,1) = startState;
-torque = zeros(3,n);
-u = zeros(3,1);
+torque = zeros(2,n);
+u = zeros(2,1);
+Q = 2;
 
-Kp = -20;
+Kp = -50;
 Kv = Kp;
 
 Mov(n-1) = struct('cdata',[],'colormap',[]);
@@ -36,55 +37,50 @@ Mov(n-1) = struct('cdata',[],'colormap',[]);
 
     function b = f(X,u)
 
-        th1 = X(1);  th2 = X(2); d3  = X(3); 
-        th1d = X(4); th2d = X(5); d3d  = X(6);
+        th1 = X(1);  th2 = X(2); 
+        th1d = X(3); th2d = X(4);
 
-        H = [I(14)+2*I(12)*cos(th1)+2*I(15)*cos(th2), .5*(I(17)+I(18)*cos(th2)), 0;
-            .5*(I(17)+I(18)*cos(th2)), I(16)+.5*I(13)*cos(th2), 0;
-            0, 0, I(19)];
+        H = [I(14)+2*I(12)*cos(th1)+2*I(15)*cos(th2), .5*(I(17)+I(18)*cos(th2));
+            .5*(I(17)+I(18)*cos(th2)), I(16)+.5*I(13)*cos(th2)];
         h = [-2*I(15)*sin(th2)*th1d*th2d - .5*I(18)*sin(th2)*th2d^2;
-            I(15)*sin(th2)*th1d^2 - .25*I(13)*sin(th2)*th2d^2;
-            0];
-        b = [th1d; th2d; d3d; H\(h - u)];
+            I(15)*sin(th2)*th1d^2 - .25*I(13)*sin(th2)*th2d^2];     
+        b = [th1d; th2d; H\(h - u)];
 
     end  % robot dynamics
 
+    for i = 1:n % time                         
 
-        for i = 1:n % time                         
-                        
-            torque(:,i) = -Kp*(state(1:3,i) - finishState(1:3)) - Kv*state(4:6,i);                                    
-            
-            
-            for k = 1:numel(torque(:,i))
-                if abs(torque(k,i)) > M
-                    torque(k,i) = M*sign(torque(k,i));
-                end
+        torque(:,i) = -Kp*(state(1:2,i) - finishState(1:2)) - ...
+            Kv*(state(3:4,i) - finishState(3:4));                                    
+
+        for k = 1:numel(torque(:,i))
+            if abs(torque(k,i)) > M
+                torque(k,i) = M*sign(torque(k,i));
             end
-            u = torque(:,i);
-            k1 = f(state(:,i),u);            
-            k2 = f(state(:,i)+.5*dt*k1,u);                
-            k3 = f(state(:,i)+.5*dt*k2,u);        
-            k4 = f(state(:,i)+dt*k3,u);     
-            state(:,i+1) = state(:,i) + (1/6)*dt*(k1+2*k2+2*k3+k4);       
+        end
+        u = torque(:,i);
+        k1 = f(state(:,i),u);            
+        k2 = f(state(:,i)+.5*dt*k1,u);                
+        k3 = f(state(:,i)+.5*dt*k2,u);        
+        k4 = f(state(:,i)+dt*k3,u);     
+        state(:,i+1) = state(:,i) + (1/6)*dt*(k1+2*k2+2*k3+k4);       
 
-        end   
+    end   
         
-        keyboard
         
-        statePath = state(1:3,:)';
-        PD_Velocity = state(4:6,:)';
+        statePath = state(1:2,:)';
+        PD_Velocity = state(3:4,:)';
         
         for i = 2:n
             
-            plot3D_SCARA(statePath(i,1),statePath(i,2),statePath(i,3));            
+            plot3D_SCARA(statePath(i,1),statePath(i,2),0);            
             pause(.1)
-            Mov(i-1) = getframe;
             
         end   
         
         for i = 1:n
-            jvi = (6*(i-1) + 1):6*i;  % indices of the 6 state variables at time step i
-            cti = (6*n + 3*(i-1) + 1):(6*n + 3*i);  %
+            jvi = (2*Q*(i-1) + 1):2*Q*i;  
+            cti = (2*Q*n + Q*(i-1) + 1):(2*Q*n + Q*i);
             X0(jvi) = state(:,i);
             X0(cti) = torque(:,i);
         end
@@ -92,9 +88,7 @@ Mov(n-1) = struct('cdata',[],'colormap',[]);
         X0(end) = t_f;
         
         PD_Position = statePath;
-            
-        
-    
+           
 end
 
 
