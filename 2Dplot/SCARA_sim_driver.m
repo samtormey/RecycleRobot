@@ -44,7 +44,8 @@ global len1 len2
     
     
     
-    options.init = 0;
+    options.init = 1;
+    X0 = 0;
     
     %%% may have options.n for RealOptimalPathFind
     
@@ -56,15 +57,11 @@ global len1 len2
     
     for i = 1:numofCircles
         % first try finding a test optimal path
-         [testPath testVelocity testTorque dummy3 X0] = approx_traj(n,16,goalregion,...
-             [the1p(i) the2p(i) d3p(i) zeros(1,3)]'); 
-         
-         X0(6*n+1:9*n) = X0(6*n+1:9*n)/10;
-         
+
         [statePath stateVelocity d_delta T] = RealOptimalPathFind(goalregion,...
             [the1p(i) the2p(i) d3p(i) zeros(1,3)]',options,X0,n);                
         n = size(statePath,1);
-                keyboard
+
         
         for j = 1:n
             hold off
