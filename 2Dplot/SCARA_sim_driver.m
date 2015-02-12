@@ -43,7 +43,7 @@ global len1 len2
     %%% position to 
     
     
-    
+   
     options.init = 1;
     X0 = 0;
     
@@ -58,7 +58,7 @@ global len1 len2
     for i = 1:numofCircles
         % first try finding a test optimal path
 
-        [statePath stateVelocity d_delta T] = RealOptimalPathFind(goalregion,...
+        [X statePath stateVelocity d_delta T] = RealOptimalPathFind(goalregion,...
             [the1p(i) the2p(i) d3p(i) zeros(1,3)]',options,X0,n);                
         n = size(statePath,1);
 
