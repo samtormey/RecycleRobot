@@ -1,4 +1,4 @@
-function [statePath stateVelocity d_delta T] = RealOptimalPathFind(start,finish,options,X0,n)
+function [X statePath stateVelocity d_delta T] = RealOptimalPathFind(start,finish,options,X0,n)
 
 % takes advantage of scopes in Matlab in order to reduce 
 % number of inputs required for auxillary functions.
@@ -203,15 +203,13 @@ yessave = 1;
     d_delta = X(end) / (n-1);
     disp('Time it takes to find optimal path')
     save('CurrentX0','X')
-    
-    
+
     for i = 1:3
       statePath(:,i) = X(i:6:6*n);
       stateVelocity(:,i) = X((i+3):6:6*n);
       control(:,i) = X(6*n+i:3:end-1);
       T = X(end);
     end  % extract state variables
-    
 
 end
 

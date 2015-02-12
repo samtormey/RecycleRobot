@@ -1,77 +1,106 @@
-function moving_dot
+function SCARA_sim_driver
 
 close all
 
-global circsize len1 len2 width
+global len1 len2
 
+    %rng(180)  % one that breaks
+    rng(90)  % interesting, works
 
-    circsize = 15;
-    len1 = 2;
-    len2 = 1;
-    width = .1;
+    robot = ScaraInit;
+
+    len1 = robot.l_1;
+    len2 = robot.l_2;
+    len3 = robot.l_3;
     numofCircles = 5;
     
-    goalregion = [0;0;-1];    
+    goalregion = [0;0;-1;zeros(3,1)];    
     
-     CirclePositions(1,:) = len1*rand(1,numofCircles) + len2;
-     CirclePositions(2,:) = rand(1,numofCircles)*pi;
-     CirclePositions(3,:) = zeros(numofCircles,1);
+    Octo_Center(1,:) = len1*rand(1,numofCircles) + len2;
+    Octo_Center(2,:) = rand(1,numofCircles)*pi;
+    Octo_Center(3,:) = zeros(numofCircles,1);
 
     
-    [CirclePositions(1,:) CirclePositions(2,:)] = pol2cart(CirclePositions(2,:),CirclePositions(1,:));    
+    [Octo_Center(1,:) Octo_Center(2,:)] = pol2cart(Octo_Center(2,:),Octo_Center(1,:));    
      
-    [the1p, the2p, the1n, the2n] = inverseThe1_2([CirclePositions(1,:); CirclePositions(2,:)])
-    d3p = -1 + CirclePositions(3,:);
+    [the1p, the2p, the1n, the2n] = inverseThe1_2([Octo_Center(1,:); Octo_Center(2,:)])
+    d3p = -1 + Octo_Center(3,:);
     d3n = d3p;
     
-    oct = CirclePositions;
-    
+    oct = Octo_Center;    
     axislength = 2*(len1 + len2 + .5);
-
     figure
-    hold on
-    plot(0,0,'o','MarkerSize',20,'MarkerFaceColor','k')
-        
-    the1 = 0:.01:2*pi;
-    the2 = -2*pi:.01:0;
-    time = numel(the1);   
+    hold on  
+    axis([-axislength/2 axislength/2 -axislength/2 axislength])
+    axis square
+   
+    
+    %%% The plots need to change velocity according to T!!!! 
+    %%% it is not just a time step forward, they need to know the velocity
+    %%% to know how much to pause!!!
+    
+    %%% Maybe each plot could be .1 seconds, then we divide the change in
+    %%% position to 
+    
     
    
     options.init = 1;
+    X0 = 0;
+    
+    %%% may have options.n for RealOptimalPathFind
+    
+    loops = 20*numofCircles;
+    M(loops) = struct('cdata',[],'colormap',[]);
+    cnt = 1;    
+    n = 40;
+    
+    
     for i = 1:numofCircles
-        statePath = RealOptimalPathFind([goalregion' zeros(1,3)]',...
-            [the1p(i) the2p(i) d3p(i) zeros(1,3)]',options);
+        % first try finding a test optimal path
+
+        [X statePath stateVelocity d_delta T] = RealOptimalPathFind(goalregion,...
+            [the1p(i) the2p(i) d3p(i) zeros(1,3)]',options,X0,n);                
         n = size(statePath,1);
+
+        
         for j = 1:n
             hold off
-            plot3D_SCARA(statePath(j,1),statePath(j,2),statePath(j,3));
+            plot3D_SCARA(statePath(j,1),statePath(j,2),statePath(j,3));     
             for k = 1:numofCircles
                 plot3D_OCTO(oct(1,k),oct(2,k),oct(3,k),0);
             end
-            axis([-axislength/2 axislength/2 -axislength/2 axislength])
-            axis square
-            pause(.2)
+            grid on
+            pause(d_delta)
+
         end
         for j = 1:n
             hold off
-            plot3D_SCARA(statePath(n-j+1,1),statePath(n-j+1,2),statePath(n-j+1,3));           
-            oct(:,i) = [x2; y2];
-            plotcircle(CirclePositions);         
-            axis([-axislength/2 axislength/2 -axislength/2 axislength])
-            axis square
-            pause(.2)
+            plot3D_SCARA(statePath(n-j+1,1),statePath(n-j+1,2),statePath(n-j+1,3)); 
+            oct(1,i) = len1*cos(statePath(n-j+1,1)) + len2*cos(statePath(n-j+1,1) + statePath(n-j+1,2));
+            oct(2,i) = len1*sin(statePath(n-j+1,1)) + len2*sin(statePath(n-j+1,1) + statePath(n-j+1,2));
+            oct(3,i) = 1 + statePath(n-j+1,3);
+            for k = 1:numofCircles
+                plot3D_OCTO(oct(1,k),oct(2,k),oct(3,k),0);  % is is possible to only plot changing oct positions, on the belt, they will always be changing
+            end       
+            grid on
+            pause(d_delta)
+            
         end
         options.init = 0;
     end
+    
+    
+    keyboard
+    
 
 end
 
-function [the1p, the2p, the1n, the2n] = inverseThe1_2(circlePositions)
+function [the1p, the2p, the1n, the2n] = inverseThe1_2(Octo_Center)
 
     global len1 len2
     
-    xx = circlePositions(1,:);
-    yy = circlePositions(2,:);
+    xx = Octo_Center(1,:);
+    yy = Octo_Center(2,:);
     
     c2 = (xx.^2 + yy.^2 - len1^2 - len2^2) / ...
                 (2*len1*len2);
@@ -99,58 +128,4 @@ function [the1p, the2p, the1n, the2n] = inverseThe1_2(circlePositions)
     the1n = atan2(yy,xx) - ...
               atan2(k2n,k1);    
 
-end
-
-function [x2 y2] = plot2D_SCARA(the1,the2,d3)
-
-global len1 len2 width
-
-    x1 = cos(the1)*len1;
-    y1 = sin(the1)*len1;
-    
-    the1_perp = the1 - pi/2;
-    the2_perp = the1 + the2 - pi/2;
-    
-    w1 = width*cos(the1_perp)/2;
-    w2 = width*sin(the1_perp)/2;
-    
-    u1 = width*cos(the2_perp)/2;
-    u2 = width*sin(the2_perp)/2;
-    
-    x2 = cos(the2+the1)*len2 + x1;
-    y2 = sin(the2+the1)*len2 + y1;
-
-    
-    p1 = [w1, w2];
-    p2 = [x1 + w1, y1 + w2];
-    p3 = [x1 - w1, y1 - w2];
-    p4 = -p1;
-    
-    q1 = [x1 y1] + [u1 u2];
-    q2 = [x2 y2] + [u1 u2];
-    q3 = [x2 y2] - [u1 u2];
-    q4 = [x1 y1] - [u1 u2];
-    
-    fill([p1(1) p2(1) p3(1) p4(1)],[p1(2) p2(2) p3(2) p4(2)],'b')
-    hold on
-    fill([q1(1) q2(1) q3(1) q4(1)],[q1(2) q2(2) q3(2) q4(2)],'g')
-    color = [1,0,0]*d3;
-    plot(x2,y2,'o','Markersize',20,'MarkerFaceColor',color)
-
-
-end
-
-
-
-function plotcircle(positions)
-
-% takes an array, 'positions' of circles where the first row are the x
-% positions and the 2nd row are the y positions.
-
-global circsize
-
-    for i = 1:size(positions,2)
-        plot(positions(1,i),positions(2,i),'o','Markersize',circsize,'MarkerFaceColor','b');
-    end
-    
 end
