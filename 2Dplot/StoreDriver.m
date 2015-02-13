@@ -23,7 +23,7 @@ big_belt_y = belt.big_belt_y;
 
 % just to start
 
-num_theta = 40;
+num_theta = 3;
 dt = 2*pi/num_theta
 theta_vec = -pi+dt:dt:pi;
 
@@ -40,6 +40,10 @@ goal_configs = [];
 n = 20; % number of time steps
 options.init = 1;
 X0 = zeros(9*n+1,1);
+
+
+save(['./Precompute/Paths_n=',num2str(n),'_numThe=',num2str(num_theta)],'A')
+
 
 for th1 = theta_vec
     for th2 = theta_vec        
@@ -63,16 +67,15 @@ for th1 = theta_vec
                         goal_iter = goal_iter + 1;
                         
                     end
-                end                   
-                if goal_iter > 4
-                    keyboard
-                end
+                end    
             end
         end        
     end
 end
 
 rmpath /Users/samtormey/matlab/RecycleRobot/2DPlot/
+
+save(['./Precompute/Paths_n=',num2str(n),'_numThe=',num2str(num_theta)],'A')
 
 end
 
