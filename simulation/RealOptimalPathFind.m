@@ -184,6 +184,12 @@ yessave = 1;
         toc
         disp('Time it takes to find initial guess')
     end 
+    
+    
+    if options.init == 2
+        X0 = sigmoidInitialGuess(startState,finishState,n);
+    end
+    
        
     % Lower and upperbounds on state variables
     JointLB = -inf*ones(6*n,1); %      JointLB(5:3:end) = -3;
@@ -198,7 +204,9 @@ yessave = 1;
  
     
     tic
-    X = fmincon(@Objective,X0,[],[],[],[],lb,ub,@F_ownJacobian,opt);
+    disp('About to start fmincon')
+    %X = fmincon(@Objective,X0,[],[],[],[],lb,ub,@F_ownJacobian,opt);
+    X = X0;
     toc
     d_delta = X(end) / (n-1);
     disp('Time it takes to find optimal path')
@@ -214,10 +222,50 @@ yessave = 1;
 end
 
 % Extract the total time variable (the objective)
-
 function b = Objective(x)
-
     b = x(end); 
+end
+
+function X0 = sigmoidInitialGuess(startState,finishState,n)
+
+SZ = 9*n+1;
+X0 = zeros(SZ,1);
+
+startPosition = startState(1:3)';
+startVelocity = startState(4:6)';
+finishPosition = finishState(1:3)';
+finishVelocity = finishState(4:6)';
+
+positionPathGuess = zeros(n,3);
+velocityPathGuess = zeros(n,3);
+torquePathGuess = zeros(n,3);
+
+positionSigmoid = @(x,alpha,beta) (beta-alpha)./(1+exp(-x)) + alpha;
+% derivative of sigmoid function:
+velocitySigmoid = @(x,alpha,beta) (beta-alpha).* ...
+    positionSigmoid(x,alpha,beta).*(1-positionSigmoid(x,alpha,beta));
+
+for j = 1:3
+    positionPathGuess(:,j) = positionSigmoid(linspace(-4,4,n)', ...
+        startPosition(j),finishPosition(j));
+    % alpha & beta for velocity come from the position start & end
+    velocityPathGuess(:,j) = velocitySigmoid(linspace(-4,4,n)', ...
+        startPosition(j),finishPosition(j));
+    % assumption that torque shape may roughly follow velocity
+    torquePathGuess(:,j) = velocityPathGuess(:,j);
+end
+
+
+for j = 1:3
+    X0(j:6:6*n) = positionPathGuess(:,j);
+    X0(j+3:6:6*n) = velocityPathGuess(:,j);
+    X0(6*n+j:3:end-1) = torquePathGuess(:,j);
+end
+
+% empirical guess for T
+T = 0.1;
+X0(end) = T;
+
 
 end
 
