@@ -27,7 +27,7 @@ end
 
 
 
-    function acc = f_acc(X,acc)
+    function torque = f_acc(X,acc)
 
         
         th1 = X(1);  th2 = X(2); d3  = X(3); 
@@ -40,7 +40,7 @@ end
             I(15)*sin(th2)*th1d^2 - .25*I(13)*sin(th2)*th2d^2;
             0];   
         
-        acc = H*acc + h 
+        torque = -H*acc + h; 
         
     end
     

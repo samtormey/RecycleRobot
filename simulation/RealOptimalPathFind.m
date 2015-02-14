@@ -1,16 +1,15 @@
-function [statePath stateVelocity d_delta] = RealOptimalPathFind(start,finish,options)
+function [statePath stateVelocity d_delta T] = RealOptimalPathFind(start,finish,options,X0,n)
 
 % takes advantage of scopes in Matlab in order to reduce 
 % number of inputs required for auxillary functions.
-
+%
 clc;
 
 startState = start;
 finishState = finish;
 
-n = 20;    % number of time steps
 SZ = 9*n+1;   
-X0 = zeros(SZ,1);  
+X0 = zeros(SZ,1); 
 
 dtau = 1/(n-1);   
 dt = 1e-8;  % for finite difference in Jacobian
@@ -19,17 +18,21 @@ J = sparse((n+1)*6,SZ);  % pre-allocation for own Jacobian
 I = computeMoments;  % compute moments to be used in F and f, all constants
 
 
-% loads the previous solution X to test as new initial guess
+%% Vestiges of old X0 paradigm
 
-temp = load('CurrentX0.mat');
-X0_temp = temp.X;                   
-if numel(X0_temp) == numel(X0)
-    X0 = X0_temp;
-end
-   
-% boundary conditions
-X0(1:6) = start;  
-X0((6*(n-1) + 1):6*n) = finish;
+            % loads the previous solution X to test as new initial guess
+            % 
+            % temp = load('CurrentX0.mat');
+            % X0_temp = temp.X;                   
+            % if numel(X0_temp) == numel(X0)
+            %     X0 = X0_temp;
+            % end
+
+            % % boundary conditions
+            % X0(1:6) = start;  
+            % X0((6*(n-1) + 1):6*n) = finish;
+            
+%%
 
 back = 0;   %  Backwards or Forward Euler, own Jacobian only implemented for Forwards currently
 yessave = 1;
