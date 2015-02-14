@@ -23,7 +23,7 @@ big_belt_y = belt.big_belt_y;
 
 % just to start
 
-num_theta = 40;
+num_theta = 2;
 dt = 2*pi/num_theta
 theta_vec = -pi+dt:dt:pi;
 
@@ -41,39 +41,43 @@ n = 20; % number of time steps
 options.init = 1;
 X0 = zeros(9*n+1,1);
 
-for th1 = theta_vec
-    for th2 = theta_vec        
-        for g1 = theta_vec % cycle through goal theta 1
-            for g2 = theta_vec                      
-                [xg,yg] = FK(g1,g2,len1,len2);
-                if small_goal_y <= yg <= big_goal_y
-                    [xB,yB] = FK(th1,th2,len1,len2);
-                    if small_belt_y <= yB <= big_belt_y                        
-                        start = [th1; th2; zeros(4,1)];
-                        finish = [g1; g2; zeros(4,1)];
-                    
 
-                        [X0 statePath stateVelocity d_delta T] = ...
-                            RealOptimalPathFind(start,finish,options,X0,n);
-                    
-                        A{th1_i,th2_i,goal_iter,1} = T;
-                        A{th1_i,th2_i,goal_iter,2} = statePath;          
-                    
-                        % update goal configuration storage
-                        goal_config(goal_iter,1:2) = [g1,g2];
-                        goal_iter = goal_iter + 1;
-                        
-                    end
+save(['./Precompute/Paths_n=',num2str(n),'_numThe=',num2str(num_theta)],'A')
+
+
+for g1 = theta_vec
+    for g2 = theta_vec   
+         [xg,yg] = FK(g1,g2,len1,len2);         
+        if small_goal_y <= yg <= big_goal_y
+            % update goal configuration storage 
+            goal_config(goal_iter,1:2) = [g1,g2];
+            goal_iter = goal_iter + 1;
+            for th1 = theta_vec % cycle through goal theta 1
+                for th2 = theta_vec                      
+                    [xg,yg] = FK(g1,g2,len1,len2);
+                    if small_goal_y <= yg <= big_goal_y
+                        [xB,yB] = FK(th1,th2,len1,len2);
+                        if small_belt_y <= yB <= big_belt_y                        
+                            start = [th1; th2; zeros(4,1)];
+                            finish = [g1; g2; zeros(4,1)];                    
+                            [X0 statePath stateVelocity d_delta T] = ...
+                                RealOptimalPathFind(start,finish,options,X0,n);
+                            the1_ind = round((th1 + pi)/dt);
+                            the2_ind = round((th2 + pi)/dt);
+                            A{the1_ind,the2_ind,goal_iter,1} = T;
+                            A{the1_ind,the2_ind,goal_iter,2} = statePath;          
+                                             
+                        end
+                    end    
                 end
-                    
-                    % update initial guess
-             end
-            if goal_iter > 10
-                keyboard
-            end
-        end        
+            end        
+        end
     end
 end
+
+
+save(['./Precompute/Paths_n=',num2str(n),'_numThe=',num2str(num_theta)],'A','goal_config')
+
 
 rmpath /Users/samtormey/matlab/RecycleRobot/2DPlot/
 
