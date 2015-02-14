@@ -8,79 +8,73 @@ function StoreDriver
 %        where num_x = number of discretizated elements of x
 %     ToP = 1 for time, 2 for path
 
-
 A = {};
+
 addpath /Users/samtormey/matlab/RecycleRobot/2DPlot/
+
+% Initialize robot and belt values
 robot = ScaraInit;
 len1 = robot.l_1;
 len2 = robot.l_2;
 
 belt = ConvBelt;
-small_goal_y = belt.small_goal_y;
-big_goal_y = belt.big_goal_y;
-small_belt_y = belt.small_belt_y;
-big_belt_y = belt.big_belt_y;
+goal_y = belt.robo2goal;
+belt_bottom = belt.robo2bottom;
+belt_top = belt.robo2top;
 
-% just to start
-
+% Create discretization of theta configurations
 num_theta = 2;
 dt = 2*pi/num_theta
 theta_vec = -pi+dt:dt:pi;
-
-% Not the real way to get the end vector or theta values
-% num_theta_end = 2;
-% Goal_vec = 0:2*pi/(num_theta_end-1):2*pi;
-
-time = 1;
-path = ones(5,3);
-
-goal_iter = 1; % iteration counter for goal storage
-goal_configs = [];
 
 n = 20; % number of time steps
 options.init = 1;
 X0 = zeros(9*n+1,1);
 
-
 save(['./Precompute/Paths_n=',num2str(n),'_numThe=',num2str(num_theta)],'A')
 
-% number of goal region points in a line
+% generate goal region points
 gps = 10;
-goal_width = 2*sqrt(big_goal_y^2+(len1+len2)^2);
+goal_width = 2*sqrt((len1+len2)^2 - goal_y^2);
 goal_points_x = linspace(-goal_width/2,goal_width/2,gps);
-goal_points_y = big_goal_y*ones(1,gps);
+goal_points_y = goal_y*ones(1,gps);
 points = [goal_points_x; goal_points_y];
 
 % Inverse Kinematics
 [the1p, the2p, the1n, the2n] = inverseThe1_2(points);
+goal_configs = [the1p the2p; the1n the2n]'; 
 
-% matrix storing all of the configurations
-configurations = [the1p the2p; the1n the2n]; 
-
-keyboard
-
-for k = 1: length(configurations)
-    g1 = configurations(k,1);
-    for th1 = theta_vec % cycle through goal theta 1
-        for th2 = theta_vec
-            [xg,yg] = FK(g1,g2,len1,len2);
-            if small_goal_y <= yg <= big_goal_y  % if in goal region
-                [xB,yB] = FK(th1,th2,len1,len2);
-                if small_belt_y <= yB <= big_belt_y
-                    start = [th1; th2; zeros(4,1)];
-                    finish = [g1; g2; zeros(4,1)];
-                    [X0 statePath stateVelocity d_delta T] = ...
-                        RealOptimalPathFind(start,finish,options,X0,n);
-                    the1_ind = round((th1 + pi)/dt);
-                    the2_ind = round((th2 + pi)/dt);
-                    A{the1_ind,the2_ind,goal_iter,1} = T;
-                    A{the1_ind,the2_ind,goal_iter,2} = statePath;
-                    
-                end
-            end
-        end
-    end
-end
+for k = 1: length(goal_configs)
+    % retrieve goal configuration
+    goal_th1 = goal_configs(k,1);
+    goal_th2 = goal_configs(k,2);
+    
+    for th1_i = 1:length(theta_vec)
+        th1 = theta_vec(th1_i);
+        
+        for th2_i = 1:length(theta_vec)
+            th2 = theta_vec(th2_i);            
+            % check if starting configuration is on the belt
+            [xB,yB] = FK(th1,th2,len1,len2);
+            
+            if belt_bottom <= yB <= belt_top
+                start = [th1; th2; zeros(4,1)];
+                finish = [goal_th1; goal_th2; zeros(4,1)];
+                [X0 statePath stateVelocity d_delta T] = ...
+                    RealOptimalPathFind(start,finish,options,X0,n);
+                
+                % store solutions
+                A{th1_i,th2_i,k,1} = T;
+                A{th1_i,th2_i,k,2} = statePath;
+            
+            else % if starting config is not on the belt
+                A{th1_i,th2_i,k,1} = NaN;
+                A{th1_i,th2_i,k,2} = NaN;
+                
+            end % if
+        end % th1
+    end % th2
+end % k (goal goal_configs)
 
 
 rmpath /Users/samtormey/matlab/RecycleRobot/2DPlot/
