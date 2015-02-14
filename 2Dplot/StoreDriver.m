@@ -46,6 +46,7 @@ save(['./Precompute/Paths_n=',num2str(n),'_numThe=',num2str(num_theta)],'A')
 
 
 for g1 = theta_vec
+<<<<<<< HEAD
     for g2 = theta_vec   
          [xg,yg] = FK(g1,g2,len1,len2);         
         if small_goal_y <= yg <= big_goal_y
@@ -74,14 +75,43 @@ for g1 = theta_vec
                 end
             end        
         end
+=======
+    for g2 = theta_vec        
+        for th1 = theta_vec % cycle through goal theta 1
+            for th2 = theta_vec                      
+                [xg,yg] = FK(g1,g2,len1,len2);
+                if small_goal_y <= yg <= big_goal_y  % if in goal region
+                    [xB,yB] = FK(th1,th2,len1,len2);
+                    if small_belt_y <= yB <= big_belt_y                        
+                        start = [th1; th2; zeros(4,1)];
+                        finish = [g1; g2; zeros(4,1)];                    
+                        [X0 statePath stateVelocity d_delta T] = ...
+                            RealOptimalPathFind(start,finish,options,X0,n);
+                        the1_ind = round((th1 + pi)/dt);
+                        the2_ind = round((th2 + pi)/dt);
+                        A{the1_ind,the2_ind,goal_iter,1} = T;
+                        A{the1_ind,the2_ind,goal_iter,2} = statePath;          
+                    
+                        % update goal configuration storage
+                        goal_config(goal_iter,1:2) = [g1,g2];
+                        goal_iter = goal_iter + 1;
+                        
+                    end
+                end    
+            end
+        end        
+>>>>>>> ad2bff196e482472a41fe9d13169f7aae71be9ea
     end
 end
 
 
 save(['./Precompute/Paths_n=',num2str(n),'_numThe=',num2str(num_theta)],'A','goal_config')
+<<<<<<< HEAD
 
 
 rmpath /Users/samtormey/matlab/RecycleRobot/2DPlot/
+=======
+>>>>>>> ad2bff196e482472a41fe9d13169f7aae71be9ea
 
 end
 

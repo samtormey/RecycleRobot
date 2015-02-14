@@ -5,7 +5,8 @@ close all
 global len1 len2
 
     %rng(180)  % one that breaks
-    rng(90)  % interesting, works
+    %rng(90)  % interesting, works
+    rng(180)
 
     robot = ScaraInit;
 
@@ -43,9 +44,19 @@ global len1 len2
     %%% position to 
     
     
+<<<<<<< HEAD:simulation/SCARA_sim_driver.m
+    
+<<<<<<< HEAD:simulation/SCARA_sim_driver.m
+    % options.init = 1;
+    options.init = 2;
+=======
+    options.init = 0;
+>>>>>>> 1c8c65306ecf6f73de09cfcdf105965b6fa8bf5a:2Dplot/SCARA_sim_driver.m
+=======
    
     options.init = 1;
     X0 = 0;
+>>>>>>> 613e23d7c34d04d826769c0b37c6d9f8cfc5b36f:2Dplot/SCARA_sim_driver.m
     
     %%% may have options.n for RealOptimalPathFind
     
@@ -86,7 +97,7 @@ global len1 len2
             pause(d_delta)
             
         end
-        options.init = 0;
+        %options.init = 0;
     end
     
     
