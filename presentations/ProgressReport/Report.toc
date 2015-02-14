@@ -1,5 +1,1 @@
-<<<<<<< HEAD
-\beamer@endinputifotherversion {3.33pt}
-=======
 \beamer@endinputifotherversion {3.27pt}
->>>>>>> 613e23d7c34d04d826769c0b37c6d9f8cfc5b36f
