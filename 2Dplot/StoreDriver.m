@@ -23,7 +23,7 @@ big_belt_y = belt.big_belt_y;
 
 % just to start
 
-num_theta = 3;
+num_theta = 2;
 dt = 2*pi/num_theta
 theta_vec = -pi+dt:dt:pi;
 
@@ -45,12 +45,12 @@ X0 = zeros(9*n+1,1);
 save(['./Precompute/Paths_n=',num2str(n),'_numThe=',num2str(num_theta)],'A')
 
 
-for th1 = theta_vec
-    for th2 = theta_vec        
-        for g1 = theta_vec % cycle through goal theta 1
-            for g2 = theta_vec                      
+for g1 = theta_vec
+    for g2 = theta_vec        
+        for th1 = theta_vec % cycle through goal theta 1
+            for th2 = theta_vec                      
                 [xg,yg] = FK(g1,g2,len1,len2);
-                if small_goal_y <= yg <= big_goal_y
+                if small_goal_y <= yg <= big_goal_y  % if in goal region
                     [xB,yB] = FK(th1,th2,len1,len2);
                     if small_belt_y <= yB <= big_belt_y                        
                         start = [th1; th2; zeros(4,1)];
@@ -75,7 +75,7 @@ end
 
 rmpath /Users/samtormey/matlab/RecycleRobot/2DPlot/
 
-save(['./Precompute/Paths_n=',num2str(n),'_numThe=',num2str(num_theta)],'A')
+save(['./Precompute/Paths_n=',num2str(n),'_numThe=',num2str(num_theta)],'A','goal_config')
 
 end
 
