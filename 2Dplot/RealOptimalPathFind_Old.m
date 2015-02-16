@@ -1,46 +1,25 @@
-function [X statePath d_delta T] = RealOptimalPathFind  %(start,finish,options,X0,n)
-
+function [statePath stateVelocity d_delta T] = RealOptimalPathFind_Old %(start,finish,options,X0,n)
 
 % takes advantage of scopes in Matlab in order to reduce 
 % number of inputs required for auxillary functions.
 %
+clc;
 
-
-%  Check norm of own Jacobian - lnlsq Jac
-
-
-Q = 2;  % number of joints
-
-
-
-% startState = [0 0 -.3 0 0 0]';  % Example states
-% finishState = [2 2 -.8 0 0 0]';
-
-
-startState = [0 1 0 0]';
-finishState = [-pi+.1 -pi+1.5 0 0]';   % need to specify from which direction it moves.
-% finishState = [.2 3 0 0]';
-
-
-
+startState = [4 5 0 0 0 0]';
+finishState = [.2 3 0 0 0 0]';
+start = startState;
+finish = finishState;
+options.init = 1;
 n = 20;
-options.init = 2;
-SZ = 3*Q*n+1;   
-
-
+SZ = 9*n+1;   
+X0 = zeros(SZ,1); 
 
 dtau = 1/(n-1);   
 dt = 1e-8;  % for finite difference in Jacobian
 M = 10;
-J = sparse((n+1)*2*Q,SZ);  % pre-allocation for own Jacobian
-
+J = sparse((n+1)*6,SZ);  % pre-allocation for own Jacobian
+keyboard
 I = computeMoments;  % compute moments to be used in F and f, all constants
-
-if n ~= 20
-    disp('n is not 20')
-    return    
-end
-    
 
 
 %% Vestiges of old X0 paradigm
@@ -62,61 +41,67 @@ end
 back = 0;   %  Backwards or Forward Euler, own Jacobian only implemented for Forwards currently
 yessave = 1;
 
+
+% startState = [0 0 -.3 0 0 0]';  % Example states
+% finishState = [2 2 -.8 0 0 0]';
+
         
     function b = f(X,u)
 
-        th1 = X(1);  th2 = X(2); 
-        th1d = X(3); th2d = X(4);
+        th1 = X(1);  th2 = X(2); d3  = X(3); 
+        th1d = X(4); th2d = X(5); d3d  = X(6);
 
-        H = [I(14)+2*I(12)*cos(th1)+2*I(15)*cos(th2), .5*(I(17)+I(18)*cos(th2));
-            .5*(I(17)+I(18)*cos(th2)), I(16)+.5*I(13)*cos(th2)];
+        H = [I(14)+2*I(12)*cos(th1)+2*I(15)*cos(th2), .5*(I(17)+I(18)*cos(th2)), 0;
+            .5*(I(17)+I(18)*cos(th2)), I(16)+.5*I(13)*cos(th2), 0;
+            0, 0, I(19)];
         h = [-2*I(15)*sin(th2)*th1d*th2d - .5*I(18)*sin(th2)*th2d^2;
-            I(15)*sin(th2)*th1d^2 - .25*I(13)*sin(th2)*th2d^2];     
-        b = [th1d; th2d; H\(h - u)];
+            I(15)*sin(th2)*th1d^2 - .25*I(13)*sin(th2)*th2d^2;
+            0];     
+        b = [th1d; th2d; d3d; H\(h - u)];
 
     end  % robot dynamics
 
     % discretizied optimization function without computing Jacobian,
     % F_ownJacobian is more fully commented
 
-    function b = F_dyn(X)
+    function b = F(X)   
+        
+        
+        b = zeros((n+1)*6,1);               
 
-            b = zeros((n+1)*2*Q,1);               
+        for i = 1:n-1            
+            jvi = (6*(i-1) + 1):6*i;
+            cti = (6*n + 3*(i-1) + 1):(6*n + 3*i);
+            jvip1 = (6*(i) + 1):6*(i+1);                
+            ctip1 = (6*n + 3*(i) + 1):(6*n + 3*(i+1));           
+            if back == 0        
+                feval = f(X(jvi),X(cti));
+                b(jvi) = (X(jvip1) - X(jvi))/dtau - ... 
+                    X(end)*feval;                                                  
+            end            
 
-            for i = 1:n-1            
-                jvi = (2*Q*(i-1) + 1):2*Q*i;  % indices of the 2*Q state variables at time step i
-                cti = (2*Q*n + Q*(i-1) + 1):(2*Q*n + Q*i); % indices of the Q control variables at time step i
-                jvip1 = (Q*2*(i) + 1):2*Q*(i+1); % 2*Q state variables at time step i+1                   
-                ctip1 = (2*Q*n + Q*(i) + 1):(2*Q*n + Q*(i+1));  % control variables at time step i+1  (used for backwards Euler)                  
-                if back == 0        
-                    feval = f(X(jvi),X(cti));  
-                    b(jvi) = (X(jvip1) - X(jvi))/dtau - ... 
-                        X(end)*feval;                                                  
-                end            
-
-                if back == 1
-                    b(jvi) = (X(jvip1) - X(jvi))/dtau - ... 
-                        X(end)*f(X(jvip1),X(ctip1));
-                end 
+            if back == 1
+                b(jvi) = (X(jvip1) - X(jvi))/dtau - ... 
+                    X(end)*f(X(jvip1),X(ctip1));
+            end 
             
         end
 
-        jvn = (2*Q*(n-1) + 1):2*Q*n;
-        b(end-(4*Q-1):end-(2*Q)) = startState - X(1:2*Q);
-        b(end-2*Q+1:end) = finishState - X(jvn);     
-        Cout = [];
+        jvn = (6*(n-1) + 1):6*n;  
+        b(end-11:end-6) = startState - X(1:6);
+        b(end-5:end) = finishState - X(jvn);                                         
         
     end   
 
     function [Cout,Ceq, Coutgrad, Ceqgrad] = F_ownJacobian(X)  % this has our hand structured Jacobian, not currently working.    
                  
-            b = zeros((n+1)*2*Q,1);               
+        b = zeros((n+1)*6,1);               
 
-            for i = 1:n-1            
-                jvi = (2*Q*(i-1) + 1):2*Q*i;  % indices of the 2*Q state variables at time step i
-                cti = (2*Q*n + Q*(i-1) + 1):(2*Q*n + Q*i); % indices of the Q control variables at time step i
-                jvip1 = (Q*2*(i) + 1):2*Q*(i+1); % 2*Q state variables at time step i+1                   
-                ctip1 = (2*Q*n + Q*(i) + 1):(2*Q*n + Q*(i+1));  % control variables at time step i+1  (used for backwards Euler)                  
+        for i = 1:n-1            
+            jvi = (6*(i-1) + 1):6*i;  % indices of the 6 state variables at time step i
+            cti = (6*n + 3*(i-1) + 1):(6*n + 3*i);  % indices of the 3 control variables at time step i
+            jvip1 = (6*(i) + 1):6*(i+1);  % 6 state variables at time step i+1              
+            ctip1 = (6*n + 3*(i) + 1):(6*n + 3*(i+1));  % control variables at time step i+1  (used for backwards Euler)        
             
             % Forward Euler 
             if back == 0        
@@ -126,13 +111,16 @@ yessave = 1;
                 
             % Compute the Jacobian        
                 
+            
+                % how much would vectorizing increase performance?
+            
                 % differentiate F(jvi) wrt to jvi
                 for j = jvi
                     
                     % this is for computing finite differences
-                    dtej = zeros(2*Q,1);  % directional infinitesimal
-                    bjvi_dtej = zeros(2*Q,1);                    
-                    k = mod(j,2*Q); if k == 0, k = 2*Q; end  % iterating through the 6 state variables, could be replaced with a counter 1:6
+                    dtej = zeros(6,1);  % directional infinitesimal
+                    bjvi_dtej = zeros(6,1);                    
+                    k = mod(j,6); if k == 0, k = 6; end  % iterating through the 6 state variables, could be replaced with a counter 1:6
                     dtej(k) = dt; % creating directional infinitesimal
                     Xjvi_dtej = X(jvi) + dtej; % adding directional infinitesimal to THETA(i) 
                               
@@ -147,9 +135,11 @@ yessave = 1;
                 for j = cti
                     
                     % prepare finite difference for the control variables
-                    dtej = zeros(Q,1);
-                    k = mod(j,Q); if k == 0, k = Q; end
-                    dtej(k) = dt;                              
+                    dtej = zeros(3,1);
+                    k = mod(j,3); if k == 0, k = 3; end
+                    dtej(k) = dt;           
+                    
+                    % 
                     Ucti_dtej = X(cti) + dtej;
                     bjvi_dtej = -X(end)*(f(X(jvi),Ucti_dtej) - evald_f)/dt;  
                     J(jvi,j) = bjvi_dtej; 
@@ -169,80 +159,70 @@ yessave = 1;
         end
         
         % Boundary conditions
-        endstate = 2*Q*(n+1); 
-        J(endstate-(4*Q-1):endstate,:) = 0;
-        J(endstate-(4*Q-1):endstate-2*Q,1:2*Q) = -1*eye(2*Q,2*Q);
-        J(endstate-2*Q+1:endstate,endstate-(4*Q-1):endstate-2*Q) = -1*eye(2*Q,2*Q);
-        jvn = (2*Q*(n-1) + 1):2*Q*n;
-        b(end-(4*Q-1):end-(2*Q)) = startState - X(1:2*Q);
-        b(end-2*Q+1:end) = finishState - X(jvn);        
-                
+        endstate = 6*(n+1); 
+        J(endstate-11:endstate,:) = 0;
+        J(endstate-11:endstate-6,1:6) = -1*eye(6,6);
+        J(endstate-5:endstate,endstate-11:endstate-6) = -1*eye(6,6);
+        b(end-11:end-6) = startState - X(1:6);
+        jvn = (6*(n-1) + 1):6*n;        
+        b(end-5:end) = finishState - X(jvn); 
+        
         % Wrappers for fmincon
         Ceq = b;
         Ceqgrad = J';
         Cout = [];       
-        Coutgrad = [];
+         Coutgrad = [];
         
     end   
    
     % Option to find random initial guess
-%     if options.init == 1
-%         tic
-%         while(norm(F_dyn(X0)) > .1)   % could save an X0 that works, save a few seconds
-%             fprintf('\n Finding random initial guess for X \n');
-%             X0 = rand(SZ,1);      
-%             X0(1:2*Q) = startState;
-%             X0((2*Q*(n-1) + 1):2*Q*n) = finishState;
-%             X0 = fsolve(@F_dyn,X0);      
-%         end
-%         toc
-%         disp('Time it takes to find initial guess')
-%     end 
-    
-    if options.init == 2
-        [ X0,~,~,~ ] = simulateScara_controllers( startState, finishState, n, 4);
-    end
-%     if options.init == 3
-%         X0 = approx_traj(n,2)
-%     end
-    
+    if options.init == 1
+        tic
+        while(sum(abs(F(X0))) > .1)   % could save an X0 that works, save a few seconds
+            fprintf('\n Finding random initial guess for X \n');
+            X0 = rand(SZ,1);      
+            X0(1:6) = start;
+            X0((6*(n-1) + 1):6*n) = finish;
+            X0 = fsolve(@F,X0);      
+        end
+        toc
+        disp('Time it takes to find initial guess')
+    end 
+       
     % Lower and upperbounds on state variables
-    JointLB = -inf*ones(2*Q*n,1); %      JointLB(5:3:end) = -3;  
-    JointUB =  inf*ones(2*Q*n,1);  
-    lb = [JointLB; -M*ones(Q*n,1); 0];
-    ub = [JointUB; M*ones(Q*n,1); inf];
-     opt = optimset('Algorithm','sqp','GradConstr','on');
-     opt.MaxFunEvals = 100000;
-     opt.TolFun = .3; %*ones(SZ,n+2)';   % maybe increasing the tolerance would help?, size of b = F(X)
-      disp('Made it to fmincon!')
+    JointLB = -inf*ones(6*n,1); %      JointLB(5:3:end) = -3;
+    JointLB(3:6:end) = -1;
+    JointUB = inf*ones(6*n,1);
+    JointUB(3:6:end) = 0;   
+    lb = [JointLB; -M*ones(3*n,1); 0];
+    ub = [JointUB; M*ones(3*n,1); inf];
+    opt = optimset('Algorithm','sqp','GradConstr','on');
+    opt.MaxFunEvals = 100000;
+    opt.TolFun = .3; %*ones(SZ,n+2)';   % maybe increasing the tolerance would help?, size of b = F(X)
+ 
+
     
-     tic
-     X = fmincon(@Objective,X0,[],[],[],[],lb,ub,@F_ownJacobian,opt);
-     toc
+    
+    tic
+    X = fmincon(@Objective,X0,[],[],[],[],lb,ub,@F_ownJacobian,opt);
+    toc
     d_delta = X(end) / (n-1);
     disp('Time it takes to find optimal path')
     save('CurrentX0','X')
-
     
-    for i = 1:Q
-      statePath(:,i) = X(i:2*Q:2*Q*n);
-      stateVelocity(:,i) = X((i+Q):2*Q:2*Q*n);
-      control(:,i) = X(2*Q*n+i:Q:end-1);
+    
+    for i = 1:3
+      statePath(:,i) = X(i:6:6*n);
+      stateVelocity(:,i) = X((i+3):6:6*n);
+      control(:,i) = X(6*n+i:3:end-1);
       T = X(end);
     end  % extract state variables
     
-      for i = 1:Q
-          statePath_X0(:,i) = X0(i:2*Q:2*Q*n);
-          stateVelocity_X0(:,i) = X0((i+Q):2*Q:2*Q*n);
-          control_X0(:,i) = X0(2*Q*n+i:Q:end-1);
-          T_X0 = X(end);
-      end 
+       for i = 1:n
+      plot3D_SCARA(statePath(i,1),statePath(i,2),0);
+      pause(.1);
+    end
     
-%     for i = 1:n
-%       plot3D_SCARA(statePath(i,1),statePath(i,2),0);
-%       pause(.1);
-%     end
-%     control
 
 end
 
@@ -250,9 +230,9 @@ end
 
 function b = Objective(x)
 
-    b = x(end);     
-    
-end    
+    b = x(end); 
+
+end
 
 
 function I = computeMoments
@@ -328,7 +308,7 @@ I(15) = I(5) + I(13);
 I(16) = I(6) + I(9) + .25*I(10);
 I(17) = I(3) + I(11);
 I(18) = I(5) + 2*(I(12)+I(13));
-I(19) = M3;  % M3
+I(19) = 1;  % M3
 
 end
 
