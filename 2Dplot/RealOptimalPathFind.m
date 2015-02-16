@@ -17,8 +17,8 @@ Q = 2;  % number of joints
 % finishState = [2 2 -.8 0 0 0]';
 
 
-startState = [0 1 0 0]';
-finishState = [-pi+.1 -pi+1.5 0 0]';   % need to specify from which direction it moves.
+startState = [0 6 0 0]';
+finishState = [-pi-.4 -pi-4 0 0]';   % need to specify from which direction it moves.
 % finishState = [.2 3 0 0]';
 
 

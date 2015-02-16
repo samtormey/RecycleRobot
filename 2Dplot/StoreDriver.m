@@ -56,9 +56,8 @@ for k = 1: length(goal_configs)
             [xB,yB] = FK(th1,th2,len1,len2);
             
             if belt_bottom <= yB <= belt_top
-                keyboard
-                start = [th1; th2; zeros(4,1)];
-                finish = [goal_th1; goal_th2; zeros(4,1)];
+                start = [th1; th2; zeros(3,1)];
+                finish = [goal_th1; goal_th2; zeros(3,1)];
                 [X0 statePath stateVelocity d_delta T] = ...
                     RealOptimalPathFind(start,finish,options,X0,n);
                 
