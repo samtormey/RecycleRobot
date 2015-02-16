@@ -24,6 +24,8 @@ global len1 len2
     [Octo_Center(1,:) Octo_Center(2,:)] = pol2cart(Octo_Center(2,:),Octo_Center(1,:));    
      
     [the1p, the2p, the1n, the2n] = inverseThe1_2([Octo_Center(1,:); Octo_Center(2,:)])
+    
+    keyboard
     d3p = -1 + Octo_Center(3,:);
     d3n = d3p;
     
