@@ -1,33 +1,20 @@
-function [X statePath d_delta T] = RealOptimalPathFind  %(start,finish,options,X0,n)
+function [X statePath T exitflag comp_time] = RealOptimalPathFind(start,finish,options,X0,n)
 
 
 % takes advantage of scopes in Matlab in order to reduce 
 % number of inputs required for auxillary functions.
 %
-
-
-%  Check norm of own Jacobian - lnlsq Jac
-
+warning('off','all')
 
 Q = 2;  % number of joints
 
 
-
-% startState = [0 0 -.3 0 0 0]';  % Example states
-% finishState = [2 2 -.8 0 0 0]';
-
-
-startState = [0 6 0 0]';
-finishState = [-pi-.4 -pi-4 0 0]';   % need to specify from which direction it moves.
-% finishState = [.2 3 0 0]';
-
+startState = start;
+finishState = finish;   % need to specify from which direction it moves.
 
 
 n = 20;
-options.init = 2;
 SZ = 3*Q*n+1;   
-
-
 
 dtau = 1/(n-1);   
 dt = 1e-8;  % for finite difference in Jacobian
@@ -183,25 +170,16 @@ yessave = 1;
         Cout = [];       
         Coutgrad = [];
         
-    end   
-   
-    % Option to find random initial guess
-%     if options.init == 1
-%         tic
-%         while(norm(F_dyn(X0)) > .1)   % could save an X0 that works, save a few seconds
-%             fprintf('\n Finding random initial guess for X \n');
-%             X0 = rand(SZ,1);      
-%             X0(1:2*Q) = startState;
-%             X0((2*Q*(n-1) + 1):2*Q*n) = finishState;
-%             X0 = fsolve(@F_dyn,X0);      
-%         end
-%         toc
-%         disp('Time it takes to find initial guess')
-%     end 
-    
-    if options.init == 2
+    end
+
+    if options.init == 1
         [ X0,~,~,~ ] = simulateScara_controllers( startState, finishState, n, 4);
     end
+
+    if options.init == 2
+        fsolve_init(n);
+    end 
+    
 %     if options.init == 3
 %         X0 = approx_traj(n,2)
 %     end
@@ -211,18 +189,33 @@ yessave = 1;
     JointUB =  inf*ones(2*Q*n,1);  
     lb = [JointLB; -M*ones(Q*n,1); 0];
     ub = [JointUB; M*ones(Q*n,1); inf];
-     opt = optimset('Algorithm','sqp','GradConstr','on');
-     opt.MaxFunEvals = 100000;
-     opt.TolFun = .3; %*ones(SZ,n+2)';   % maybe increasing the tolerance would help?, size of b = F(X)
-      disp('Made it to fmincon!')
+    opt = optimset('Algorithm','sqp','GradConstr','on','Display','off');
+    opt.MaxFunEvals = 100000;
+    opt.TolFun = 0.3; %*ones(SZ,n+2)';   % maybe increasing the tolerance would help?, size of b = F(X)
     
-     tic
-     X = fmincon(@Objective,X0,[],[],[],[],lb,ub,@F_ownJacobian,opt);
-     toc
+    tic
+    [X,fval,exitflag] = fmincon(@Objective,X0,[],[],[],[],lb,ub,@F_ownJacobian,opt);
+    comp_time = toc;
+    fprintf(' time = %1.3f',comp_time)
+    if options.init == 1
+       fprintf('  (Used controller initial guess)') 
+    elseif options.init == 2
+       fprintf('  (Used fsolve initial guess)') 
+    end
+    
+    if exitflag ~= 1 && options.init ~= 1
+       [X0,~,~,~ ] = simulateScara_controllers(startState, finishState, n, 4); 
+       [X,fval,exitflag] = fmincon(@Objective,X0,[],[],[],[],lb,ub,@F_ownJacobian,opt);
+    end
+    if exitflag ~= 1 && options.init ~= 2
+       X0 = fsolve_init(n);
+       [X,fval,exitflag] = fmincon(@Objective,X0,[],[],[],[],lb,ub,@F_ownJacobian,opt);
+    end
+        
+    
     d_delta = X(end) / (n-1);
-    disp('Time it takes to find optimal path')
+%     fprintf('Time it takes to find optimal path: %f\n',time)
     save('CurrentX0','X')
-
     
     for i = 1:Q
       statePath(:,i) = X(i:2*Q:2*Q*n);
@@ -231,12 +224,6 @@ yessave = 1;
       T = X(end);
     end  % extract state variables
     
-      for i = 1:Q
-          statePath_X0(:,i) = X0(i:2*Q:2*Q*n);
-          stateVelocity_X0(:,i) = X0((i+Q):2*Q:2*Q*n);
-          control_X0(:,i) = X0(2*Q*n+i:Q:end-1);
-          T_X0 = X(end);
-      end 
     
 %     for i = 1:n
 %       plot3D_SCARA(statePath(i,1),statePath(i,2),0);
@@ -253,6 +240,19 @@ function b = Objective(x)
     b = x(end);     
     
 end    
+
+function X0 = fsolve_init(n)
+SZ = 9*n + 1;
+X0 = zeros(SZ,1);
+while(norm(F_dyn(X0)) > .1)   % could save an X0 that works, save a few seconds
+    opts.optimset('Display','off')
+    fprintf('\n Finding random initial guess for X \n');
+    X0 = rand(SZ,1);
+    X0(1:2*Q) = startState;
+    X0((2*Q*(n-1) + 1):2*Q*n) = finishState;
+    X0 = fsolve(@F_dyn,X0);
+end
+end
 
 
 function I = computeMoments

@@ -7,7 +7,7 @@ function StoreDriver
 %     th1_G = theta1(Goal) * (num_theta_G/2pi)
 %        where num_x = number of discretizated elements of x
 %     ToP = 1 for time, 2 for path
-
+clc;
 A = {};
 
 addpath /Users/samtormey/matlab/RecycleRobot/2DPlot/
@@ -23,16 +23,18 @@ belt_bottom = belt.robo2bottom;
 belt_top = belt.robo2top;
 
 % Create discretization of theta configurations
-num_theta = 1000;
-dt = 2*pi/num_theta
+num_theta = 3;
+dt = 2*pi/num_theta;
 theta_vec = -pi+dt:dt:pi;
 
 n = 20; % number of time steps
 options.init = 1;
 X0 = zeros(9*n+1,1);
 
+total_time = 0; % computational time
+
 % generate goal region points
-gps = 4;
+gps = 5;
 goal_width = 2*sqrt((len1+len2)^2 - goal_y^2);
 goal_points_x = linspace(-goal_width/2,goal_width/2,gps);
 goal_points_y = goal_y*ones(1,gps);
@@ -40,8 +42,8 @@ points = [goal_points_x; goal_points_y];
 
 % Inverse Kinematics
 [the1p, the2p, the1n, the2n] = inverseThe1_2(points,len1,len2);
-goal_configs = [the1p the2p; the1n the2n]'; 
-
+goal_configs = [the1p the1n; the2p the2n]'; 
+keyboard
 for k = 1: length(goal_configs)
     % retrieve goal configuration
     goal_th1 = goal_configs(k,1);
@@ -51,22 +53,37 @@ for k = 1: length(goal_configs)
         th1 = theta_vec(th1_i);
         
         for th2_i = 1:length(theta_vec)
+            fprintf('\niter %d: ', num_theta^2*(k-1) + num_theta*(th1_i-1) + th2_i)
+            
             th2 = theta_vec(th2_i);            
             % check if starting configuration is on the belt
             [xB,yB] = FK(th1,th2,len1,len2);
             
             if belt_bottom <= yB <= belt_top
+<<<<<<< HEAD
                 start = [th1; th2; zeros(3,1)];
                 finish = [goal_th1; goal_th2; zeros(3,1)];
                 [X0 statePath stateVelocity d_delta T] = ...
+=======
+                
+                start = [th1; th2; 0; 0];
+                finish = [goal_th1; goal_th2; 0; 0];
+                [X0 statePath T exitflag comp_time] = ...
+>>>>>>> 0299c65a8416d1664c8296541af043e6c8543cb5
                     RealOptimalPathFind(start,finish,options,X0,n);
+                
+                if exitflag ~= 1
+                   fprintf('\nWARNING: fmincon solution not found for ')
+                   fprintf('k = %d, th1_i = %d, th2_i = %d\n', k, th1_i, th2_i)
+                end
                 
                 % store solutions
                 A{th1_i,th2_i,k,1} = T;
                 A{th1_i,th2_i,k,2} = statePath;
                 
-                % Update initial guess
-                options.init = 0;
+                options.init = 1; % reuse initial guess
+                
+                total_time = total_time + comp_time;
             
             else % if starting config is not on the belt
                 A{th1_i,th2_i,k,1} = NaN;
@@ -77,12 +94,11 @@ for k = 1: length(goal_configs)
         end % th1
     end % th2
 end % k (goal goal_configs)
+fprintf('\n')
 
-keyboard
-
+save(['./Precompute/Paths_n=',num2str(n),'_numThe=',num2str(num_theta)],'A',...
+        'goal_configs','belt','n','robot','num_theta','total_time')
 rmpath /Users/samtormey/matlab/RecycleRobot/2DPlot/
-
-save(['./Precompute/Paths_n=',num2str(n),'_numThe=',num2str(num_theta)],'A','goal_configs')
 
 end
 
