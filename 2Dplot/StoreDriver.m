@@ -24,7 +24,7 @@ belt_top = belt.robo2top;
 
 % Create discretization of theta configurations
 num_theta = 1000;
-dt = 2*pi/num_theta
+dt = 2*pi/num_theta;
 theta_vec = -pi+dt:dt:pi;
 
 n = 20; % number of time steps
@@ -58,7 +58,7 @@ for k = 1: length(goal_configs)
             [xB,yB] = FK(th1,th2,len1,len2);
             
             if belt_bottom <= yB <= belt_top
-                keyboard
+                
                 start = [th1; th2; zeros(4,1)];
                 finish = [goal_th1; goal_th2; zeros(4,1)];
                 [X0 statePath stateVelocity d_delta T] = ...
@@ -68,8 +68,9 @@ for k = 1: length(goal_configs)
                 A{th1_i,th2_i,k,1} = T;
                 A{th1_i,th2_i,k,2} = statePath;
                 
+                keyboard
                 % Update initial guess
-                options.init = 0;
+                options.init = 1;
             
             else % if starting config is not on the belt
                 A{th1_i,th2_i,k,1} = NaN;

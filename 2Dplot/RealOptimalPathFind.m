@@ -3,7 +3,7 @@ function [X statePath stateVelocity d_delta T] = RealOptimalPathFind(start,finis
 % takes advantage of scopes in Matlab in order to reduce 
 % number of inputs required for auxillary functions.
 %
-clc;
+warning('off','all')
 
 startState = start;
 finishState = finish;
@@ -172,14 +172,16 @@ yessave = 1;
     end   
    
     % Option to find random initial guess
-    if options.init == 1
+    if options.init == 1        
         tic
         while(sum(abs(F(X0))) > .1)   % could save an X0 that works, save a few seconds
             fprintf('\n Finding random initial guess for X \n');
+            
+            opts = optimset('Display','off');
             X0 = rand(SZ,1);      
             X0(1:6) = start;
             X0((6*(n-1) + 1):6*n) = finish;
-            X0 = fsolve(@F,X0);      
+            X0 = fsolve(@F,X0,opts);      
         end
         toc
         disp('Time it takes to find initial guess')
@@ -192,18 +194,26 @@ yessave = 1;
     JointUB(3:6:end) = 0;   
     lb = [JointLB; -M*ones(3*n,1); 0];
     ub = [JointUB; M*ones(3*n,1); inf];
-    opt = optimset('Algorithm','sqp','GradConstr','on');
+    opt = optimset('Algorithm','sqp','GradConstr','on','Display','off');
     opt.MaxFunEvals = 100000;
     opt.TolFun = .3; %*ones(SZ,n+2)';   % maybe increasing the tolerance would help?, size of b = F(X)
- 
+    opt.Tolfun = 1e-8;
     
     tic
-    X = fmincon(@Objective,X0,[],[],[],[],lb,ub,@F_ownJacobian,opt);
+    [X,fval,exitflag] = fmincon(@Objective,X0,[],[],[],[],lb,ub,@F_ownJacobian,opt);
     toc
+    if exitflag < 1
+        fprintf('\nWARNING: Solution not found\n')
+        if options.init == 0;
+            
+    else
+        fprintf('\n Solution  found\n')
+    end
+    
     d_delta = X(end) / (n-1);
     disp('Time it takes to find optimal path')
     save('CurrentX0','X')
-
+    
     for i = 1:3
       statePath(:,i) = X(i:6:6*n);
       stateVelocity(:,i) = X((i+3):6:6*n);
@@ -211,13 +221,19 @@ yessave = 1;
       T = X(end);
     end  % extract state variables
 
+    keyboard    
 end
 
 % Extract the total time variable (the objective)
 
 function b = Objective(x)
-
-    b = x(end); 
+    n = (length(x) - 1)/ 9;
+    p  = 0.01;
+    for i = 1:3
+        sumX =  sum(x(6*n+i:3:end-1));
+    end
+    
+    b = x(end) + p*sumX; 
 
 end
 
