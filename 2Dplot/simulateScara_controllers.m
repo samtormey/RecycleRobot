@@ -71,12 +71,12 @@ Mov(n-1) = struct('cdata',[],'colormap',[]);
         statePath = state(1:2,:)';
         PD_Velocity = state(3:4,:)';
         
-        for i = 2:n
-            
-            plot3D_SCARA(statePath(i,1),statePath(i,2),0);            
-            pause(.1)
-            
-        end   
+%         for i = 2:n
+%             
+%             plot3D_SCARA(statePath(i,1),statePath(i,2),0);            
+%             pause(.1)
+%             
+%         end   
         
         for i = 1:n
             jvi = (2*Q*(i-1) + 1):2*Q*i;  

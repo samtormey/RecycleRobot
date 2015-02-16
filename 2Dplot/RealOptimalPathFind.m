@@ -1,4 +1,4 @@
-function [statePath d_delta T] = RealOptimalPathFind  %(start,finish,options,X0,n)
+function [X statePath d_delta T] = RealOptimalPathFind  %(start,finish,options,X0,n)
 
 % takes advantage of scopes in Matlab in order to reduce 
 % number of inputs required for auxillary functions.
@@ -17,8 +17,8 @@ Q = 2;  % number of joints
 % finishState = [2 2 -.8 0 0 0]';
 
 
-startState = [0 0 0 0]';
-finishState = [-pi+1 -pi+1 0 0]';   % need to specify from which direction it moves.
+startState = [0 1 0 0]';
+finishState = [-pi+.1 -pi+1.5 0 0]';   % need to specify from which direction it moves.
 % finishState = [.2 3 0 0]';
 
 
@@ -26,7 +26,7 @@ finishState = [-pi+1 -pi+1 0 0]';   % need to specify from which direction it mo
 n = 20;
 options.init = 2;
 SZ = 3*Q*n+1;   
-X0 = zeros(SZ,1); 
+
 
 
 dtau = 1/(n-1);   
@@ -232,18 +232,17 @@ yessave = 1;
     end  % extract state variables
     
       for i = 1:Q
-      statePath_X0(:,i) = X0(i:2*Q:2*Q*n);
-      stateVelocity_X0(:,i) = X0((i+Q):2*Q:2*Q*n);
-      control_X0(:,i) = X0(2*Q*n+i:Q:end-1);
-      T_X0 = X(end);
-    end 
-    keyboard
+          statePath_X0(:,i) = X0(i:2*Q:2*Q*n);
+          stateVelocity_X0(:,i) = X0((i+Q):2*Q:2*Q*n);
+          control_X0(:,i) = X0(2*Q*n+i:Q:end-1);
+          T_X0 = X(end);
+      end 
     
-    for i = 1:n
-      plot3D_SCARA(statePath(i,1),statePath(i,2),0);
-      pause(.1);
-    end
-    control
+%     for i = 1:n
+%       plot3D_SCARA(statePath(i,1),statePath(i,2),0);
+%       pause(.1);
+%     end
+%     control
 
 
 end
