@@ -215,7 +215,7 @@ yessave = 1;
     
     d_delta = X(end) / (n-1);
 %     fprintf('Time it takes to find optimal path: %f\n',time)
-    save('CurrentX0','X')
+  
     
     for i = 1:Q
       statePath(:,i) = X(i:2*Q:2*Q*n);

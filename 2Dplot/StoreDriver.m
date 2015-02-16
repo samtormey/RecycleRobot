@@ -7,6 +7,10 @@ function StoreDriver
 %     th1_G = theta1(Goal) * (num_theta_G/2pi)
 %        where num_x = number of discretizated elements of x
 %     ToP = 1 for time, 2 for path
+
+% notice there is structure to the NaNs in A, we could reduce storage if 
+% we needed to
+
 clc;
 A = {};
 
@@ -23,18 +27,20 @@ belt_bottom = belt.robo2bottom;
 belt_top = belt.robo2top;
 
 % Create discretization of theta configurations
-num_theta = 3;
+num_theta = 5;
 dt = 2*pi/num_theta;
 theta_vec = -pi+dt:dt:pi;
+
 
 n = 20; % number of time steps
 options.init = 1;
 X0 = zeros(9*n+1,1);
+cnt = 0;
 
 total_time = 0; % computational time
 
 % generate goal region points
-gps = 5;
+gps = 3;
 goal_width = 2*sqrt((len1+len2)^2 - goal_y^2);
 goal_points_x = linspace(-goal_width/2,goal_width/2,gps);
 goal_points_y = goal_y*ones(1,gps);
@@ -42,34 +48,27 @@ points = [goal_points_x; goal_points_y];
 
 % Inverse Kinematics
 [the1p, the2p, the1n, the2n] = inverseThe1_2(points,len1,len2);
-goal_configs = [the1p the1n; the2p the2n]'; 
-keyboard
-for k = 1: length(goal_configs)
-    % retrieve goal configuration
-    goal_th1 = goal_configs(k,1);
-    goal_th2 = goal_configs(k,2);
+goal_configs = [the1p the1n(2:end-1); the2p the2n(2:end-1)]'; % note this!
+
+
+parfor k = 1:length(goal_configs)
+    % retrieve goal configuration      
     
-    for th1_i = 1:length(theta_vec)
+    for th1_i = 1:num_theta
         th1 = theta_vec(th1_i);
         
-        for th2_i = 1:length(theta_vec)
-            fprintf('\niter %d: ', num_theta^2*(k-1) + num_theta*(th1_i-1) + th2_i)
+        for th2_i = 1:num_theta           
             
             th2 = theta_vec(th2_i);            
             % check if starting configuration is on the belt
-            [xB,yB] = FK(th1,th2,len1,len2);
+            [~,yB] = FK(th1,th2,len1,len2);
             
-            if belt_bottom <= yB <= belt_top
-<<<<<<< HEAD
-                start = [th1; th2; zeros(3,1)];
-                finish = [goal_th1; goal_th2; zeros(3,1)];
-                [X0 statePath stateVelocity d_delta T] = ...
-=======
-                
+            if belt_bottom <= yB && yB <= belt_top
+%                 cnt = cnt + 1;
+%                 fprintf('\niter %d: ', cnt)
                 start = [th1; th2; 0; 0];
-                finish = [goal_th1; goal_th2; 0; 0];
-                [X0 statePath T exitflag comp_time] = ...
->>>>>>> 0299c65a8416d1664c8296541af043e6c8543cb5
+                finish = [goal_configs(k,:); 0; 0];
+                [statePath, T, exitflag, ~] = ...
                     RealOptimalPathFind(start,finish,options,X0,n);
                 
                 if exitflag ~= 1
@@ -81,17 +80,17 @@ for k = 1: length(goal_configs)
                 A{th1_i,th2_i,k,1} = T;
                 A{th1_i,th2_i,k,2} = statePath;
                 
-                options.init = 1; % reuse initial guess
+%                 options.init = 1; % reuse initial guess
                 
-                total_time = total_time + comp_time;
+%                 total_time = total_time + comp_time;
             
-            else % if starting config is not on the belt
-                A{th1_i,th2_i,k,1} = NaN;
-                A{th1_i,th2_i,k,2} = NaN;
-                options.init = 1; % reset initial guess flag
-                
-            end % if
-        end % th1
+%             else % if starting config is not on the belt
+%                 A{th1_i,th2_i,k,1} = NaN;
+%                 A{th1_i,th2_i,k,2} = NaN;
+%                 options.init = 1; % reset initial guess flag
+%                 
+             end % if
+       end % th1
     end % th2
 end % k (goal goal_configs)
 fprintf('\n')
