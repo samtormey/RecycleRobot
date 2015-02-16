@@ -23,7 +23,7 @@ belt_bottom = belt.robo2bottom;
 belt_top = belt.robo2top;
 
 % Create discretization of theta configurations
-num_theta = 2;
+num_theta = 1000;
 dt = 2*pi/num_theta
 theta_vec = -pi+dt:dt:pi;
 
@@ -32,14 +32,14 @@ options.init = 1;
 X0 = zeros(9*n+1,1);
 
 % generate goal region points
-gps = 10;
+gps = 4;
 goal_width = 2*sqrt((len1+len2)^2 - goal_y^2);
 goal_points_x = linspace(-goal_width/2,goal_width/2,gps);
 goal_points_y = goal_y*ones(1,gps);
 points = [goal_points_x; goal_points_y];
 
 % Inverse Kinematics
-[the1p, the2p, the1n, the2n] = inverseThe1_2(points);
+[the1p, the2p, the1n, the2n] = inverseThe1_2(points,len1,len2);
 goal_configs = [the1p the2p; the1n the2n]'; 
 
 for k = 1: length(goal_configs)
@@ -56,6 +56,7 @@ for k = 1: length(goal_configs)
             [xB,yB] = FK(th1,th2,len1,len2);
             
             if belt_bottom <= yB <= belt_top
+                keyboard
                 start = [th1; th2; zeros(4,1)];
                 finish = [goal_th1; goal_th2; zeros(4,1)];
                 [X0 statePath stateVelocity d_delta T] = ...
@@ -64,20 +65,25 @@ for k = 1: length(goal_configs)
                 % store solutions
                 A{th1_i,th2_i,k,1} = T;
                 A{th1_i,th2_i,k,2} = statePath;
+                
+                % Update initial guess
+                options.init = 0;
             
             else % if starting config is not on the belt
                 A{th1_i,th2_i,k,1} = NaN;
                 A{th1_i,th2_i,k,2} = NaN;
+                options.init = 1; % reset initial guess flag
                 
             end % if
         end % th1
     end % th2
 end % k (goal goal_configs)
 
+keyboard
 
 rmpath /Users/samtormey/matlab/RecycleRobot/2DPlot/
 
-save(['./Precompute/Paths_n=',num2str(n),'_numThe=',num2str(num_theta)],'A','goal_config')
+save(['./Precompute/Paths_n=',num2str(n),'_numThe=',num2str(num_theta)],'A','goal_configs')
 
 end
 
@@ -92,12 +98,12 @@ function [x,y] = FK(the1,the2,len1,len2)
 end
 
 
-function [the1p, the2p, the1n, the2n] = inverseThe1_2(points)
+function [the1p, the2p, the1n, the2n] = inverseThe1_2(points,len1,len2)
 
-    global len1 len2
-    
     xx = points(1,:);
     yy = points(2,:);
+    
+    I = ones(size(xx));
     
     c2 = (xx.^2 + yy.^2 - len1^2 - len2^2) / ...
                 (2*len1*len2);
