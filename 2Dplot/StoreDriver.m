@@ -31,7 +31,6 @@ num_theta = 5;
 dt = 2*pi/num_theta;
 theta_vec = -pi+dt:dt:pi;
 
-
 n = 20; % number of time steps
 options.init = 1;
 X0 = zeros(9*n+1,1);
@@ -50,25 +49,26 @@ points = [goal_points_x; goal_points_y];
 [the1p, the2p, the1n, the2n] = inverseThe1_2(points,len1,len2);
 goal_configs = [the1p the1n(2:end-1); the2p the2n(2:end-1)]'; % note this!
 
-
-parfor k = 1:length(goal_configs)
-    % retrieve goal configuration      
+for k = 1: length(goal_configs)
+    % retrieve goal configuration
+    goal_th1 = goal_configs(k,1);
+    goal_th2 = goal_configs(k,2);
     
-    for th1_i = 1:num_theta
+    for th1_i = 1:length(theta_vec)
         th1 = theta_vec(th1_i);
         
-        for th2_i = 1:num_theta           
+        for th2_i = 1:length(theta_vec)            
             
             th2 = theta_vec(th2_i);            
             % check if starting configuration is on the belt
-            [~,yB] = FK(th1,th2,len1,len2);
+            [xB,yB] = FK(th1,th2,len1,len2);
             
             if belt_bottom <= yB && yB <= belt_top
-%                 cnt = cnt + 1;
-%                 fprintf('\niter %d: ', cnt)
+                cnt = cnt + 1;
+                fprintf('\niter %d: ', cnt)
                 start = [th1; th2; 0; 0];
-                finish = [goal_configs(k,:); 0; 0];
-                [statePath, T, exitflag, ~] = ...
+                finish = [goal_th1; goal_th2; 0; 0];
+                [X0 statePath T exitflag comp_time] = ...
                     RealOptimalPathFind(start,finish,options,X0,n);
                 
                 if exitflag ~= 1
@@ -80,17 +80,17 @@ parfor k = 1:length(goal_configs)
                 A{th1_i,th2_i,k,1} = T;
                 A{th1_i,th2_i,k,2} = statePath;
                 
-%                 options.init = 1; % reuse initial guess
+                options.init = 1; % reuse initial guess
                 
-%                 total_time = total_time + comp_time;
+                total_time = total_time + comp_time;
             
-%             else % if starting config is not on the belt
-%                 A{th1_i,th2_i,k,1} = NaN;
-%                 A{th1_i,th2_i,k,2} = NaN;
-%                 options.init = 1; % reset initial guess flag
-%                 
-             end % if
-       end % th1
+            else % if starting config is not on the belt
+                A{th1_i,th2_i,k,1} = NaN;
+                A{th1_i,th2_i,k,2} = NaN;
+                options.init = 1; % reset initial guess flag
+                
+            end % if
+        end % th1
     end % th2
 end % k (goal goal_configs)
 fprintf('\n')
