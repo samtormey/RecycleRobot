@@ -31,8 +31,6 @@ n = 20; % number of time steps
 options.init = 1;
 X0 = zeros(9*n+1,1);
 
-save(['./Precompute/Paths_n=',num2str(n),'_numThe=',num2str(num_theta)],'A')
-
 % generate goal region points
 gps = 10;
 goal_width = 2*sqrt((len1+len2)^2 - goal_y^2);

@@ -3,7 +3,6 @@ function [X statePath stateVelocity d_delta T] = RealOptimalPathFind(start,finis
 % takes advantage of scopes in Matlab in order to reduce 
 % number of inputs required for auxillary functions.
 %
-clc;
 
 startState = start;
 finishState = finish;
@@ -217,7 +216,10 @@ end
 
 function b = Objective(x)
 
+%     n = 20;
     b = x(end); 
+%     b = b + norm(x(6*n+3:3:end));
+    
 
 end
 
