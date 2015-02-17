@@ -172,6 +172,21 @@ yessave = 1;
         
     end
 
+
+
+    function X0 = fsolve_init(n)
+    SZ = 9*n + 1;
+    X0 = zeros(SZ,1);
+    while(norm(F_dyn(X0)) > .1)   % could save an X0 that works, save a few seconds       
+        fprintf('\n Finding random initial guess for X \n');
+        X0 = rand(SZ,1);
+        X0(1:2*Q) = startState;
+        X0((2*Q*(n-1) + 1):2*Q*n) = finishState;
+        X0 = fsolve(@F_dyn,X0);
+    end
+    end
+
+
     if options.init == 1
         [ X0,~,~,~ ] = simulateScara_controllers( startState, finishState, n, 4);
     end
@@ -240,20 +255,6 @@ function b = Objective(x)
     b = x(end);     
     
 end    
-
-function X0 = fsolve_init(n)
-SZ = 9*n + 1;
-X0 = zeros(SZ,1);
-while(norm(F_dyn(X0)) > .1)   % could save an X0 that works, save a few seconds
-    opts.optimset('Display','off')
-    fprintf('\n Finding random initial guess for X \n');
-    X0 = rand(SZ,1);
-    X0(1:2*Q) = startState;
-    X0((2*Q*(n-1) + 1):2*Q*n) = finishState;
-    X0 = fsolve(@F_dyn,X0);
-end
-end
-
 
 function I = computeMoments
 

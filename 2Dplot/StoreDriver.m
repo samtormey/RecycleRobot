@@ -27,7 +27,7 @@ belt_bottom = belt.robo2bottom;
 belt_top = belt.robo2top;
 
 % Create discretization of theta configurations
-num_theta = 5;
+num_theta = 40;
 dt = 2*pi/num_theta;
 theta_vec = -pi+dt:dt:pi;
 
@@ -39,7 +39,7 @@ cnt = 0;
 total_time = 0; % computational time
 
 % generate goal region points
-gps = 3;
+gps = 5;
 goal_width = 2*sqrt((len1+len2)^2 - goal_y^2);
 goal_points_x = linspace(-goal_width/2,goal_width/2,gps);
 goal_points_y = goal_y*ones(1,gps);
@@ -95,7 +95,7 @@ for k = 1: length(goal_configs)
 end % k (goal goal_configs)
 fprintf('\n')
 
-save(['./Precompute/Paths_n=',num2str(n),'_numThe=',num2str(num_theta)],'A',...
+save(['./Precompute/Paths_n=',num2str(n),'_numThe=',num2str(num_theta),'_gps=',num2str(gps)],'A',...
         'goal_configs','belt','n','robot','num_theta','total_time')
 rmpath /Users/samtormey/matlab/RecycleRobot/2DPlot/
 
