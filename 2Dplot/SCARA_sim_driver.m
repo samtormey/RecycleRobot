@@ -45,25 +45,27 @@ global len1 len2
     %%% position to 
     
     
-   
+
+    
     options.init = 1;
-    X0 = 0;
     
     %%% may have options.n for RealOptimalPathFind
     
-    loops = 20*numofCircles;
-    M(loops) = struct('cdata',[],'colormap',[]);
+%     loops = 20*numofCircles;
+%     M(loops) = struct('cdata',[],'colormap',[]);
     cnt = 1;    
-    n = 40;
+    n = 20;
     
     
     for i = 1:numofCircles
-        % first try finding a test optimal path
 
-        [X statePath stateVelocity d_delta T] = RealOptimalPathFind(goalregion,...
-            [the1p(i) the2p(i) d3p(i) zeros(1,3)]',options,X0,n);                
-        n = size(statePath,1);
-
+ 
+         options.objective = 1;
+        [statePath d_delta T] = RealOptimalPathFind(goalregion,...
+            [the1p(i) the2p(i) d3p(i) zeros(1,3)]',options,[],n);                
+       
+        keyboard
+        
         
         for j = 1:n
             hold off
@@ -88,7 +90,7 @@ global len1 len2
             pause(d_delta)
             
         end
-        options.init = 0;
+        options.init = 1;
     end
     
     
