@@ -20,6 +20,7 @@ dt = t_f/n;
 robot = ScaraInit();
 state = zeros(4,n); 
 X0 = zeros(6*n+1,1);
+
 state(:,1) = startState;
 torque = zeros(2,n);
 u = zeros(2,1);

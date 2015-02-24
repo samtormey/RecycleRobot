@@ -1,4 +1,4 @@
-function [X statePath T exitflag comp_time] = RealOptimalPathFind(start,finish,options,X0,n)
+function [X control T exitflag comp_time] = RealOptimalPathFind(start,finish,options,X0,n)
 
 
 % takes advantage of scopes in Matlab in order to reduce 
@@ -211,7 +211,7 @@ yessave = 1;
     tic
     [X,fval,exitflag] = fmincon(@Objective,X0,[],[],[],[],lb,ub,@F_ownJacobian,opt);
     comp_time = toc;
-    fprintf(' time = %1.3f',comp_time)
+    fprintf('\n time = %1.3f',comp_time)
     if options.init == 1
        fprintf('  (Used controller initial guess)') 
     elseif options.init == 2
