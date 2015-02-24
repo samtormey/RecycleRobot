@@ -1,4 +1,4 @@
-function [ positions ] = conrol_to_position( control, n, start, T)
+function [ positions ] = control_to_position( control, n, start, T)
 
 
 close all;
