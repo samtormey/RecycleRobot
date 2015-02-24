@@ -1,4 +1,0 @@
-function approx_path(n,tf,start,finish)   % assumes want 0 initial and final velocity
-
-
-

@@ -28,7 +28,7 @@ function [the1p, the2p, the1n, the2n] = inverseThe(circlePositions)
     the1p = atan2(yy,xx) - ...
               atan2(k2p,k1);
          
-          keyboard
+          %keyboard
           
     the1n = atan2(yy,xx) - ...
               atan2(k2n,k1);    
