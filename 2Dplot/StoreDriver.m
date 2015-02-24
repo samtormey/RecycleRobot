@@ -108,9 +108,9 @@ fprintf('\n')
 
 keyboard
 
-% save(['./Precompute/Paths_n=',num2str(n),'_numThe=',num2str(num_theta),'_gps=',num2str(gps)],'A',...
-%         'goal_configs','belt','n','robot','num_theta','total_time')
-% rmpath /Users/samtormey/matlab/RecycleRobot/2DPlot/
+save(['./Precompute/Paths_n=',num2str(n),'_numThe=',num2str(num_theta),'_gps=',num2str(gps)],'A',...
+        'goal_configs','belt','n','robot','num_theta','total_time')
+rmpath /Users/samtormey/matlab/RecycleRobot/2DPlot/
 
 end
 
