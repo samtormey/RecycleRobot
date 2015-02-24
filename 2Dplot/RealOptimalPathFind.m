@@ -1,4 +1,4 @@
-function [X statePath T exitflag comp_time] = RealOptimalPathFind(start,finish,options,X0,n)
+function [X control T exitflag comp_time] = RealOptimalPathFind(start,finish,options,X0,n)
 
 
 % takes advantage of scopes in Matlab in order to reduce 
