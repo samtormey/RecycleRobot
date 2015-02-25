@@ -9,6 +9,8 @@ len2 = robot.l_2;
 
 v = belt_params.velocity;
 disc = belt_params.disc;
+dt = 2*pi/disc;
+theta_vec = -pi+dt:dt:pi;
 
 
 % heuristic for gap spaces in a row along the belt
@@ -26,8 +28,8 @@ bfp = Inf;
 while bfp == Inf && count <= maxiter
     count = count + 1;
     [the1p, the2p, the1n, the2n] = inverseThe(sol + [count*gap_size; 0]);
-    [index1p, index2p] = getBestStoredIndices(the1p, the2p, disc);
-    [index1n, index2n] = getBestStoredIndices(the1n, the2n, disc);
+    [index1p, index2p] = getBestStoredIndices(the1p, the2p, theta_vec);
+    [index1n, index2n] = getBestStoredIndices(the1n, the2n, theta_vec);
     keyboard
     maybe_best_time_p = A{index1p, index2p, sgp_index, 2, 1};
     maybe_best_time_n = A{index1n, index2n, sgp_index, 2, 1};
