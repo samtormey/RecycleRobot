@@ -15,7 +15,7 @@ A = pit.A;
 
 maxiter = 50;
 
-[bft, bfp] = goal2belt_picker(sgp_index, sol, A, maxiter);
+[bft, bfp, b2g_bft, b2g_bfp] = goal2belt_picker(sgp_index, sol, A, maxiter);
 
 
 
