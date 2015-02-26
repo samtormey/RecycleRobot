@@ -79,7 +79,7 @@ while bfp == Inf && count <= maxiter
     end
 end
           
-
+keyboard;
 
 return
             
