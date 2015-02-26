@@ -35,23 +35,20 @@ faces = [1 2 3 4 4 4 4 4; 5 6 7 8 8 8 8 8; 2 1 5 6 6 6 6 6; ...
 
 plot3D_SCARA(0,0,0);
 axis([-blr blr -blr blr 0 blr])
+
 patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
-
-
-
-
 % 
-% keyboard
 % grid on
 % rectangle('Position',[-blr,belt_bottom,2*blr,belt_top],'FaceColor',[.5 .5 .5])
-% hold on
+% 
 %     for i = 1:100
 %         for j = 1:num_rec
 %             if i > 1
 % %                 delete(h(j))
 %             end
-%             h(j) = rectangle('Position',[start_rec(j)+(2*blr)/i, ...
-%                 belt_bottom,rec_width,belt_top],'FaceColor',[.3,.3,.3]);
+%             h(j) = rectangle('Position',[start_rec(j)+(2*blr)/i,belt_bottom,rec_width,belt_top], ...
+%                 'FaceColor',[.3,.3,.3]);
+%             pause(.001)
 %         end
 %         pause(.1)
 %     end
