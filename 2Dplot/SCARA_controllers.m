@@ -1,4 +1,4 @@
-function [ X0, torque, PD_Position, PD_Velocity ] = simulateScara_controllers ( startState, finishState, n,t_f)
+function [ X0, torque, PD_Position, PD_Velocity ] = SCARA_controllers ( startState, finishState, n,t_f)
 
  
 
