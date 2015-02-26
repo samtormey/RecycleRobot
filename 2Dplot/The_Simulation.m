@@ -21,15 +21,57 @@ axis([-blr blr -blr blr 0 blr])
 grid on
 rectangle('Position',[-blr,belt_bottom,2*blr,belt_top],'FaceColor',[.5 .5 .5])
 
-    for i = 1:100
-        for j = 1:num_rec
-            if i > 1
-%                 delete(h(j))
-            end
-            h(j) = rectangle('Position',[start_rec(j)+(2*blr)/i,belt_bottom,rec_width,belt_top], ...
-                'FaceColor',[.3,.3,.3]);
-            pause(.001)
+for i = 1:num_rec
+    rec_vert(:,:,i) = [start_rec(i),belt_bottom,.1;
+                        start_rec(i), belt_top,.1;
+                        start_rec(i)+rec_width, belt_top,.1;
+                        start_rec(i)+rec_width, belt_bottom,.1];
+end
+
+%octox = -blr;  
+octox = 0;
+
+start = [2.1256 0 0 0]';
+sgp_index = 1;
+sol = [0; 0.8];
+pit = load('Precompute/Controls_n=20_numThe=20_gps=4.mat');
+A = pit.A;
+n = pit.n;
+maxiter = 50;
+
+[time,control] = goal2belt_picker(sgp_index, sol, A, maxiter);
+dt = time/(n-1);
+path = control_to_position(control, n, start, time);
+
+
+disp(path)
+
+
+
+
+    for i = 1:100       
+%         for j = 1:num_rec
+%             if rec_vert(1,1,j) > blr
+%                 rec_vert(:,1,j) = -blr*ones(4,1) + [0 0 rec_width rec_width]';
+%             end
+%             rec_vert(:,:,j) = rec_vert(:,:,j) + [.05*ones(4,1) zeros(4,2)]; 
+%             if i > 1
+%                  delete(h(j))
+%             end
+%             h(j) = patch(rec_vert(:,1,j),rec_vert(:,2,j),rec_vert(:,3,j));
+%             pause(.001)
+%         end
+        octox = octox + v*dt;   
+      
+        if i < n+1
+            plot3D_SCARA(path(i,1),path(i,2),0)
+            grid on
         end
+        if i > 1
+            delete(g);
+        end
+        g = plot3D_OCTO(octox,.8,0,0);
+        rectangle('Position',[-blr,belt_bottom,2*blr,belt_top],'FaceColor',[.5 .5 .5])
         pause(.1)
     end
 
