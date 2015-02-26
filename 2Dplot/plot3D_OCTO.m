@@ -1,4 +1,6 @@
 function plot3D_OCTO(x,y,z,theta)
+% x, y, z are the coordinates of the center
+% theta is the orientation
 
 n = 8;
 % shift the angle space input by theta
