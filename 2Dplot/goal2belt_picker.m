@@ -5,6 +5,7 @@ function [bft, bfp] = goal2belt_picker(sgp_index, sol, A, maxiter)
 
 belt_params = ConvBelt();
 robot = ScaraInit;
+len1 = robot.l_1;
 len2 = robot.l_2;
 
 v = belt_params.velocity;
@@ -14,7 +15,9 @@ theta_vec = -pi+dt:dt:pi;
 
 
 % heuristic for gap spaces in a row along the belt
-gap_size = 2*pi*len2/disc;
+% alpha just a toggle
+alpha = 8;
+gap_size = 2*pi*len2/disc/alpha;
 
 % loop through forward solutions in a row until we find 
 % one reachable in time
@@ -27,10 +30,17 @@ bfp = Inf;
 
 while bfp == Inf && count <= maxiter
     count = count + 1;
-    [the1p, the2p, the1n, the2n] = inverseThe(sol + [count*gap_size; 0]);
+    disp(count)
+    
+    % break if solution not on the belt
+    if norm(sol + [count*gap_size; 0]) > len1 + len2
+        disp('No solution found')
+        break
+    end
+    [the1p, the2p, the1n, the2n] = inverseThe(sol + [count*gap_size; 0], ...
+        len1, len2);
     [index1p, index2p] = getBestStoredIndices(the1p, the2p, theta_vec);
     [index1n, index2n] = getBestStoredIndices(the1n, the2n, theta_vec);
-    keyboard
     maybe_best_time_p = A{index1p, index2p, sgp_index, 2, 1};
     maybe_best_time_n = A{index1n, index2n, sgp_index, 2, 1};
    
@@ -42,7 +52,14 @@ while bfp == Inf && count <= maxiter
         n_or_p_better = 'n';
     end
     
+        %disp('Maybe best time:')
+        %disp(maybe_best_time)
+        %disp('Octo travel time:')
+        %disp(gap_size*count/v)
+ 
+    
     if maybe_best_time < (gap_size*count)/v
+        
         % best feasible time
         bft = maybe_best_time;
         % best feasible path
@@ -53,6 +70,9 @@ while bfp == Inf && count <= maxiter
         else
             disp('Uh-oh')
         end
+        
+        disp('Victory!')
+        break
     end
 end
           

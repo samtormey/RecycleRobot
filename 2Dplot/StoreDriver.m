@@ -100,11 +100,10 @@ for k = 1: size(goal_configs,1)
         end % th1
     end % th2
 end % k (goal goal_configs)
+
 if error == 1
    fprintf('There was an error in one of the computations') 
 end
-fprintf('\n')
-
 
 save(['./Precompute/Controls_n=',num2str(n),'_numThe=',num2str(num_theta),'_gps=',num2str(gps)],'A',...
         'goal_configs','belt','n','robot','num_theta','total_time')

@@ -23,7 +23,7 @@ rectangle('Position',[-blr,belt_bottom,2*blr,belt_top],'FaceColor',[.5 .5 .5])
     for i = 1:100
         for j = 1:num_rec
             if i > 1
-            delete(h(j))
+             delete(h(j))
             end
             h(j) = rectangle('Position',[start_rec(j)+(2*blr)/i,belt_bottom,rec_width,belt_top], ...
                 'FaceColor',[.3,.3,.3]);

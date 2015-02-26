@@ -9,8 +9,8 @@ rmpath /Users/samtormey/matlab/RecycleRobot/2DPlot/
 belt.robo2bottom = 0.1;
 belt.robo2top = len1 + len2 - .5;
 belt.robo2goal = len1 + len2 - .3;
-belt.left_right = 3;
-belt.velocity = 1;
+
+belt.velocity = 0.1;
 belt.disc = 20;
 belt.num_rec = 4;
 belt.rec_width = .3;
