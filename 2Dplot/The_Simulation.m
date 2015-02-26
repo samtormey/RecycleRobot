@@ -46,11 +46,12 @@ for i = 1:num_rec
 end
 
 %octox = -blr;  
-octox = 0;
+octox = 1.3;
 
 start = [2.1256 0 0 0]';
 sgp_index = 1;
-sol = [0; 0.8];
+ystart = 0.8;
+sol = [octox; ystart];
 pit = load('Precompute/Controls_n=20_numThe=20_gps=4.mat');
 A = pit.A;
 n = pit.n;
@@ -58,13 +59,12 @@ maxiter = 50;
 
 [time,control] = goal2belt_picker(sgp_index, sol, A, maxiter);
 dt = time/(n-1);
-path = control_to_position(control, n, start, time);
-
+%  control = A{_,_,sgp_index,2,2};
+%  time  = A{_,_,sgp_index,2,1};
+ path = control_to_position(control, n, start, time);
 
 disp(path)
-
-
-
+keyboard
 
     for i = 1:100       
 %         for j = 1:num_rec
@@ -81,13 +81,13 @@ disp(path)
         octox = octox + v*dt;   
       
         if i < n+1
-            plot3D_SCARA(path(i,1),path(i,2),0)
+            plot3D_SCARA(path(i,1),path(i,2),-1)
             grid on
         end
         if i > 1
             delete(g);
         end
-        g = plot3D_OCTO(octox,.8,0,0);
+        g = plot3D_OCTO(octox,ystart,0,0);
         rectangle('Position',[-blr,belt_bottom,2*blr,belt_top],'FaceColor',[.5 .5 .5])
         pause(.1)
     end
