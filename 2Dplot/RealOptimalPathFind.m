@@ -188,7 +188,7 @@ yessave = 1;
 
 
     if options.init == 1
-        [ X0,~,~,~ ] = simulateScara_controllers( startState, finishState, n, 4);
+        [ X0,~,~,~ ] = SCARA_controllers( startState, finishState, n, 4);
     end
 
     if options.init == 2
@@ -219,7 +219,7 @@ yessave = 1;
     end
     
     if exitflag ~= 1 && options.init ~= 1
-       [X0,~,~,~ ] = simulateScara_controllers(startState, finishState, n, 4); 
+       [X0,~,~,~ ] = SCARA_controllers(startState, finishState, n, 4); 
        [X,fval,exitflag] = fmincon(@Objective,X0,[],[],[],[],lb,ub,@F_ownJacobian,opt);
     end
     if exitflag ~= 1 && options.init ~= 2
