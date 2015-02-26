@@ -50,6 +50,8 @@ points = [goal_points_x; goal_points_y];
 [the1p, the2p, the1n, the2n] = inverseThe1_2(points,len1,len2);
 goal_configs = [the1p the1n(2:end-1); the2p the2n(2:end-1)]'; % note this!
 
+keyboard
+
 for k = 1: size(goal_configs,1)
     % retrieve goal configuration
     goal_th1 = goal_configs(k,1);

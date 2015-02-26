@@ -34,7 +34,7 @@ dt = T/(n-1);
 
 
         end   
-        positions = [state(1,:); state(2,:); state(3,:)]';
+        positions = [state(1,:); state(2,:)]';
         
     end     
 
