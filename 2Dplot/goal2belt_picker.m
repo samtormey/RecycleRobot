@@ -25,6 +25,7 @@ theta_vec = -pi+dt:dt:pi;
 alpha = 8;
 gap_size = 2*pi*len2/disc/alpha;
 
+
 % loop through forward solutions in a row until we find 
 % one reachable in time
 count = 0;
