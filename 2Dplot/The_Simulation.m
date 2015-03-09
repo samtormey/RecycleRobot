@@ -48,7 +48,7 @@ end
 
 % initial octoprism
 octo.state = 'belt'; % 0 = on belt, 1 = with robot, 2 = off belt
-octo.x = 1.1;
+octo.x = .2;
 octo.y = 0.8;
 octo.z = 0;
 octo.theta = 0;
@@ -76,7 +76,7 @@ maxiter = 50;
         end
         if strcmp(octo.state,'robot')
             [octo.x,octo.y,octo.z] = fkSCARA(path(i-n,1),path(i-n,2),len1,len2);      
-        end
+        end        
             
         if i < n+1
             plot3D_SCARA(path(i,1),path(i,2),-1)
@@ -87,6 +87,7 @@ maxiter = 50;
         % the time it takes to compute this makes the simulation stop
         % briefly        
         if i == n+1 
+            keyboard
             current_config = [path(n,1) path(n,2) 0 0];
             [control,closest_goal_ind,time] = belt2goal_picker(A,current_config,num_goal_pts);                 
             path = control_to_position(control, n, current_config, time);
