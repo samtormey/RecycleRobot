@@ -46,23 +46,21 @@ for i = 1:num_rec
 end
 
 %octox = -blr;  
-octox = 1.3;
+octox = 1.2;
 
 start = [2.1256 0 0 0]';
 sgp_index = 1;
 ystart = 0.8;
 sol = [octox; ystart];
-pit = load('Precompute/Controls_n=20_numThe=80_gps=5')
+pit = load('Precompute/Controls_n=20_numThe=80_gps=5');
 A = pit.A;
 n = pit.n;
+[num_goal_pts,~] = size(pit.goal_configs);
 maxiter = 50;
 
- [time,control] = goal2belt_picker(sgp_index, sol, A, maxiter);
-
-%   control = A{14,6,sgp_index,2,2};
-%   time  = A{14,6,sgp_index,2,1};
- path = control_to_position(control, n, start, time);
-  dt = time/(n-1);
+[time,control] = goal2belt_picker(sgp_index, sol, A, maxiter);
+path = control_to_position(control, n, start, time);
+dt = time/(n-1);
 
 disp(path)
 
@@ -84,8 +82,21 @@ disp(path)
         if i < n+1
             plot3D_SCARA(path(i,1),path(i,2),-1)
             grid on
-        else
-            plot3D_SCARA(path(n,1),path(n,2),-1)
+        end
+        
+        
+        % the time it takes to compute this makes the simulation stop
+        % briefly        
+        if i == n+1 
+            tic
+            current_config = [path(n,1) path(n,2) 0 0];
+            [control,closest_goal_ind,time] = belt2goal_picker(A,current_config,num_goal_pts);                 
+            path = control_to_position(control, n, current_config, time);
+            dt = time/(n-1);
+            toc
+        end
+        if i >= n+1
+            plot3D_SCARA(path(i-n,1),path(i-n,2),-1)            
             grid on
         end
          
@@ -95,10 +106,11 @@ disp(path)
         g = plot3D_OCTO(octox,ystart,0,0);
 
         rectangle('Position',[-blr,belt_bottom,2*blr,belt_top],'FaceColor',[.5 .5 .5])
+        
+        patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
         pause(.1)
     end
 
-patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
 % 
 % grid on
 % rectangle('Position',[-blr,belt_bottom,2*blr,belt_top],'FaceColor',[.5 .5 .5])
