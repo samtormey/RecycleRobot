@@ -27,7 +27,7 @@ belt_bottom = belt.robo2bottom;
 belt_top = belt.robo2top;
 
 % Create discretization of theta configurations
-num_theta = 20;
+num_theta = 80;
 dt = 2*pi/num_theta;
 theta_vec = -pi+dt:dt:pi;
 
@@ -40,7 +40,7 @@ error = 0;
 total_time = 0; % computational time
 
 % generate goal region points
-gps = 4;
+gps = 5;
 goal_width = 2*sqrt((len1+len2)^2 - goal_y^2);
 goal_points_x = linspace(-goal_width/2,goal_width/2,gps);
 goal_points_y = goal_y*ones(1,gps);
@@ -50,7 +50,6 @@ points = [goal_points_x; goal_points_y];
 [the1p, the2p, the1n, the2n] = inverseThe1_2(points,len1,len2);
 goal_configs = [the1p the1n(2:end-1); the2p the2n(2:end-1)]'; % note this!
 
-keyboard
 
 for k = 1: size(goal_configs,1)
     % retrieve goal configuration

@@ -1,4 +1,4 @@
-sofunction [the1p, the2p, the1n, the2n] = inverseThe(circlePositions, len1, len2)
+function [the1p, the2p, the1n, the2n] = inverseThe(circlePositions, len1, len2)
     
     xx = circlePositions(1,:);
     yy = circlePositions(2,:);
