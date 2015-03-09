@@ -45,40 +45,34 @@ for i = 1:num_rec
                         start_rec(i)+rec_width, belt_bottom,.1];
 end
 
-%octox = -blr;  
-octox = 1.2;
 
-start = [2.1256 0 0 0]';
-sgp_index = 1;
-ystart = 0.8;
-sol = [octox; ystart];
-pit = load('Precompute/Controls_n=20_numThe=80_gps=5');
+% initial octoprism
+octo.state = 0; % 0 = on belt, 1 = with robot, 2 = off belt
+octo.x = 1.3;
+octo.y = 0.8;
+
+sol = [octo.x; octo.y];
+pit = load('Precompute/Controls_n=20_numThe=80_gps=5')
 A = pit.A;
+
+sgp_index = 1;
+start = [pit.goal_configs(sgp_index,:) 0 0]';
+
 n = pit.n;
 [num_goal_pts,~] = size(pit.goal_configs);
 maxiter = 50;
 
 [time,control] = goal2belt_picker(sgp_index, sol, A, maxiter);
-path = control_to_position(control, n, start, time);
-dt = time/(n-1);
 
-disp(path)
+ path = control_to_position(control, n, start, time);
+ dt = time/(n-1);
 
-    for i = 1:100       
-%         for j = 1:num_rec
-%             if rec_vert(1,1,j) > blr
-%                 rec_vert(:,1,j) = -blr*ones(4,1) + [0 0 rec_width rec_width]';
-%             end
-%             rec_vert(:,:,j) = rec_vert(:,:,j) + [.05*ones(4,1) zeros(4,2)]; 
-%             if i > 1
-%                  delete(h(j))
-%             end
-%             h(j) = patch(rec_vert(:,1,j),rec_vert(:,2,j),rec_vert(:,3,j));
-%             pause(.001)
-%         end
-        octox = octox + v*dt;   
+    for i = 1:1.3*n       
 
-      
+        if octo.state ~= 1
+            octo.x = octo.x + v*dt;
+        end
+            
         if i < n+1
             plot3D_SCARA(path(i,1),path(i,2),-1)
             grid on
@@ -99,17 +93,22 @@ disp(path)
             plot3D_SCARA(path(i-n,1),path(i-n,2),-1)            
             grid on
         end
-         
-%         if i > 1
-%             delete(g);
-%         end
-        g = plot3D_OCTO(octox,ystart,0,0);
-
-        rectangle('Position',[-blr,belt_bottom,2*blr,belt_top],'FaceColor',[.5 .5 .5])
         
+        if i == n % if robot arm is at the end of path, the octo is grabbed
+            octo.state = 1;
+        end
+
+
+        g = plot3D_OCTO(octo.x,octo.y,0,0);
+
         patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
-        pause(.1)
+        
+        pause(.07)
     end
+    
+    figure(2)
+    scara_coverage;
+
 
 % 
 % grid on

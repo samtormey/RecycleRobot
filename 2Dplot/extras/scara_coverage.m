@@ -1,7 +1,6 @@
 % plot coverage of nxn scara discretizations
-close all
 
-n = 60;
+n = 80;
 l1 = 1;
 l2 = 1;
 
@@ -18,6 +17,6 @@ for i = 1:n
     end
 end
 
-title(['Scara coverage with n = ' num2str(n) ' discretization'], ...
-    'fontsize',16)
+% title(['Scara coverage with n = ' num2str(n) ' discretization'], ...
+%     'fontsize',16)
         

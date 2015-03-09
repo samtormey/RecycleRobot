@@ -2,6 +2,12 @@
 function [bft, bfp] = goal2belt_picker(sgp_index, sol, A, maxiter)
 % sgp_index: starting goal point index, 2x1 vector
 % sol: starting octo location, 
+% A: pre-computed time and path storage
+% maxiter = max iterations of guesses
+%
+% bft = best feasible time (goal to belt)
+% bfp = best feasible path (goal to belt)
+
 
 belt_params = ConvBelt();
 robot = ScaraInit;
@@ -31,7 +37,6 @@ bfp = Inf;
 
 while bfp == Inf && count <= maxiter
     count = count + 1;
-    disp(count)
     
     % break if solution not on the belt
     if norm(sol + [count*gap_size; 0]) > len1 + len2
@@ -72,12 +77,9 @@ while bfp == Inf && count <= maxiter
             disp('Uh-oh')
         end
         
-        disp('Victory!')
         break
     end
 end
-          
-
 
 return
             
