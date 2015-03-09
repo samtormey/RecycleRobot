@@ -25,7 +25,7 @@ dt = T/(n-1);
     end  % robot dynamics
 
         for i = 1:n-1 % time  
-             u = control(i,:)';                   
+            u = control(i,:)';                   
             k1 = f(state(:,i),u);            
             k2 = f(state(:,i)+.5*dt*k1,u);                
             k3 = f(state(:,i)+.5*dt*k2,u);        
