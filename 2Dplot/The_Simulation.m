@@ -66,7 +66,7 @@ maxiter = 50;
  path = control_to_position(control, n, start, time);
  dt = time/(n-1);
  
-
+keyboard
     for i = 1:1.3*n       
 
         if octo.state ~= 1
@@ -89,12 +89,9 @@ maxiter = 50;
 
         patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
         
-        pause(.07)
+        pause(20)
     end
     
-    figure(2)
-    scara_coverage;
-
 
 % 
 % grid on

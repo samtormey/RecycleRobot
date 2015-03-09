@@ -77,6 +77,10 @@ while bfp == Inf && count <= maxiter
             disp('Uh-oh')
         end
         
+        start = [2.1256, 0, 0, 0]; n = 20;
+        path = control_to_position(bfp, n, start, bft);
+        [armx, army, armz] = fkSCARA(path(end,1),path(end,2),1,1);
+        keyboard
         break
     end
 end
