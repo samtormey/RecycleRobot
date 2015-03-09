@@ -64,8 +64,6 @@ maxiter = 50;
  path = control_to_position(control, n, start, time);
   dt = time/(n-1);
 
-disp(path)
-
     for i = 1:100       
 %         for j = 1:num_rec
 %             if rec_vert(1,1,j) > blr
@@ -79,21 +77,22 @@ disp(path)
 %             pause(.001)
 %         end
         octox = octox + v*dt;   
-
       
         if i < n+1
             plot3D_SCARA(path(i,1),path(i,2),-1)
             grid on
         end
         if i > 1
-            delete(g);
+%             delete(g);
+             clear g;
         end
         g = plot3D_OCTO(octox,ystart,0,0);
-        rectangle('Position',[-blr,belt_bottom,2*blr,belt_top],'FaceColor',[.5 .5 .5])
+%         rectangle('Position',[-blr,belt_bottom,2*blr,belt_top],'FaceColor',[.5 .5 .5])
+        patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
         pause(.1)
     end
 
-patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
+
 % 
 % grid on
 % rectangle('Position',[-blr,belt_bottom,2*blr,belt_top],'FaceColor',[.5 .5 .5])
