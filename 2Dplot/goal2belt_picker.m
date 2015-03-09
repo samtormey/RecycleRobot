@@ -34,6 +34,7 @@ bft = Inf;
 % best feasible path 
 bfp = Inf;
 
+
 while bfp == Inf && count <= maxiter
     count = count + 1;
     
