@@ -84,11 +84,16 @@ disp(path)
         if i < n+1
             plot3D_SCARA(path(i,1),path(i,2),-1)
             grid on
+        else
+            plot3D_SCARA(path(n,1),path(n,2),-1)
+            grid on
         end
-        if i > 1
-            delete(g);
-        end
+         
+%         if i > 1
+%             delete(g);
+%         end
         g = plot3D_OCTO(octox,ystart,0,0);
+
         rectangle('Position',[-blr,belt_bottom,2*blr,belt_top],'FaceColor',[.5 .5 .5])
         pause(.1)
     end
