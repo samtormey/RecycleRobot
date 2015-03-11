@@ -8,7 +8,6 @@ function [bft, bfp] = goal2belt_picker(sgp_index, sol, A, maxiter)
 % bft = best feasible time (goal to belt)
 % bfp = best feasible path (goal to belt)
 
-
 belt_params = ConvBelt();
 robot = ScaraInit;
 len1 = robot.l_1;
