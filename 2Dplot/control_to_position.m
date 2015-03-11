@@ -1,8 +1,5 @@
 function [ positions ] = control_to_position( control, n, start, T)
 
-
-close all;
-
 % Initialize robot
 robot = ScaraInit();
 state = zeros(4,n);
