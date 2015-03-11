@@ -106,7 +106,6 @@ maxiter = 50;
             octo.state = 'robot';
         end
 
-
         g = plot3D_OCTO(octo.x,octo.y,octo.z,octo.theta);
 
         patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
