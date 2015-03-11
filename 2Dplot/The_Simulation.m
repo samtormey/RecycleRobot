@@ -70,7 +70,7 @@ maxiter = 50;
  dt = time/(n-1);
 
 
-    for i = 1:100       
+    for i = 1:2*n    
 
         if strcmp(octo.state,'belt')
             octo.x = octo.x + v*dt;
@@ -88,11 +88,12 @@ maxiter = 50;
         % the time it takes to compute this makes the simulation stop
         % briefly        
         if i == n+1 
-            keyboard
+            
             current_config = [path(n,1) path(n,2) 0 0];
             [control,closest_goal_ind,time] = belt2goal_picker(A,current_config,num_goal_pts);                 
             path = control_to_position(control, n, current_config, time);
             dt = time/(n-1);
+            
         end
         if i >= n+1
             [octo.x,octo.y,octo.z] = fkSCARA(path(i-n,1),path(i-n,2),len1,len2);      
@@ -111,7 +112,7 @@ maxiter = 50;
 
         patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
         
-        pause(.1)
+        pause(.05)
     end
     
 % grid on
