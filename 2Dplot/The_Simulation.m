@@ -1,7 +1,7 @@
 function The_Simulation
 
 close all
-%%
+%
 belt = ConvBelt;
 goal_y = belt.robo2goal;
 belt_bottom = belt.robo2bottom;
@@ -15,7 +15,7 @@ len2 = robot.l_2;
 num_rec = belt.num_rec;
 rec_width = belt.rec_width;
 h = zeros(num_rec,1);
-%%
+%
 start_rec = linspace(-blr,blr,num_rec);
 
 top_corners = [-blr belt_bottom 0;
@@ -87,7 +87,7 @@ maxiter = 50;
         % the time it takes to compute this makes the simulation stop
         % briefly        
         if i == n+1 
-            keyboard
+            %keyboard
             current_config = [path(n,1) path(n,2) 0 0];
             [control,closest_goal_ind,time] = belt2goal_picker(A,current_config,num_goal_pts);                 
             path = control_to_position(control, n, current_config, time);
