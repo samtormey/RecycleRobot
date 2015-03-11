@@ -192,7 +192,7 @@ yessave = 1;
     end
 
     if options.init == 2
-        fsolve_init(n);
+        X0 = fsolve_init(n);
     end 
     
 %     if options.init == 3
