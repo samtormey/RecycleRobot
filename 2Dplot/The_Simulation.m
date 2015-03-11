@@ -1,7 +1,7 @@
 function The_Simulation
 
 close all
-%%
+%
 belt = ConvBelt;
 goal_y = belt.robo2goal;
 belt_bottom = belt.robo2bottom;
@@ -15,7 +15,7 @@ len2 = robot.l_2;
 num_rec = belt.num_rec;
 rec_width = belt.rec_width;
 h = zeros(num_rec,1);
-%%
+%
 start_rec = linspace(-blr,blr,num_rec);
 
 top_corners = [-blr belt_bottom 0;
@@ -52,6 +52,18 @@ octo.x = -.2;
 octo.y = 0.8;
 octo.z = 0;
 octo.theta = 0;
+octo.id = 1;
+
+x = octo;
+
+num_octos = 5;
+for i = 2:num_octos
+    x = [x octo];
+    x(end).id = i;
+end
+
+
+
 
 sol = [octo.x; octo.y];
 pit = load('Precompute/Controls_n=20_numThe=80_gps=5');
@@ -69,57 +81,53 @@ maxiter = 50;
  path = control_to_position(control, n, start, time);
  dt = time/(n-1);
 
-    for i = 1:2*n       
 
-        if strcmp(octo.state,'belt')
-            octo.x = octo.x + v*dt;
-        end
-        if strcmp(octo.state,'robot')
-            [octo.x,octo.y,octo.z] = fkSCARA(path(i-n,1),path(i-n,2),len1,len2);      
-        end        
-            
-        if i < n+1
-            plot3D_SCARA(path(i,1),path(i,2),-1)
-            grid on
-        end
-        
-        
-        % the time it takes to compute this makes the simulation stop
-        % briefly        
-        if i == n+1 
-            current_config = [path(n,1) path(n,2) 0 0];
-            [control,closest_goal_ind,time] = belt2goal_picker(A,current_config,num_goal_pts);                 
-            path = control_to_position(control, n, current_config, time);
-            dt = time/(n-1);
-        end
-        if i >= n+1
-            [octo.x,octo.y,octo.z] = fkSCARA(path(i-n,1),path(i-n,2),len1,len2);      
-            plot3D_SCARA(path(i-n,1),path(i-n,2),-1)               
-%             g = plot3D_OCTO(octo.x,octo.y,octo.z,octo.theta);
-%             patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);            
-             grid on
-        end
-        
-        if i == n+1 % should be if distance between arm and octo is small
-            octo.state = 'robot';
-        end
+for i = 1:2*n    
 
-
-        g = plot3D_OCTO(octo.x,octo.y,octo.z,octo.theta);
-        keyboard
-        
-        g = plot3D_OCTO(-3,octo.y,octo.z,octo.theta);
-        keyboard
-
-        patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
-        
-        pause(.1)
+    if strcmp(octo.state,'belt')
+        octo.x = octo.x + v*dt;
     end
+    if strcmp(octo.state,'robot')
+        [octo.x,octo.y,octo.z] = fkSCARA(path(i-n,1),path(i-n,2),len1,len2);      
+    end     
+
+    if i < n+1
+        plot3D_SCARA(path(i,1),path(i,2),-1)
+        grid on
+    end
+
+
+    % the time it takes to compute this makes the simulation stop
+    % briefly        
+    if i == n+1 
+        current_config = [path(n,1) path(n,2) 0 0];
+        [control,closest_goal_ind,time] = belt2goal_picker(A,current_config,num_goal_pts);                 
+        path = control_to_position(control, n, current_config, time);
+        dt = time/(n-1);
+
+    end
+    if i >= n+1
+        [octo.x,octo.y,octo.z] = fkSCARA(path(i-n,1),path(i-n,2),len1,len2);      
+        plot3D_SCARA(path(i-n,1),path(i-n,2),-1)               
+        g = plot3D_OCTO(octo.x,octo.y,octo.z,octo.theta);
+
+        patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);            
+        grid on
+    end
+
+    if i == n+1 % should be if distance between arm and octo is small
+        octo.state = 'robot';
+    end
+
+
+
+    g = plot3D_OCTO(octo.x,octo.y,octo.z,octo.theta);
+
+    patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
+
+    pause(.05)
+end
     
-    % scara_coverage;
-
-
-% 
 % grid on
 % rectangle('Position',[-blr,belt_bottom,2*blr,belt_top],'FaceColor',[.5 .5 .5])
 % 

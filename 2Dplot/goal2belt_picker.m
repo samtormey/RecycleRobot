@@ -8,7 +8,6 @@ function [bft, bfp] = goal2belt_picker(sgp_index, sol, A, maxiter)
 % bft = best feasible time (goal to belt)
 % bfp = best feasible path (goal to belt)
 
-
 belt_params = ConvBelt();
 robot = ScaraInit;
 len1 = robot.l_1;
@@ -77,6 +76,9 @@ while bfp == Inf && count <= maxiter
             disp('Uh-oh')
         end
         
+        start = [2.1256, 0, 0, 0]; n = 20;
+        path = control_to_position(bfp, n, start, bft);
+        [armx, army, armz] = fkSCARA(path(end,1),path(end,2),1,1);
         break
     end
 end
