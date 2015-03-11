@@ -52,6 +52,26 @@ octo.x = .2;
 octo.y = 0.8;
 octo.z = 0;
 octo.theta = 0;
+octo.id = 1;
+
+x = octo;
+
+num_octos = 5;
+for i = 2:num_octos
+    x = [x octo];
+    x(end).id = i;
+end
+
+
+
+
+
+
+
+
+
+
+
 
 sol = [octo.x; octo.y];
 pit = load('Precompute/Controls_n=20_numThe=80_gps=5');
