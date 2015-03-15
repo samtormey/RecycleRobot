@@ -3,5 +3,8 @@ Stuff to work for our team
 RealOptimalPath: The first two time steps are the same
 
 goal2belt: work on discretization of the cartesian points on the belt to better match the discretization of the robot arm
+- Work on having the arm recognize objects outside of the current range ahead of time. ie
+if there is an object out of reach that will come into reach the arm can swing by early
+and pick it up
 
 control_to_position: Maybe switch from Runge-Kutta to Forward Euler so its more consistent with RealOptimalPath

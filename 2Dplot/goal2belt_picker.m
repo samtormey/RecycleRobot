@@ -1,5 +1,5 @@
 % Given a moving belt, find the best feasible time and path
-function [bft, bfp] = goal2belt_picker(sgp_index, sol, A, maxiter)
+function [bfp, bft] = goal2belt_picker(sgp_index, sol, A, maxiter)
 % sgp_index: starting goal point index, 2x1 vector
 % sol: starting octo location, 
 % A: pre-computed time and path storage
@@ -76,9 +76,7 @@ while bfp == Inf && count <= maxiter
             disp('Uh-oh')
         end
         
-        start = [2.1256, 0, 0, 0]; n = 20;
-        path = control_to_position(bfp, n, start, bft);
-        [armx, army, armz] = fkSCARA(path(end,1),path(end,2),1,1);
+       
         break
     end
 end
