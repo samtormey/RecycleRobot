@@ -82,6 +82,7 @@ for i = 2:num_octos
 end
 
 
+
 pit = load('Precompute/Controls_n=20_numThe=80_gps=5');
 A = pit.A;
 n = pit.n;
@@ -118,9 +119,7 @@ while real_time < 30
            
            [id, control, time] = decisionAlgo(octos,robot,A);           
             checkk = checkk + 1;  
-            if checkk == 6
-                keyboard
-            end
+      
                 
            if id ~= 0 % there is a reachable octoprism
                start = [pit.goal_configs(robot.curr_goal_index,:) 0 0]';
