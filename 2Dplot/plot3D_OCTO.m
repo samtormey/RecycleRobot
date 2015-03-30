@@ -27,7 +27,6 @@ side_faces = ...
 faces = cat(1,top_bottom_faces,side_faces);
 [num_faces, ~] = size(faces);
 
-
 g = patch('Vertices',vertices,'Faces',faces,...
         'FaceVertexCData',hsv(num_faces),'FaceColor','flat');
 

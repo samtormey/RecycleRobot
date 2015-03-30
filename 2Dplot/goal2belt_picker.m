@@ -13,6 +13,7 @@ robot = ScaraInit;
 len1 = robot.l_1;
 len2 = robot.l_2;
 
+
 v = belt_params.velocity;
 disc = belt_params.disc;
 dt = 2*pi/disc;
@@ -33,19 +34,21 @@ bft = Inf;
 % best feasible path 
 bfp = Inf;
 
-
 while bfp == Inf && count <= maxiter
     count = count + 1;
     
     % break if solution not on the belt
     if norm(sol + [count*gap_size; 0]) > len1 + len2
-        disp('No solution found')
         break
     end
     [the1p, the2p, the1n, the2n] = inverseThe(sol + [count*gap_size; 0], ...
         len1, len2);
+    [xp,yp,z] = fkSCARA(the1p,the2p, len1, len2);
+    [xn,yn,z] = fkSCARA(the1n,the2n, len1, len2);
+    
     [index1p, index2p] = getBestStoredIndices(the1p, the2p, theta_vec);
     [index1n, index2n] = getBestStoredIndices(the1n, the2n, theta_vec);
+    
     maybe_best_time_p = A{index1p, index2p, sgp_index, 2, 1};
     maybe_best_time_n = A{index1n, index2n, sgp_index, 2, 1};
    
@@ -57,14 +60,8 @@ while bfp == Inf && count <= maxiter
         n_or_p_better = 'n';
     end
     
-        %disp('Maybe best time:')
-        %disp(maybe_best_time)
-        %disp('Octo travel time:')
-        %disp(gap_size*count/v)
- 
-    
     if maybe_best_time < (gap_size*count)/v
-        
+
         % best feasible time
         bft = maybe_best_time;
         % best feasible path

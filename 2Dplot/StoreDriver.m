@@ -1,12 +1,12 @@
 function StoreDriver
 
-% A = (th1_B, th2_B2, th1_G, th2_G, ToP)
-%     th1_B = theta1 * (num_theta/2pi)
+% A = (th1, th2, k, Direction, ToP)
+%     th1 = theta1 * (num_theta/2pi)
 %        where num_theta = number of thetas taken in discretization
 %        and theta1 = first angle for initial belt configuration
-%     th1_G = theta1(Goal) * (num_theta_G/2pi)
-%        where num_x = number of discretizated elements of x
-%     ToP = 1 for time, 2 for path
+%     k   =  index of the goal point
+%     Direction = 1 for belt to goal, 2 for goal to belt
+%     ToP = 1 for time, 2 for control
 
 % notice there is structure to the NaNs in A, we could reduce storage if 
 % we needed to
