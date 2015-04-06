@@ -23,7 +23,7 @@ rec_width = belt.rec_width;
 h = zeros(num_rec,1);
 
 real_time = 0;
-%
+
 start_rec = linspace(-blr,blr,num_rec);
 
 top_corners = [-blr belt_bottom 0;
@@ -55,7 +55,7 @@ end
 
 
 % initial octoprism
-octo.state = 'vis_belt'; % inv_belt, vis_belt, robot, goal
+octo.state = 1; % 0 = inv_belt, 1 = vis_belt, 2 = robot, 3 = goal
 octo.x = -blr;
 octo.y = (belt_top - belt_bottom - 0.5)*rand + belt_bottom;
 octo.z = 0;
@@ -63,8 +63,8 @@ octo.theta = 0;
 octo.id = 1;
 octos = octo;
 
-max_time = 1/v; % max time difference between octoprisms appearing on the belt
-min_time = 0.5/v;
+max_time = 0.8/v; % max time difference between octoprisms appearing on the belt
+min_time = 0.3/v;
 new_octo = min_time; % time check for adding octoprisms
 
 % num_octos = 500;
@@ -80,6 +80,8 @@ A = pit.A;
 n = pit.n;
 [num_goal_pts,~] = size(pit.goal_configs);
 
+test = 0;
+test_octo = 0;
 while 1
     
     % This if statement updates the robot state and what step it is on for
@@ -94,7 +96,7 @@ while 1
            robot.pathCounter = 1;
            robot.state = 'beltToGoal';           
            robot.curr_goal_index = closest_goal_ind;
-           octos(id).state = 'robot';
+           octos(id).state = 2;
        else
            robot.pathCounter = robot.pathCounter + 1;
 
@@ -103,7 +105,7 @@ while 1
        % Robot is moving from the belt to the goal
        if robot.pathCounter == n
            robot.state = 'waiting'; 
-           octos(id).state = 'goal';
+           octos(id).state = 3;
            
        else
            robot.pathCounter = robot.pathCounter + 1;
@@ -129,28 +131,31 @@ while 1
     dt = robot.time/(n-1);
     % octos on the belt move right
     
+    tic
     plot3D_SCARA(robot.path(robot.pathCounter,1),robot.path(robot.pathCounter,2),-1)
     grid on
-    
+    test = test + toc;
     
     for k = 1:numel(octos)
-        if strcmp(octos(k).state,'invis_belt') || strcmp(octos(k).state,'vis_belt')
+        if octos(k).state == 0 || octos(k).state == 1
             octos(k).x = octos(k).x + v*dt;
         end
-        if strcmp(octos(k).state,'invis_belt') && octos(k).x > -blr
-            octos(k).state = 'vis_belt';
+        if octos(k).state == 0 && octos(k).x > -blr
+            octos(k).state = 1;
         end
-        if strcmp(octos(k).state,'robot')
+        if octos(k).state == 2
             [xx,yy,zz] = fkSCARA(robot.path(robot.pathCounter,1),robot.path(robot.pathCounter,2),len1,len2);
             octos(k).x = xx;
             octos(k).y = yy;
         end
+        tic
         plot3D_OCTO(octos(k).x,octos(k).y,octos(k).z,octos(k).theta); 
+        test_octo = test_octo + toc;
     end
         
     patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
     
-    pause(dt/2)
+    pause(dt/10)
     
     real_time = real_time + dt;
     
@@ -168,7 +173,7 @@ while 1
 %             counter = counter + 1;
 %         end
         
-        octo.state = 'vis_belt';
+        octo.state = 1;
         octos = [octos octo];
         octos(end).id = octos(end-1).id + 1;
         new_octo = new_octo + min_time + rand*(max_time - min_time);
@@ -191,7 +196,7 @@ time = 0;
 shortest_time = Inf;
 
 for i = 1:curr_num_octo
-    if strcmp(octos(i).state,'vis_belt') && norm([octos(i).x octos(i).y]) < robot.l_1 + robot.l_2
+    if octos(i).state == 1 && norm([octos(i).x octos(i).y]) < robot.l_1 + robot.l_2
         [temp_control, time] = goal2belt_picker(robot.curr_goal_index, ...
             [octos(i).x; octos(i).y], A, maxiter);
         
@@ -229,7 +234,7 @@ end
 %     if strcmp(octo.state,'belt')
 %         octo.x = octo.x + v*dt;
 %     end
-%     if strcmp(octo.state,'robot')
+%     if strcmp(octo.state,2)
 %         [octo.x,octo.y,octo.z] = fkSCARA(path(i-n,1),path(i-n,2),len1,len2);      
 %     end        
 % 
@@ -257,7 +262,7 @@ end
 %     end
 % 
 %     if i == n+1 % should be if distance between arm and octo is small
-%         octo.state = 'robot';
+%         octo.state = 2;
 %     end
 % 
 % 
