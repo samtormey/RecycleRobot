@@ -1,7 +1,7 @@
 function The_Simulation
 
 close all
-%
+
 belt = ConvBelt;
 goal_y = belt.robo2goal;
 belt_bottom = belt.robo2bottom;
@@ -21,6 +21,7 @@ len2 = robot.l_2;
 num_rec = belt.num_rec;
 rec_width = belt.rec_width;
 h = zeros(num_rec,1);
+
 
 
 checkk = 0;
@@ -61,25 +62,29 @@ for i = 1:num_rec
 end
 
 
-
 % initial octoprism
 
 octo.state = 'vis_belt'; % inv_belt, vis_belt, robot, goal
-octo.x = -len1-len2;
-octo.y = 1;
+
+octo.x = -blr;
+octo.y = (belt_top - belt_bottom - 0.5)*rand + belt_bottom;
 octo.z = 0;
 octo.theta = 0;
 octo.id = 1;
-
 octos = octo;
 
-num_octos = 5;
-for i = 2:num_octos
-    octo.x = octo.x + i/8;
-    octo.y = octo.y - i/20;
-    octos = [octos octo];
-    octos(end).id = i;
-end
+
+max_time = 1/v; % max time difference between octoprisms appearing on the belt
+min_time = 0.5/v;
+new_octo = min_time; % time check for adding octoprisms
+
+% num_octos = 500;
+% for i = 2:num_octos
+%     octo.x = octos(i-1).x - rand*max_space;
+%     octo.y = (belt_top - belt_bottom - 0.5)*rand + belt_bottom;
+%     octos = [octos octo];
+%     octos(end).id = i;
+% end
 
 
 
@@ -88,9 +93,12 @@ A = pit.A;
 n = pit.n;
 [num_goal_pts,~] = size(pit.goal_configs);
 
-while real_time < 30
+while 1
     
+    % This if statement updates the robot state and what step it is on for
+    % the current path. If the path is complete it finds a new path.
     if strcmp(robot.state,'goalToBelt')
+    % Robot is moving from the goal to the belt
        if robot.pathCounter == n
            start = [robot.path(n,1) robot.path(n,2) 0 0]';
            [control,closest_goal_ind,time] = belt2goal_picker(A,start,num_goal_pts); 
@@ -105,6 +113,7 @@ while real_time < 30
 
        end
     elseif strcmp(robot.state, 'beltToGoal')
+       % Robot is moving from the belt to the goal
        if robot.pathCounter == n
            robot.state = 'waiting'; 
            octos(id).state = 'goal';
@@ -118,9 +127,7 @@ while real_time < 30
     if strcmp(robot.state, 'waiting') 
            
            [id, control, time] = decisionAlgo(octos,robot,A);           
-            checkk = checkk + 1;  
-      
-                
+
            if id ~= 0 % there is a reachable octoprism
                start = [pit.goal_configs(robot.curr_goal_index,:) 0 0]';
                robot.path = control_to_position(control, n, start, time);
@@ -137,37 +144,55 @@ while real_time < 30
     plot3D_SCARA(robot.path(robot.pathCounter,1),robot.path(robot.pathCounter,2),-1)
     grid on
     
+    
     for k = 1:numel(octos)
-        if strcmp(octos(k).state,'invis_belt') || strcmp(octos(k).state,'vis_belt')
-            octos(k).x = octos(k).x + v*dt;
-        end
-        if strcmp(octos(k).state,'invis_belt') && octos(k).x > -blr
-            octos(k).state = 'vis_belt';
+        if strcmp(octos(k).state,'vis_belt')
+            octos(k).x = octos(k).x + v*dt;        
         end
         if strcmp(octos(k).state,'robot')
             [xx,yy,zz] = fkSCARA(robot.path(robot.pathCounter,1),robot.path(robot.pathCounter,2),len1,len2);
             octos(k).x = xx;
             octos(k).y = yy;
         end
-        plot3D_OCTO(octos(k).x,octos(k).y,octos(k).z,octos(k).theta); 
+        if strcmp(octos(k).state,'robot') || strcmp(octos(k).state,'vis_belt') 
+            plot3D_OCTO(octos(k).x,octos(k).y,octos(k).z,octos(k).theta); 
+        end
+        if strcmp(octos(k).state,'goal')
+            plot3D_OCTO(octos(k).x,octos(k).y,octos(k).z,octos(k).theta); 
+        end
     end
-    
+   
+        
     patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
-    
-    text(0, -2, .5,'Real-Comp-Time, Min-Time Control')
-    pause(dt)
+
+    pause(dt/2)
     
     real_time = real_time + dt;
-           
-    if checkk >= 1
-        cntt = cntt + 1;
-        M(cntt) = getframe;
+    
+    
+    % Update octoprism struct
+    if real_time > new_octo
+        % add octo to struct
+        octo.x = -blr;
+        octo.y = (belt_top - belt_bottom - 0.5)*rand + belt_bottom + 0.25;
+       
+%         % make sure the octos don't overlap
+%         counter = 0;
+%         while ((octo.x - octos(end).x)^2 + (octo.y - octos(end).y)^2) < 0.5 && counter < 10
+%             octo.x = -blr;
+%             octo.y = (belt_top - belt_bottom - 0.5)*rand + belt_bottom + 0.25;
+%             counter = counter + 1;
+%         end
+        
+        octo.state = 'vis_belt';
+        octos = [octos octo];
+        octos(end).id = octos(end-1).id + 1;
+        new_octo = new_octo + min_time + rand*(max_time - min_time);
+        
+        
+
     end
-    
-             
   
-    
-    
 end
     
 
@@ -190,6 +215,7 @@ for i = 1:curr_num_octo
         
         [temp_control, time] = goal2belt_picker(robot.curr_goal_index, ...
             [octos(i).x; octos(i).y], A, maxiter);
+        
         if time < shortest_time
             best_id = octos(i).id;
             control = temp_control;

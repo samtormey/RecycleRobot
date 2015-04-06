@@ -8,7 +8,7 @@ belt.robo2bottom = 0.1;
 belt.robo2top = len1 + len2 - .5;
 belt.robo2goal = len1 + len2 - .3;
 
-belt.velocity = 0.1;
+belt.velocity = 0.3;
 belt.disc = 80;
 belt.num_rec = 4;
 belt.rec_width = .3;
