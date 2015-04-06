@@ -33,16 +33,27 @@ dt = T/(n-1);
             
                 
             stateDer = f(state(:,i),u); 
-            state(:,i+1) = state(:,i) + dt*stateDer;                                      
-        
-
+            state(:,i+1) = state(:,i) + dt*stateDer; 
 
         end   
         positions = [state(1,:); state(2,:)]';
         
-    end     
 
+[row,col] = size(positions);
+    
+    for rr = 1:row
+        for cc = 1:col
+                if positions(rr,cc) > pi
+                    positions(rr,cc) = positions(rr,cc) - 2*pi;
+                end
+                if positions(rr,cc) < -pi
+                    positions(rr,cc) = positions(rr,cc) + 2*pi;
+                end
+        end
+    end
+            
 
+end
 
 function I = computeMoments
 
