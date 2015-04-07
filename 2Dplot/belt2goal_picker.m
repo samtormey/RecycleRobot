@@ -23,6 +23,3 @@ control = A{ind1,ind2,closest_goal_ind,1,2};
 time = A{ind1,ind2,closest_goal_ind,1,1};
 
 new_start = [theta_vec(ind1) theta_vec(ind2) 0 0]';
-
-
-    

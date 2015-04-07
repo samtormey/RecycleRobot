@@ -50,6 +50,13 @@ points = [goal_points_x; goal_points_y];
 [the1p, the2p, the1n, the2n] = inverseThe1_2(points,len1,len2);
 goal_configs = [the1p the1n(2:end-1); the2p the2n(2:end-1)]'; % note this!
 
+% create 0 to 2pi thetas adn goals
+theta_vec2pi = theta_vec;
+theta_vec2pi(1:39) = theta_vec2pi(1:39) + 2*pi;
+goal_configs2pi = goal_configs;
+goal_configs2pi(6:8,2) = goal_configs2pi(6:8,2) + 2*pi;
+
+keyboard
 
 for k = 1: size(goal_configs,1)
     % retrieve goal configuration
@@ -106,9 +113,9 @@ if error == 1
    fprintf('There was an error in one of the computations') 
 end
 
-save(['./Precompute/Controls_n=',num2str(n),'_numThe=',num2str(num_theta),'_gps=',num2str(gps)],'A',...
-        'goal_configs','belt','n','robot','num_theta','total_time')
-rmpath /Users/samtormey/matlab/RecycleRobot/2DPlot/
+% save(['./Precompute/Controls_n=',num2str(n),'_numThe=',num2str(num_theta),'_gps=',num2str(gps)],'A',...
+%         'goal_configs','belt','n','robot','num_theta','total_time')
+% rmpath /Users/samtormey/matlab/RecycleRobot/2DPlot/
 
 end
 
