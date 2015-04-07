@@ -10,3 +10,5 @@ and pick it up
 decisionAlgo: The robot only searches octos already within reach
 
 control_to_position: Maybe switch from Runge-Kutta to Forward Euler so its more consistent with RealOptimalPath
+
+belt2goal - new start is discretized at the end, 'new start' 

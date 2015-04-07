@@ -102,6 +102,15 @@ A = pit.A;
 n = pit.n;
 [num_goal_pts,~] = size(pit.goal_configs);
 
+num_theta = 80;
+dt = 2*pi/num_theta;
+theta_vec = -pi+dt:dt:pi;
+
+control_b2g = A{1,18,1,1,2};
+time_b2g =  A{1,18,1,1,1};
+
+keyboard
+
 test = 0;
 test_octo = 0;
 while 1
@@ -117,8 +126,8 @@ while 1
            
             options.init = 2;
             X0 = 0;
-%           [X control T exitflag comp_time] =  RealOptimalPathFind(start,[goal_configs(1,:) 0 0]',options,X0,n)
-           
+%           [X control T exitflag comp_time statePath] =  RealOptimalPathFind(start,[goal_configs(1,:) 0 0]',options,X0,n)
+           keyboard
            
            robot.time = time;
            robot.pathCounter = 1;
