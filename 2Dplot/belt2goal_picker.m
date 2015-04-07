@@ -21,4 +21,5 @@ end
 
 control = A{ind1,ind2,closest_goal_ind,1,2};
 time = A{ind1,ind2,closest_goal_ind,1,1};
+
     

@@ -19,4 +19,5 @@ end
 
 % title(['Scara coverage with n = ' num2str(n) ' discretization'], ...
 %     'fontsize',16)
-        
+       
+

@@ -1,5 +1,4 @@
-function The_Simulation
-
+function The_Simulation (max_space, min_space)
 close all
 %
 belt = ConvBelt;
@@ -41,10 +40,10 @@ verts = [top_corners; bottom_corners];
 faces = [1 2 3 4 4 4 4 4; 5 6 7 8 8 8 8 8; 2 1 5 6 6 6 6 6; ...
     2 3 7 6 6 6 6 6; 3 4 8 7 7 7 7 7; 4 1 5 8 8 8 8 8];
 
-plot3D_SCARA(0,0,0);
-axis([-blr blr -blr blr 0 blr])
-grid on
-rectangle('Position',[-blr,belt_bottom,2*blr,belt_top],'FaceColor',[.5 .5 .5])
+% plot3D_SCARA(0,0,0);
+% axis([-blr blr -blr blr 0 blr])
+% grid on
+% rectangle('Position',[-blr,belt_bottom,2*blr,belt_top],'FaceColor',[.5 .5 .5])
 
 for i = 1:num_rec
     rec_vert(:,:,i) = [start_rec(i),belt_bottom,.1;
@@ -63,8 +62,8 @@ octo.theta = 0;
 octo.id = 1;
 octos = octo;
 
-max_time = 0.8/v; % max time difference between octoprisms appearing on the belt
-min_time = 0.3/v;
+max_time = max_space/v; % max time difference between octoprisms appearing on the belt
+min_time = min_space/v;
 new_octo = min_time; % time check for adding octoprisms
 
 % num_octos = 500;
@@ -79,10 +78,23 @@ pit = load('Precompute/Controls_n=20_numThe=80_gps=5');
 A = pit.A;
 n = pit.n;
 [num_goal_pts,~] = size(pit.goal_configs);
+rng(1);
+% generate goal region points
+gps = 5;
+goal_width = 2*sqrt((len1+len2)^2 - goal_y^2);
+goal_points_x = linspace(-goal_width/2,goal_width/2,gps);
+goal_points_y = goal_y*ones(1,gps);
+points = [goal_points_x; goal_points_y];
+
+% Inverse Kinematics
+[the1p, the2p, the1n, the2n] = inverseThe1_2(points,len1,len2);
+goal_configs = [the1p the1n(2:end-1); the2p the2n(2:end-1)]'; % note this!
+
 
 test = 0;
 test_octo = 0;
-while 1
+
+while real_time < 30
     
     % This if statement updates the robot state and what step it is on for
     % the current path. If the path is complete it finds a new path.
@@ -90,8 +102,15 @@ while 1
     % Robot is moving from the goal to the belt
        if robot.pathCounter == n
            start = [robot.path(n,1) robot.path(n,2) 0 0]';
+           %indices = getbest indices
            [control,closest_goal_ind,time] = belt2goal_picker(A,start,num_goal_pts); 
            robot.path = control_to_position(control, n, start, time);
+           
+           path_end = robot.path(n,:);
+           if norm(path_end -  goal_configs(closest_goal_ind,:)) > 1e-3
+              keyboard 
+           end
+           
            robot.time = time;
            robot.pathCounter = 1;
            robot.state = 'beltToGoal';           
@@ -106,35 +125,33 @@ while 1
        if robot.pathCounter == n
            robot.state = 'waiting'; 
            octos(id).state = 3;
-           
        else
            robot.pathCounter = robot.pathCounter + 1;
   
        end
     end
-        
+    
+    tic
     if strcmp(robot.state, 'waiting') 
-           
            [id, control, time] = decisionAlgo(octos,robot,A);           
-
            if id ~= 0 % there is a reachable octoprism
                start = [pit.goal_configs(robot.curr_goal_index,:) 0 0]';
                robot.path = control_to_position(control, n, start, time);
                robot.pathCounter = 1;
                robot.time = time;
+               time
                robot.state = 'goalToBelt';
                
            end
-           
     end
    
     dt = robot.time/(n-1);
     % octos on the belt move right
     
-    tic
-    plot3D_SCARA(robot.path(robot.pathCounter,1),robot.path(robot.pathCounter,2),-1)
-    grid on
-    test = test + toc;
+    
+%     plot3D_SCARA(robot.path(robot.pathCounter,1),robot.path(robot.pathCounter,2),-1)
+%     grid on
+%     patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
     
     for k = 1:numel(octos)
         if octos(k).state == 0 || octos(k).state == 1
@@ -148,16 +165,9 @@ while 1
             octos(k).x = xx;
             octos(k).y = yy;
         end
-        tic
-        plot3D_OCTO(octos(k).x,octos(k).y,octos(k).z,octos(k).theta); 
+%         plot3D_OCTO(octos(k).x,octos(k).y,octos(k).z,octos(k).theta); 
         test_octo = test_octo + toc;
     end
-        
-    patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
-    
-    pause(dt/10)
-    
-    real_time = real_time + dt;
     
     % Update octoprism struct
     if real_time > new_octo
@@ -165,20 +175,24 @@ while 1
         octo.x = -blr;
         octo.y = (belt_top - belt_bottom - 0.5)*rand + belt_bottom + 0.25;
        
-%         % make sure the octos don't overlap
-%         counter = 0;
-%         while ((octo.x - octos(end).x)^2 + (octo.y - octos(end).y)^2) < 0.5 && counter < 10
-%             octo.x = -blr;
-%             octo.y = (belt_top - belt_bottom - 0.5)*rand + belt_bottom + 0.25;
-%             counter = counter + 1;
-%         end
+        % make sure the octos don't overlap
+        counter = 0;
+        while ((octo.x - octos(end).x)^2 + (octo.y - octos(end).y)^2) < 0.5 && counter < 10
+            octo.x = -blr;
+            octo.y = (belt_top - belt_bottom - 0.5)*rand + belt_bottom + 0.25;
+            counter = counter + 1;
+        end
         
         octo.state = 1;
         octos = [octos octo];
         octos(end).id = octos(end-1).id + 1;
         new_octo = new_octo + min_time + rand*(max_time - min_time);
     end
-  
+    
+    pause(dt/20)
+    
+    real_time = real_time + dt;
+
 end
     
 end 
@@ -211,6 +225,41 @@ end
 
 end
 
+
+function [the1p, the2p, the1n, the2n] = inverseThe1_2(points,len1,len2)
+
+    xx = points(1,:);
+    yy = points(2,:);
+    
+    I = ones(size(xx));
+    
+    c2 = (xx.^2 + yy.^2 - len1^2 - len2^2) / ...
+                (2*len1*len2);
+     
+    if abs(c2) > 1
+        disp('Circle Position is out of reachable workspace')
+        return
+    end
+            
+    %c2 = cos(inside2);
+    s2p = sqrt(1-c2.^2);
+    s2n = -sqrt(1-c2.^2);
+     
+    the2p = atan2(s2p,c2);
+    the2n = atan2(s2n,c2);
+    
+    
+    k1 = len1 + len2*c2;
+    k2p = len2*s2p;
+    k2n = len2*s2n;
+    
+    the1p = atan2(yy,xx) - ...
+              atan2(k2p,k1);
+          
+    the1n = atan2(yy,xx) - ...
+              atan2(k2n,k1);    
+
+end
 
 
 
