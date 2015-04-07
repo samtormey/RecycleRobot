@@ -9,7 +9,7 @@ oc = octocenter;
 
 scale = 5;
 
-verticesbottom = cat(2,cos(t)/scale+oc(1),sin(t)/scale+oc(2),ones(n,1)*(oc(3)-1/scale));
+verticesbottom = cat(2,cos(t)/scale+oc(1),sin(t)/scale+oc(2),ones(n,1)*(oc(3)-1/scale) + 0.2);
 verticestop = cat(2,cos(t)/scale+oc(1),sin(t)/scale+oc(2),ones(n,1)*(oc(3)+1/scale));
 vertices = cat(1,verticesbottom,verticestop);
 

@@ -76,7 +76,10 @@ while bfp == Inf && count <= maxiter
        
         break
     end
+    
+ 
 end
+
 
 return
             

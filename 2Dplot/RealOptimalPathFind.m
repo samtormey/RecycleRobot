@@ -13,7 +13,7 @@ startState = start;
 finishState = finish;   % need to specify from which direction it moves.
 
 
-n = 20;
+
 SZ = 3*Q*n+1;   
 
 dtau = 1/(n-1);   
@@ -24,8 +24,7 @@ J = sparse((n+1)*2*Q,SZ);  % pre-allocation for own Jacobian
 I = computeMoments;  % compute moments to be used in F and f, all constants
 
 if n ~= 20
-    disp('n is not 20')
-    return    
+    disp('n is not 20')  
 end
     
 
@@ -204,7 +203,7 @@ yessave = 1;
     JointUB =  inf*ones(2*Q*n,1);  
     lb = [JointLB; -M*ones(Q*n,1); 0];
     ub = [JointUB; M*ones(Q*n,1); inf];
-    opt = optimset('Algorithm','sqp','GradConstr','on','Display','off');
+    opt = optimset('Algorithm','trust-region-reflective','GradConstr','on','Display','off');
     opt.MaxFunEvals = 100000;
     opt.TolFun = 0.3; %*ones(SZ,n+2)';   % maybe increasing the tolerance would help?, size of b = F(X)
     
@@ -230,7 +229,7 @@ yessave = 1;
     
     d_delta = X(end) / (n-1);
 %     fprintf('Time it takes to find optimal path: %f\n',time)
-  
+
     
     for i = 1:Q
       statePath(:,i) = X(i:2*Q:2*Q*n);
