@@ -1,6 +1,6 @@
-function The_Simulation (max_space, min_space)
+function The_Simulation 
 close all
-rng(1);
+rng(2);
 belt = ConvBelt;
 goal_y = belt.robo2goal;
 belt_bottom = belt.robo2bottom;
@@ -9,11 +9,15 @@ blr = belt.left_right;
 height = belt.height;
 v = belt.velocity;
 robot = ScaraInit;
-robot.path = zeros(20,2);
+%robot.path = zeros(20,2);
+starting_angles = [2.1256 0.0];
+robot.path = [starting_angles(1)*ones(20,1), starting_angles(2)*ones(20,1)];
 robot.pathCounter = 1;
 robot.state = 'waiting';
 robot.time = 1;
 robot.curr_goal_index = 1;
+
+
 
 len1 = robot.l_1;
 len2 = robot.l_2;
@@ -58,10 +62,10 @@ verts = [top_corners; bottom_corners];
 faces = [1 2 3 4 4 4 4 4; 5 6 7 8 8 8 8 8; 2 1 5 6 6 6 6 6; ...
     2 3 7 6 6 6 6 6; 3 4 8 7 7 7 7 7; 4 1 5 8 8 8 8 8];
 
-% plot3D_SCARA(0,0,0);
-% axis([-blr blr -blr blr 0 blr])
-% grid on
-% rectangle('Position',[-blr,belt_bottom,2*blr,belt_top],'FaceColor',[.5 .5 .5])
+%plot3D_SCARA(0,0,0);
+axis([-blr blr -blr blr 0 blr])
+grid on
+rectangle('Position',[-blr,belt_bottom,2*blr,belt_top],'FaceColor',[.5 .5 .5])
 
 for i = 1:num_rec
     rec_vert(:,:,i) = [start_rec(i),belt_bottom,.1;
@@ -97,8 +101,8 @@ new_octo = min_time; % time check for adding octoprisms
 
 
 
-pit = load('Precompute/Controls_n=20_numThe=80_gps=5');
-A = pit.A;
+pit = load('Precompute/UnitedFriendMatrix.mat');
+A = pit.UnitedA;
 n = pit.n;
 [num_goal_pts,~] = size(pit.goal_configs);
 rng(1);
@@ -121,12 +125,12 @@ theta_vec = -pi+dt:dt:pi;
 control_b2g = A{1,18,1,1,2};
 time_b2g =  A{1,18,1,1,1};
 
-keyboard
+%
 
 test = 0;
 test_octo = 0;
 
-while real_time < 30
+while 1
     
     % This if statement updates the robot state and what step it is on for
     % the current path. If the path is complete it finds a new path.
@@ -135,13 +139,13 @@ while real_time < 30
        if robot.pathCounter == n
 
             start = [robot.path(n,1) robot.path(n,2) 0 0]';
-            [control,closest_goal_ind,time,start] = belt2goal_picker(A,start,num_goal_pts); 
+            [control,closest_goal_ind,time] = belt2goal_picker(A,start,num_goal_pts); 
             robot.path = control_to_position(control, n, start, time);
            
             options.init = 2;
             X0 = 0;
 %           [X control T exitflag comp_time statePath] =  RealOptimalPathFind(start,[goal_configs(1,:) 0 0]',options,X0,n)
-           keyboard
+           %
            
            robot.time = time;
            robot.pathCounter = 1;
@@ -185,9 +189,9 @@ while real_time < 30
     % octos on the belt move right
     
     
-%     plot3D_SCARA(robot.path(robot.pathCounter,1),robot.path(robot.pathCounter,2),-1)
-%     grid on
-%     patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
+    plot3D_SCARA(robot.path(robot.pathCounter,1),robot.path(robot.pathCounter,2),-1)
+    grid on
+    patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
     
     for k = 1:numel(octos)
         if octos(k).state == 0 || octos(k).state == 1
@@ -201,7 +205,7 @@ while real_time < 30
             octos(k).x = xx;
             octos(k).y = yy;
         end
-%         plot3D_OCTO(octos(k).x,octos(k).y,octos(k).z,octos(k).theta); 
+        plot3D_OCTO(octos(k).x,octos(k).y,octos(k).z,octos(k).theta); 
         test_octo = test_octo + toc;
     end
    
@@ -269,7 +273,7 @@ if strcmp(algo,'SPT')
 
     end
 if size(time_vec,1) > 0
-    keyboard
+    %
 end
 end
 

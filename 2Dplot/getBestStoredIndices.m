@@ -31,9 +31,12 @@ end
 if theta2 > pi
     theta2 = theta2 - 2*pi;
 end
+ 
+% [~,index1] = min(abs(normalizeAngle(theta1 - theta_vec)));
+% [~,index2] = min(abs(normalizeAngle(theta2 - theta_vec)));
 
-[~,index1] = min(abs(normalizeAngle(theta1 - theta_vec)));
-[~,index2] = min(abs(normalizeAngle(theta2 - theta_vec)));
+[~,index1] = min(abs(theta1 - theta_vec));
+[~,index2] = min(abs(theta2 - theta_vec));
 
 return
 

@@ -10,7 +10,7 @@ function ModStoreDriver
 %     Direction = 1 for belt to goal, 2 for goal to belt
 %     ToP = 1 for time, 2 for control
 clc;
-SingleMod(1,0);
+SingleMod(0,1);
 
 end
 
