@@ -1,0 +1,4 @@
+1. We're doing disc subtraction in getBestStoredIndices. 
+A little more code could make it faster. 
+
+2. belt2goal_picker calls ConvBelt() which might be some slowness.
