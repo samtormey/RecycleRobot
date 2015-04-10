@@ -101,8 +101,10 @@ new_octo = min_time; % time check for adding octoprisms
 
 
 
-pit = load('Precompute/UnitedFriendMatrix.mat');
-A = pit.UnitedA;
+% pit = load('Precompute/UnitedFriendMatrix.mat');
+% A = pit.UnitedA;
+pit = load('Precompute/Controls_n=20_numThe=80_gps=5.mat');
+A = pit.A;
 n = pit.n;
 [num_goal_pts,~] = size(pit.goal_configs);
 rng(1);
@@ -211,7 +213,7 @@ while 1
    
     patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
     
-    pause(dt/10)
+    pause(dt)
     
     real_time = real_time + dt;
     
@@ -250,7 +252,7 @@ end
 function [best_id, control, shortest_time] = decisionAlgo(octos,robot,A,algo)
 
 curr_num_octo = numel(octos);
-maxiter = 50;
+maxiter = 500;
 best_id = 0;
 control = 0;
 time = 0;
@@ -284,9 +286,25 @@ if strcmp(algo,'Right')
 
     for i = 1:curr_num_octo
 
-        if octos(i).state == 1 && norm([octos(i).x octos(i).y]) < robot.l_1 + robot.l_2
+        if octos(i).state == 1
+            octos(i).id            
             [temp_control, time] = goal2belt_picker(robot.curr_goal_index, ...
                 [octos(i).x; octos(i).y], A, maxiter);
+%             if time ~= Inf
+%                 keyboard
+%             end
+   
+
+
+% temp =
+% 
+%    -0.8823
+%     0.4924
+
+%    -0.3914
+%     0.4924
+
+            
             
             if time < Inf && X < octos(i).x
                 best_id = octos(i).id;
