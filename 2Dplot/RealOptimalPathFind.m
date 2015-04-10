@@ -204,7 +204,7 @@ yessave = 1;
     JointUB =  inf*ones(2*Q*n,1);  
     lb = [JointLB; -M*ones(Q*n,1); 0];
     ub = [JointUB; M*ones(Q*n,1); inf];
-    opt = optimset('Algorithm','trust-region-reflective','GradConstr','on','Display','off');
+    opt = optimset('Algorithm','sqp','GradConstr','on','Display','off');
     opt.MaxFunEvals = 100000;
     opt.TolFun = 0.3; %*ones(SZ,n+2)';   % maybe increasing the tolerance would help?, size of b = F(X)
     

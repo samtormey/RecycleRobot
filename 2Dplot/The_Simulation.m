@@ -1,4 +1,5 @@
 function The_Simulation 
+
 close all
 rng(2);
 belt = ConvBelt;
@@ -100,8 +101,12 @@ new_octo = min_time; % time check for adding octoprisms
 % end
 
 
-pit = load('Precompute/UnitedFriendMatrix.mat');
-A = pit.UnitedA;
+
+
+% pit = load('Precompute/UnitedFriendMatrix.mat');
+% A = pit.UnitedA;
+pit = load('Precompute/Controls_n=20_numThe=80_gps=5.mat');
+A = pit.A;
 n = pit.n;
 [num_goal_pts,~] = size(pit.goal_configs);
 rng(1);
@@ -118,20 +123,13 @@ goal_configs = [the1p the1n(2:end-1); the2p the2n(2:end-1)]'; % note this!
 
 
 num_theta = 80;
-dt = 2*pi/num_theta;
-theta_vec = -pi+dt:dt:pi;
+dtheta = 2*pi/num_theta;
+theta_vec = -pi+dtheta:dtheta:pi;
 
 control_b2g = A{1,18,1,1,2};
 time_b2g =  A{1,18,1,1,1};
 
 %
-
-test = 0;
-test_octo = 0;
-T_robot = 0;
-T_octo = 0;
-T_plot = 0;
-extra_time = 0;
 
 while 1
         
@@ -187,22 +185,22 @@ while 1
 
            end
     end
-    T_robot = T_robot + toc;
     
     dt_real = robot.time/(n-1);
     
     % octos on the belt move right
     
-    tic;
     plot3D_SCARA(robot.path(robot.pathCounter,1),robot.path(robot.pathCounter,2),-1)
     grid on
     patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
-    T_plot = T_plot + toc;
+   
     
-    tic
     for k = 1:numel(octos)
         if octos(k).state == 0 || octos(k).state == 1
             octos(k).x = octos(k).x + v*dt;
+            if octos(k).x > blr + 1;
+                octos(k).state = 4;
+            end
         end
         if octos(k).state == 0 && octos(k).x > -blr
             octos(k).state = 1;
@@ -210,16 +208,19 @@ while 1
         if octos(k).state == 2
             [xx,yy,zz] = fkSCARA(robot.path(robot.pathCounter,1),robot.path(robot.pathCounter,2),len1,len2);
             octos(k).x = xx;
-            octos(k).y = yy;
+            octos(k).y = yy;            
         end
-        plot3D_OCTO(octos(k).x,octos(k).y,octos(k).z,octos(k).theta); 
+        % if octo has not fallen off (fall off == state 4)
+        if octos(k).state < 4
+            plot3D_OCTO(octos(k).x,octos(k).y,octos(k).z,octos(k).theta);
+        end
+
     end
-    T_octo = T_octo + toc;
    
-    tic
+    
     patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
     
-    pause(dt/10)
+    pause(dt)
     
     real_time = real_time + dt_real;
     
@@ -244,7 +245,7 @@ while 1
         new_octo = new_octo + min_time + rand*(max_time - min_time);
         
     end
-    extra_time = extra_time + toc;
+   
     if real_time > 10
         profile viewer
 %         fprintf('T_robot = %f \n T_octo = %f \n T_plot = %f \n T_extra = %f \n', ...
@@ -263,7 +264,7 @@ end
 function [best_id, control, shortest_time] = decisionAlgo(octos,robot,A,algo)
 
 curr_num_octo = numel(octos);
-maxiter = 50;
+maxiter = 120;
 best_id = 0;
 control = 0;
 time = 0;
@@ -297,9 +298,10 @@ if strcmp(algo,'Right')
 
     for i = 1:curr_num_octo
 
-        if octos(i).state == 1 && norm([octos(i).x octos(i).y]) < robot.l_1 + robot.l_2
+        if octos(i).state == 1
             [temp_control, time] = goal2belt_picker(robot.curr_goal_index, ...
                 [octos(i).x; octos(i).y], A, maxiter);
+            
             
             if time < Inf && X < octos(i).x
                 best_id = octos(i).id;

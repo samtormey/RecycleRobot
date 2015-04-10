@@ -36,14 +36,22 @@ bfp = Inf;
 while bfp == Inf && count <= maxiter
     count = count + 1;
     
-    % break if solution not on the belt
-    if norm(sol + [count*gap_size; 0]) > len1 + len2
-        break
+    temp = sol + [count*gap_size; 0];
+    
+    if norm(temp) > len1 + len2
+        % if the object is too far to the left, so it will 
+        % potentially be grabbable later
+        if temp(1) < 0
+            continue
+        % if the object has fallen to far to the right, and is 
+        % now impossible to get
+        else
+            break
+        end
     end
+       
     [the1p, the2p, the1n, the2n] = inverseThe(sol + [count*gap_size; 0], ...
         len1, len2);
-    [xp,yp,z] = fkSCARA(the1p,the2p, len1, len2);
-    [xn,yn,z] = fkSCARA(the1n,the2n, len1, len2);
     
     [index1p, index2p] = getBestStoredIndices(the1p, the2p, theta_vec);
     [index1n, index2n] = getBestStoredIndices(the1n, the2n, theta_vec);
