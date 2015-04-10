@@ -61,7 +61,7 @@ draw_arm_3;
         side_faces(n,5:n) = ones(1,n-4)*n;
         
         faces = [top_face; bottom_face; side_faces];
-        figure(1); clf;
+        clf;
         
         patch('Vertices',vertices,'Faces',faces,'facecolor','b');
         view([45 45])

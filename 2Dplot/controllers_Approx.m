@@ -1,4 +1,4 @@
-function [ time ] = controllers_Approx ( startState, finishState, n, plot_eh, err, Kp, Kv, M)
+function [ time ] = controllers_Approx ( startState, finishState, n, plot_eh, err, Kp, Kv, M, robot)
 
  
 
@@ -16,7 +16,7 @@ dt = 1/n;
 % startState = [.2 .5 -.3 0 0 0]';  % Example states
 % finishState = [2 2 -.8 0 0 0]';
 
-robot = ScaraInit();
+% robot = ScaraInit();
 state = zeros(4,1); 
 state(:,1) = startState;
 torque = zeros(2,1);
@@ -68,7 +68,7 @@ i = 0;
 
     end   
     
-    steps = size(state,2)
+    steps = size(state,2);
        
         if plot_eh == 1
             for i = 2:steps
