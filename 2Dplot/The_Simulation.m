@@ -58,10 +58,10 @@ verts = [top_corners; bottom_corners];
 faces = [1 2 3 4 4 4 4 4; 5 6 7 8 8 8 8 8; 2 1 5 6 6 6 6 6; ...
     2 3 7 6 6 6 6 6; 3 4 8 7 7 7 7 7; 4 1 5 8 8 8 8 8];
 
-% plot3D_SCARA(0,0,0);
-% axis([-blr blr -blr blr 0 blr])
-% grid on
-% rectangle('Position',[-blr,belt_bottom,2*blr,belt_top],'FaceColor',[.5 .5 .5])
+plot3D_SCARA(0,0,0);
+axis([-blr blr -blr blr 0 blr])
+grid on
+rectangle('Position',[-blr,belt_bottom,2*blr,belt_top],'FaceColor',[.5 .5 .5])
 
 for i = 1:num_rec
     rec_vert(:,:,i) = [start_rec(i),belt_bottom,.1;
@@ -176,9 +176,9 @@ while real_time < 30
     % octos on the belt move right
     
     
-%     plot3D_SCARA(robot.path(robot.pathCounter,1),robot.path(robot.pathCounter,2),-1)
-%     grid on
-%     patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
+    plot3D_SCARA(robot.path(robot.pathCounter,1),robot.path(robot.pathCounter,2),-1)
+    grid on
+    patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
     
     for k = 1:numel(octos)
         if octos(k).state == 0 || octos(k).state == 1
@@ -192,7 +192,7 @@ while real_time < 30
             octos(k).x = xx;
             octos(k).y = yy;
         end
-%         plot3D_OCTO(octos(k).x,octos(k).y,octos(k).z,octos(k).theta); 
+        plot3D_OCTO(octos(k).x,octos(k).y,octos(k).z,octos(k).theta); 
         test_octo = test_octo + toc;
     end
    
