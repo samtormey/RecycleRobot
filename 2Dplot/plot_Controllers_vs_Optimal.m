@@ -1,13 +1,19 @@
 clear all
-plot_eh = 0;
-err = .04;
+plot_eh = 1;
+err = .1;
 n = 20;
 Kp = -40;
 Kv = Kp/2;
+
+M = 100;
+
 startState = [.2 .5 0 0]';  % Example states
 finishState = [2 2 0 0]';
- [ time ] = controllers_Approx ( startState, finishState, n, plot_eh, err, Kp, Kv);
-
+ [ time ] = controllers_Approx ( startState, finishState, n, plot_eh, err, Kp, Kv, M);
+ options.init = 1;
+ X0 = 1;
+ [X control T exitflag comp_time statePath] = RealOptimalPathFind(startState,finishState,options,X0,n, M);
+  T
   time
 
 
