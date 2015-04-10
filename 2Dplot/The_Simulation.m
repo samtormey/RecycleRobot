@@ -1,4 +1,5 @@
 function The_Simulation 
+
 close all
 rng(2);
 belt = ConvBelt;
@@ -210,7 +211,7 @@ while 1
             octos(k).x = xx;
             octos(k).y = yy;            
         end
-        % if 
+        % if octo has not fallen off (fall off == state 4)
         if octos(k).state < 4
             plot3D_OCTO(octos(k).x,octos(k).y,octos(k).z,octos(k).theta);
         end
