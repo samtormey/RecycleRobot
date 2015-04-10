@@ -216,7 +216,6 @@ while 1
         end
 
     end
-   
     
     patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
     
