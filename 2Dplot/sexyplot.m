@@ -1,6 +1,7 @@
 function sexyplot
 
 pit = load('Precompute/Controls_n=20_numThe=80_gps=5');
+% pit = load('Precompute/UnitedFriendMatrix.mat');
 A = pit.A;
 n = pit.n;
 
@@ -30,28 +31,89 @@ theta_vec = -pi+dt:dt:pi;
 Direction = 1;
 
 x_y_time =[];
+tally = 0;
+tally2 = 0;
 
 for th1_i = 1:length(theta_vec)
     th1 = theta_vec(th1_i);
     for th2_i = 1:length(theta_vec) 
         th2 = theta_vec(th2_i);    
         [x,y] = FK(th1,th2,len1,len2);
-%         [the1p, the2p, the1n, the2n] = inverseThe1_2([x y]',len1,len2);
-%         
-%         keyboard
-        for k = 1: size(goal_configs,1)            
-            min_time = Inf;
-            time = A{th1_i,th2_i,k,1,1}; % time from belt to goal
-            if time < min_time
-                min_time = time;
-            end  
+        
+        % x_y_test
+        counter = 0;
+        for i = 1:size(x_y_time,1)
+            if abs(x_y_time(i,1) - x) + abs(x_y_time(i,2) - y) < 1e-8 
+                counter = 1;
+                tally2 = tally2 + 1;
+            end
         end
-        x_y_time = [x_y_time;x,y,min_time];
+           
+        if counter == 0
+        
+            [the1p, the2p, the1n, the2n] = inverseThe1_2([x y]',len1,len2);
+            [th1_i_pos,th2_i_pos] = getBestStoredIndices(the1p, the2p, theta_vec);
+            [th1_i_neg,th2_i_neg] = getBestStoredIndices(the1n, the2n, theta_vec);
+            
+            if th1_i ~= th1_i_pos && th1_i ~= th1_i_neg
+                tally = tally + 1;
+            end
+            
+            for k = 1: size(goal_configs,1)
+                min_time = Inf;
+                time_pos = A{th1_i_pos,th2_i_pos,k,1,1};
+                time_neg = A{th1_i_neg,th2_i_neg,k,1,1};
+                if time_pos < min_time
+                    min_time = time_pos;
+                end
+                if time_neg < min_time
+                    min_time = time_neg;
+                end
+                if min_time < 0
+                    keyboard
+                end
+            end
+            if min_time < Inf
+                x_y_time = [x_y_time;x,y,min_time];
+            end
+        end
+        
     end
 end
+X = x_y_time(:,1);
+Y = x_y_time(:,2);
+Z = x_y_time(:,3);
+[XI YI ZI] = griddata(X,Y,Z,linspace(-2,2),linspace(0,2)');
 
-keyboard
-surf(x_y_time(:,1),x_y_time(:,2),diag(x_y_time(:,3)))
+figure(1)
+trisurf(delaunay(X,Y),X,Y,Z)
+% surf(XI,YI,ZI)
+plot_belt
+plot3D_SCARA2(0,0,0);
+view([0 0 90])
+
+title('Optimal Path Time','Fontsize',19)
+xlabel('x','Fontsize',20)
+ylabel('y','Fontsize',20)
+h = colorbar;
+ylabel(h, 'Time (seconds) ','Fontsize',20)
+
+figure(2)
+surf(XI,YI,ZI)
+plot_belt
+plot3D_SCARA2(0,0,0);
+view([0 0 90])
+
+title('Optimal Path Time','Fontsize',19)
+xlabel('x','Fontsize',20)
+ylabel('y','Fontsize',20)
+h = colorbar;
+ylabel(h, 'Time (seconds) ','Fontsize',20)
+% 
+% figure(2)
+% surf(XI,YI,ZI)
+% % view(2)
+% colorbar
 
 end
     
@@ -99,3 +161,31 @@ function [the1p, the2p, the1n, the2n] = inverseThe1_2(points,len1,len2)
               atan2(k2n,k1);    
 
 end
+
+function plot_belt
+belt = ConvBelt;
+goal_y = belt.robo2goal;
+belt_bottom = belt.robo2bottom;
+belt_top = belt.robo2top;
+blr = belt.left_right;
+height = belt.height;
+
+top_corners = [-blr belt_bottom 0;
+               -blr belt_top 0;
+                blr belt_top 0;
+                blr belt_bottom 0];
+            
+bottom_corners =  [-blr belt_bottom -height;
+               -blr belt_top -height;
+                blr belt_top -height;
+                blr belt_bottom -height];
+            
+verts = [top_corners; bottom_corners];
+
+faces = [1 2 3 4 4 4 4 4; 5 6 7 8 8 8 8 8; 2 1 5 6 6 6 6 6; ...
+    2 3 7 6 6 6 6 6; 3 4 8 7 7 7 7 7; 4 1 5 8 8 8 8 8];
+
+patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
+axis([-2 2 -2 2 0 3])
+end
+
