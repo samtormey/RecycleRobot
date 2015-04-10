@@ -1,4 +1,5 @@
 function The_Simulation 
+
 close all
 rng(2);
 belt = ConvBelt;
@@ -16,8 +17,6 @@ robot.pathCounter = 1;
 robot.state = 'waiting';
 robot.time = 1;
 robot.curr_goal_index = 1;
-
-
 
 len1 = robot.l_1;
 len2 = robot.l_2;
@@ -62,10 +61,12 @@ verts = [top_corners; bottom_corners];
 faces = [1 2 3 4 4 4 4 4; 5 6 7 8 8 8 8 8; 2 1 5 6 6 6 6 6; ...
     2 3 7 6 6 6 6 6; 3 4 8 7 7 7 7 7; 4 1 5 8 8 8 8 8];
 
-%plot3D_SCARA(0,0,0);
-axis([-blr blr -blr blr 0 blr])
-grid on
-rectangle('Position',[-blr,belt_bottom,2*blr,belt_top],'FaceColor',[.5 .5 .5])
+figure(1); clf;
+plot3D_SCARA(0,0,0);
+
+% axis([-blr blr -blr blr 0 blr])
+% grid on
+% rectangle('Position',[-blr,belt_bottom,2*blr,belt_top],'FaceColor',[.5 .5 .5])
 
 for i = 1:num_rec
     rec_vert(:,:,i) = [start_rec(i),belt_bottom,.1;
@@ -98,6 +99,7 @@ new_octo = min_time; % time check for adding octoprisms
 %     octos = [octos octo];
 %     octos(end).id = i;
 % end
+
 
 
 
@@ -135,7 +137,7 @@ test_octo = 0;
 sim_counter = 1;
 
 while 1
-    
+        
     % This if statement updates the robot state and what step it is on for
     % the current path. If the path is complete it finds a new path.
     if strcmp(robot.state,'goalToBelt')
@@ -171,7 +173,7 @@ while 1
        end
     end
     
-    tic
+    
     if strcmp(robot.state, 'waiting') 
            
             algo = 'Right';
@@ -188,14 +190,15 @@ while 1
 
            end
     end
-   
-    dt = robot.time/(n-1);
-    % octos on the belt move right
     
+    dt_real = robot.time/(n-1);
+    
+    % octos on the belt move right
     
     plot3D_SCARA(robot.path(robot.pathCounter,1),robot.path(robot.pathCounter,2),-1)
     grid on
     patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
+   
     
     for k = 1:numel(octos)
         if octos(k).state == 0 || octos(k).state == 1
@@ -212,19 +215,19 @@ while 1
             octos(k).x = xx;
             octos(k).y = yy;            
         end
-        % if 
+        % if octo has not fallen off (fall off == state 4)
         if octos(k).state < 4
             plot3D_OCTO(octos(k).x,octos(k).y,octos(k).z,octos(k).theta);
         end
-        
-        test_octo = test_octo + toc;
+
     end
    
+    
     patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
     
     pause(dt)
     
-    real_time = real_time + dt;
+    real_time = real_time + dt_real;
     
     
     % Update octoprism struct
@@ -246,8 +249,13 @@ while 1
         octos(end).id = octos(end-1).id + 1;
         new_octo = new_octo + min_time + rand*(max_time - min_time);
         
-        
-
+    end
+   
+    if real_time > 10
+        profile viewer
+%         fprintf('T_robot = %f \n T_octo = %f \n T_plot = %f \n T_extra = %f \n', ...
+%             T_robot, T_octo, T_plot, extra_time)
+       keyboard 
     end
     
     % code below print-logs the states of the octos
@@ -346,11 +354,6 @@ end
 
 
 end
-    
-    
-
-
-
 
 function [the1p, the2p, the1n, the2n] = inverseThe1_2(points,len1,len2)
 
