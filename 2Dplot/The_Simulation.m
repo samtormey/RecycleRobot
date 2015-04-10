@@ -131,6 +131,11 @@ time_b2g =  A{1,18,1,1,1};
 
 %
 
+test = 0;
+test_octo = 0;
+
+sim_counter = 1;
+
 while 1
         
     % This if statement updates the robot state and what step it is on for
@@ -251,6 +256,37 @@ while 1
 %             T_robot, T_octo, T_plot, extra_time)
        keyboard 
     end
+    
+    % code below print-logs the states of the octos
+    if mod(sim_counter,10) == 0
+        octo_n = numel(octos);
+        state_array = zeros(octo_n,1);
+        for j = 1:octo_n
+            state_array(j) = octos(j).state;
+        end
+        
+        % hardwired now to states 0 through 4, held at indices
+        % 1 through 5
+        numPerState = zeros(5,1);
+        for j = 1:5
+            % just a cute way of extracting frequencies
+            numPerState(j) =  ...
+                octo_n - nnz(state_array - (j-1)*ones(octo_n,1));
+        end
+        
+        disp(['Real time is:  ' num2str(real_time)]);
+        disp('');
+        disp(['# Invisibles:        ' num2str(numPerState(1))]);
+        disp(['# Visible on belt:   ' num2str(numPerState(2))]);
+        disp(['# Attached to robot: ' num2str(numPerState(3))]);
+        disp(['# In goal region:    ' num2str(numPerState(4))]);
+        disp(['# Fallen off belt:   ' num2str(numPerState(5))]);
+        disp('***');
+        
+    end
+    
+    sim_counter = sim_counter + 1;
+    
 
 end
     
