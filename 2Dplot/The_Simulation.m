@@ -211,7 +211,7 @@ while 1
    
     patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
     
-    pause(dt/10)
+    pause(dt)
     
     real_time = real_time + dt;
     
