@@ -5,7 +5,18 @@ n = 20;
 Kp = -40;
 Kv = Kp/2;
 
-M = 100;
+M = 10;
+
+
+num_theta = 80;
+dtheta = 2*pi/num_theta;
+theta_vec = -pi+dtheta:dtheta:pi;
+
+for th1_i = 1:num_theta
+    for th2_i = 1:num_theta
+        for gp = 1:8
+            
+
 
 startState = [.2 .5 0 0]';  % Example states
 finishState = [2 2 0 0]';
