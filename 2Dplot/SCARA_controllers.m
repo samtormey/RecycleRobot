@@ -51,7 +51,7 @@ Mov(n-1) = struct('cdata',[],'colormap',[]);
 
     for i = 1:n % time                         
 
-        torque(:,i) = -Kp*(state(1:2,i) - finishState(1:2)) - ...
+        torque(:,i) = -Kp*(normalizeAngle(state(1:2,i) - finishState(1:2))) - ...
             Kv*(state(3:4,i) - finishState(3:4));                                    
 
         for k = 1:numel(torque(:,i))
