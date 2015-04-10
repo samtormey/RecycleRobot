@@ -1,4 +1,4 @@
-function [X control T exitflag comp_time] = RealOptimalPathFind(start,finish,options,X0,n)
+function [X control T exitflag comp_time statePath] = RealOptimalPathFind(start,finish,options,X0,n)
 
 
 % takes advantage of scopes in Matlab in order to reduce 
@@ -22,6 +22,7 @@ M = 10;
 J = sparse((n+1)*2*Q,SZ);  % pre-allocation for own Jacobian
 
 I = computeMoments;  % compute moments to be used in F and f, all constants
+n = 20;
 
 if n ~= 20
     disp('n is not 20')  

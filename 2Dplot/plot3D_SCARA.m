@@ -28,7 +28,10 @@ draw_arm_3;
 % view([46 14])
 
 
+
+
     function draw_base
+        steel_grey = [0.7 0.7 0.7];
         r = base_radius;
         
         dtheta = 2*pi/n;
@@ -60,13 +63,14 @@ draw_arm_3;
         faces = [top_face; bottom_face; side_faces];
         figure(1); clf;
         
-        patch('Vertices',vertices,'Faces',faces,'facecolor','r');
+        patch('Vertices',vertices,'Faces',faces,'facecolor','b');
         view([45 45])
         axis([-2 2 -2 2 0 3])
         
     end
 
     function draw_arm_1
+        steel_grey = [0.7 0.7 0.7];
         % h = height of base
         % t = thickness of arm
         % r = end radius
@@ -124,12 +128,13 @@ draw_arm_3;
             0        , 0        , 1];
         vertices2 = (R*vertices')';
         
-        patch('Vertices',vertices2,'Faces',faces,'facecolor','c')
+        patch('Vertices',vertices2,'Faces',faces,'facecolor',steel_grey)
         
         
     end
 
     function draw_arm_2
+        steel_grey = [0.7 0.7 0.7];
         r = base_radius; 
         
         n = round(n/2)*2; % make n even
@@ -192,12 +197,13 @@ draw_arm_3;
         vertices2 = vertices2 + translate;
 %         vertices2 = (R2*(vertices-translate)')';
         
-        patch('Vertices',vertices2,'Faces',faces,'facecolor','g')
+        patch('Vertices',vertices2,'Faces',faces,'facecolor',steel_grey)
         
         
     end
 
     function draw_arm_3
+        steel_grey = [0.7 0.7 0.7];
         n = 10;
         r = base_radius/2;
         
