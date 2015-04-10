@@ -121,8 +121,8 @@ goal_configs = [the1p the1n(2:end-1); the2p the2n(2:end-1)]'; % note this!
 
 
 num_theta = 80;
-dt = 2*pi/num_theta;
-theta_vec = -pi+dt:dt:pi;
+dtheta = 2*pi/num_theta;
+theta_vec = -pi+dtheta:dtheta:pi;
 
 control_b2g = A{1,18,1,1,2};
 time_b2g =  A{1,18,1,1,1};
@@ -198,6 +198,9 @@ while 1
     for k = 1:numel(octos)
         if octos(k).state == 0 || octos(k).state == 1
             octos(k).x = octos(k).x + v*dt;
+            if octos(k).x > blr + 1;
+                octos(k).state = 4;
+            end
         end
         if octos(k).state == 0 && octos(k).x > -blr
             octos(k).state = 1;
@@ -205,9 +208,13 @@ while 1
         if octos(k).state == 2
             [xx,yy,zz] = fkSCARA(robot.path(robot.pathCounter,1),robot.path(robot.pathCounter,2),len1,len2);
             octos(k).x = xx;
-            octos(k).y = yy;
+            octos(k).y = yy;            
         end
-        plot3D_OCTO(octos(k).x,octos(k).y,octos(k).z,octos(k).theta); 
+        % if 
+        if octos(k).state < 4
+            plot3D_OCTO(octos(k).x,octos(k).y,octos(k).z,octos(k).theta);
+        end
+        
         test_octo = test_octo + toc;
     end
    
@@ -252,7 +259,7 @@ end
 function [best_id, control, shortest_time] = decisionAlgo(octos,robot,A,algo)
 
 curr_num_octo = numel(octos);
-maxiter = 500;
+maxiter = 120;
 best_id = 0;
 control = 0;
 time = 0;
@@ -287,23 +294,8 @@ if strcmp(algo,'Right')
     for i = 1:curr_num_octo
 
         if octos(i).state == 1
-            octos(i).id            
             [temp_control, time] = goal2belt_picker(robot.curr_goal_index, ...
                 [octos(i).x; octos(i).y], A, maxiter);
-%             if time ~= Inf
-%                 keyboard
-%             end
-   
-
-
-% temp =
-% 
-%    -0.8823
-%     0.4924
-
-%    -0.3914
-%     0.4924
-
             
             
             if time < Inf && X < octos(i).x
