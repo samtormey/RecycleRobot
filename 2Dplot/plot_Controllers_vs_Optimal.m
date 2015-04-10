@@ -1,13 +1,30 @@
 clear all
-plot_eh = 0;
-err = .04;
+plot_eh = 1;
+err = .1;
 n = 20;
 Kp = -40;
 Kv = Kp/2;
+
+M = 10;
+
+
+num_theta = 80;
+dtheta = 2*pi/num_theta;
+theta_vec = -pi+dtheta:dtheta:pi;
+
+for th1_i = 1:num_theta
+    for th2_i = 1:num_theta
+        for gp = 1:8
+            
+
+
 startState = [.2 .5 0 0]';  % Example states
 finishState = [2 2 0 0]';
- [ time ] = controllers_Approx ( startState, finishState, n, plot_eh, err, Kp, Kv);
-
+ [ time ] = controllers_Approx ( startState, finishState, n, plot_eh, err, Kp, Kv, M);
+ options.init = 1;
+ X0 = 1;
+ [X control T exitflag comp_time statePath] = RealOptimalPathFind(startState,finishState,options,X0,n, M);
+  T
   time
 
 

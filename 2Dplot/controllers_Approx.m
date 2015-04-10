@@ -1,4 +1,4 @@
-function [ time ] = controllers_Approx ( startState, finishState, n, plot_eh, err, Kp, Kv)
+function [ time ] = controllers_Approx ( startState, finishState, n, plot_eh, err, Kp, Kv, M)
 
  
 
@@ -8,7 +8,7 @@ close all;
 
 % Initialize robot
 
-M = 10;
+% M = 10;
 
 n = 20;
 dt = 1/n;
