@@ -1,4 +1,4 @@
-function StoreDriver
+function ControllersDriver
 
 % A = (th1, th2, k, Direction, ToP)
 %     th1 = theta1 * (num_theta/2pi)
@@ -20,6 +20,7 @@ addpath /Users/samtormey/matlab/RecycleRobot/2DPlot/
 robot = ScaraInit;
 len1 = robot.l_1;
 len2 = robot.l_2;
+err = .05;
 
 belt = ConvBelt;
 goal_y = belt.robo2goal;
@@ -52,10 +53,11 @@ goal_configs = [the1p the1n(2:end-1); the2p the2n(2:end-1)]'; % note this!
 
 % create 0 to 2pi thetas adn goals
 theta_vec2pi = theta_vec;
-theta_vec2pi(1:39) = theta_vec2pi(1:39) + 2*pi;
+theta_vec2pi(1:num_theta/2 - 1) = theta_vec2pi(1:num_theta/2 - 1) + 2*pi;
 goal_configs2pi = goal_configs;
 goal_configs2pi(6:8,2) = goal_configs2pi(6:8,2) + 2*pi;
 
+A = cell(num_theta,num_theta,gps,2,2);
 
 
 for k = 1: size(goal_configs,1)
@@ -76,34 +78,17 @@ for k = 1: size(goal_configs,1)
                 cnt = cnt + 1;
                 fprintf('\niter %d: ', cnt)
                 start = [th1; th2; 0; 0];
-                finish = [goal_th1; goal_th2; 0; 0];
-                
-                keyboard
-                startState = [-pi, theta_vec(18), 0, 0]';
-                finishState = [goal_configs(1,:), 0, 0]';
-                t_f = 4;
-                [ X0, torque, PD_Position, PD_Velocity ] = SCARA_controllers ( startState, finishState, n,t_f)
-                
-                [X0 control_b2g T_b2g exitflag1 comp_time] = ...
-                    RealOptimalPathFind(start,finish,options,X0,n);
-                [X0 control_g2b T_g2b exitflag2 comp_time] = ...
-                    RealOptimalPathFind(finish,start,options,X0,n);
-                
-                if exitflag1 ~= 1 || exitflag2 ~= 1
-                   error = 1;
-                   fprintf('\nWARNING: fmincon solution not found for ')
-                   fprintf('k = %d, th1_i = %d, th2_i = %d\n', k, th1_i, th2_i)
-                end
-                
-                % store solutions
+                finish = [goal_th1; goal_th2; 0; 0];                
+                tic
+                [T_b2g, control_b2g] = controllers_Approx (  start,  finish, n, err, robot);     
+                [T_g2b, control_g2b] = controllers_Approx (  finish, start,  n, err, robot);
+                toc
+%          
                 A{th1_i,th2_i,k,1,1} = T_b2g;
                 A{th1_i,th2_i,k,1,2} = control_b2g;
                 A{th1_i,th2_i,k,2,1} = T_g2b;
                 A{th1_i,th2_i,k,2,2} = control_g2b;
-                
-                options.init = 1; % reuse initial guess
-                
-                total_time = total_time + comp_time;
+                                
             
             else % if starting config is not on the belt
                 A{th1_i,th2_i,k,1,1} = NaN;
@@ -116,13 +101,10 @@ for k = 1: size(goal_configs,1)
     end % th2
 end % k (goal goal_configs)
 
-if error == 1
-   fprintf('There was an error in one of the computations') 
-end
+ControllerA = A;
 
-% save(['./Precompute/Controls_n=',num2str(n),'_numThe=',num2str(num_theta),'_gps=',num2str(gps)],'A',...
-%         'goal_configs','belt','n','robot','num_theta','total_time')
-% rmpath /Users/samtormey/matlab/RecycleRobot/2DPlot/
+save(['./Precompute/Controllers_Controls_n=',num2str(n),'_numThe=',num2str(num_theta),'_gps=',num2str(gps)],'ControllerA',...
+        'goal_configs','belt','n','robot','num_theta')
 
 end
 

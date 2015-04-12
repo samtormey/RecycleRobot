@@ -83,41 +83,33 @@ ending robot configurations. \\
                 
 %\vspace{1cm}
 
-\begin{block}{\centering Stochastic Elliptic Problem} 
+\begin{block}{\centering Double Pendulum Physics} 
 
+We calculate the kinetic energy of our system as
+	
 \begin{align*}
--\nabla\cdot(a_N(\bxi,\bx)\nabla u(\bxi,\bx)) &= f(\bx) \;\; &&\text{in} \; \cD\times\Gamma\\
-u(\bxi,\bx) &= 0 \;\; &&\text{on} \; \partial\cD\times\Gamma
+	E = \frac{1}{2}\dot\theta_1^2(I_4 + 2I_5\cos\theta_2)
+	+ \frac{1}{2}\dot\theta_2^2I_6
+	+ \dot\theta_1\dot\theta_2(I_3 + I_5 \cos\theta_2)
 \end{align*}
-\noindent
-\hspace{1em}where\\
-\vspace{0.5em}
-\hspace{2em} $u(\bxi,\bx)$ - a state variable (e.g. pressure)\\
-\hspace{2em} $a_N(\bxi,\bx)$ - a random diffusion coefficient (e.g. permeability) \\
-\hspace{6.2em} given by
-%\vspace{1em}
-%Under the finite noise assumption $a(\bxi,\bx)\approx a_N(\bxi,\bx)$ with\\
-\begin{align*}
-\log{(a_N(\bxi,\bx))} = \sum\limits_{n=1}^N Y_n(\bxi)\zeta_n\psi_n(\bx)
-\end{align*}
+
+where the $I_j$ terms represent moments of inertia. 
+
+We ignore gravity and thus potential energy. The Euler-Lagrange equation then applies
+only to the kinetic energy above:
 
 \begin{columns}[T]
-\begin{column}{20cm}{}
- \raggedleft\includegraphics[height=10cm, width = 18cm]{figures/solution.png}\\
-\raggedright \hspace{2em}\scriptsize{Realization of $u(\bxi,\bx)$}
+\begin{column}{16cm}{}
+\begin{align*}
+\frac{\partial E}{\partial \theta_j} - 
+\frac{d}{dt}\frac{\partial E}{\partial \dot{\theta_j}} = 0
+\end{align*}
 \end{column}
-%\begin{column}{10cm}{}
-%\centering \includegraphics[height=10cm, width = 12cm]{figures/mesh}\\
-%\centering \scriptsize{Mesh and quantity of interest}
-%\end{column}
-\begin{column}{12cm}{}
-\centering \includegraphics[height=10cm, width = 12cm]{figures/diffusion.png}\\
-\centering \scriptsize{Realization of $a_N(\bxi,\bx)$}
+\begin{column}{16cm}{}
+\centering\includegraphics[height=12cm, width = 12cm]{figures/double-pendulum.png}\\
 \end{column}
-\end{columns}
 
-\vspace{1em}
-\hspace{1em}Quantity of interest: $Q(u(\bxi,\bx))=u(\bxi,\bx^*)$.
+\end{columns}
 
 \end{block}
 

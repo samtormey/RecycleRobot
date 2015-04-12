@@ -13,7 +13,7 @@ len1 = robot.l_1;
 len2 = robot.l_2;
 
 plot_eh = 0;
-err = .1;
+err = .05;
 n = 20;
 Kp = -50;
 Kv = Kp/2;
@@ -75,9 +75,10 @@ for th1_i = 1:length(theta_vec)
                 min_time_controllers = Inf;
             for k = 1: size(goal_configs,1)
                 time_pos = A{th1_i_pos,th2_i_pos,k,1,1};
-                time_neg = A{th1_i_neg,th2_i_neg,k,1,1};      
 
-                time_pos_controllers = controllers_Approx ( [the1p; the2p; 0; 0], [goal_configs(k,:)'; 0; 0], n, plot_eh, err, Kp, Kv, M, robot);
+                time_neg = A{th1_i_neg,th2_i_neg,k,1,1}; 
+                keyboard
+                time_pos_controllers = controllers_Approx ( [the1p; the2p; 0; 0], [goal_configs(k,:)'; 0; 0], n, plot_eh, err, Kp, Kv, M, robot);     
                 time_neg_controllers = controllers_Approx ( [the1n; the2n; 0; 0], [goal_configs(k,:)'; 0; 0], n, plot_eh, err, Kp, Kv, M, robot);
                 B(th1_i,th2_i,k,1) = time_pos_controllers;
                 B(th1_i,th2_i,k,2) = time_neg_controllers;
@@ -101,7 +102,9 @@ for th1_i = 1:length(theta_vec)
             end
             if min_time < Inf
                 x_y_time = [x_y_time;x,y,min_time];
-%                 x_y_time_controllers = [x_y_time_controllers;x,y,min_time_controllers];
+
+                x_y_time_controllers = [x_y_time_controllers;x,y,min_time_controllers];
+                min_time_controllers
             end
         end
         
