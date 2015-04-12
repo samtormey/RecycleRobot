@@ -23,6 +23,7 @@ len2 = robot.l_2;
 num_rec = belt.num_rec;
 rec_width = belt.rec_width;
 h = zeros(num_rec,1);
+d_fart = .1;
 
 % generate goal region points
 gps = 5;
@@ -136,7 +137,9 @@ test_octo = 0;
 
 sim_counter = 1;
 
-while 1
+while real_time < 250
+        real_time;
+        tic
         
     % This if statement updates the robot state and what step it is on for
     % the current path. If the path is complete it finds a new path.
@@ -146,12 +149,7 @@ while 1
 
             start = [robot.path(n,1) robot.path(n,2) 0 0]';
             [control,closest_goal_ind,time] = belt2goal_picker(A,start,num_goal_pts); 
-            robot.path = control_to_position(control, n, start, time);
-           
-            options.init = 2;
-            X0 = 0;
-%           [X control T exitflag comp_time statePath] =  RealOptimalPathFind(start,[goal_configs(1,:) 0 0]',options,X0,n)
-           %
+            robot.path = control_to_position(control, n, start, time);           
            
            robot.time = time;
            robot.pathCounter = 1;
@@ -191,7 +189,7 @@ while 1
            end
     end
     
-    dt_real = robot.time/(n-1);
+    dt = robot.time/(n-1);
     
     % octos on the belt move right
     
@@ -224,10 +222,7 @@ while 1
    
     
     patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
-    
-    pause(dt)
-    
-    real_time = real_time + dt_real;
+
     
     
     % Update octoprism struct
@@ -251,12 +246,12 @@ while 1
         
     end
    
-    if real_time > 10
-        profile viewer
-%         fprintf('T_robot = %f \n T_octo = %f \n T_plot = %f \n T_extra = %f \n', ...
-%             T_robot, T_octo, T_plot, extra_time)
-       keyboard 
-    end
+%     if real_time > 10
+%         profile viewer
+% %         fprintf('T_robot = %f \n T_octo = %f \n T_plot = %f \n T_extra = %f \n', ...
+% %             T_robot, T_octo, T_plot, extra_time)
+%        keyboard 
+%     end
     
     % code below print-logs the states of the octos
     if mod(sim_counter,10) == 0
@@ -275,18 +270,30 @@ while 1
                 octo_n - nnz(state_array - (j-1)*ones(octo_n,1));
         end
         
-        disp(['Real time is:  ' num2str(real_time)]);
-        disp('');
-        disp(['# Invisibles:        ' num2str(numPerState(1))]);
-        disp(['# Visible on belt:   ' num2str(numPerState(2))]);
-        disp(['# Attached to robot: ' num2str(numPerState(3))]);
-        disp(['# In goal region:    ' num2str(numPerState(4))]);
-        disp(['# Fallen off belt:   ' num2str(numPerState(5))]);
-        disp('***');
+%         disp(['Real time is:  ' num2str(real_time)]);
+%         disp('');
+%         disp(['# Invisibles:        ' num2str(numPerState(1))]);
+%         disp(['# Visible on belt:   ' num2str(numPerState(2))]);
+%         disp(['# Attached to robot: ' num2str(numPerState(3))]);
+%         disp(['# In goal region:    ' num2str(numPerState(4))]);
+%         disp(['# Fallen off belt:   ' num2str(numPerState(5))]);
+%         disp('***');
         
-    end
+        
+        
+    end        
     
     sim_counter = sim_counter + 1;
+    
+    comptime = toc;     
+    if (dt - comptime) < 0
+        disp('pause is neg')
+        pause(.01)
+    else
+        pause(dt/2 - comptime) 
+    end
+   
+    real_time = real_time + dt;
     
 
 end

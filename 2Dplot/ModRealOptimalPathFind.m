@@ -1,4 +1,4 @@
-function [X control T exitflag comp_time statePath] = RealOptimalPathFind(start,finish,options,X0,n,M)
+function [X control T exitflag comp_time statePath] = ModRealOptimalPathFind(start,finish,options,X0,n)
 
 
 % takes advantage of scopes in Matlab in order to reduce 
@@ -18,7 +18,7 @@ SZ = 3*Q*n+1;
 
 dtau = 1/(n-1);   
 dt = 1e-8;  % for finite difference in Jacobian
-% M = 10;
+M = 50;
 J = sparse((n+1)*2*Q,SZ);  % pre-allocation for own Jacobian
 
 I = computeMoments;  % compute moments to be used in F and f, all constants
@@ -66,7 +66,7 @@ yessave = 1;
     % discretizied optimization function without computing Jacobian,
     % F_ownJacobian is more fully commented
 
-    function b = F_dyn(X)
+    function [Cout,b] = F_dyn(X)
 
             b = zeros((n+1)*2*Q,1);               
 
@@ -77,23 +77,25 @@ yessave = 1;
                 ctip1 = (2*Q*n + Q*(i) + 1):(2*Q*n + Q*(i+1));  % control variables at time step i+1  (used for backwards Euler)                  
                 if back == 0        
                     feval = f(X(jvi),X(cti));  
-                    b(jvi) = (X(jvip1) - X(jvi))/dtau - ... 
+                    b(jvi) = (normalizeAngle(X(jvip1) - X(jvi)))/dtau - ... 
                         X(end)*feval;                                                  
                 end            
 
                 if back == 1
-                    b(jvi) = (X(jvip1) - X(jvi))/dtau - ... 
+                    b(jvi) = (normalizeAngle(X(jvip1) - X(jvi)))/dtau - ... 
                         X(end)*f(X(jvip1),X(ctip1));
                 end 
             
-        end
+            end
 
         jvn = (2*Q*(n-1) + 1):2*Q*n;
-        b(end-(4*Q-1):end-(2*Q)) = startState - X(1:2*Q);
-        b(end-2*Q+1:end) = finishState - X(jvn);     
+        b(end-(4*Q-1):end-(2*Q)) = normalizeAngle(startState - X(1:2*Q));
+        b(end-2*Q+1:end) = normalizeAngle(finishState - X(jvn));     
         Cout = [];
+        disp('called F_Dyn')
         
     end   
+
 
     function [Cout,Ceq, Coutgrad, Ceqgrad] = F_ownJacobian(X)  % this has our hand structured Jacobian, not currently working.    
                  
@@ -108,7 +110,7 @@ yessave = 1;
             % Forward Euler 
             if back == 0        
                 evald_f = f(X(jvi),X(cti));   % save the value of f to reduce redundancy
-                b(jvi) = (X(jvip1) - X(jvi))/dtau - ...  % x' = f  constraint, this is just F
+                b(jvi) = (normalizeAngle(X(jvip1) - X(jvi)))/dtau - ...  % x' = f  constraint, this is just F
                     X(end)*evald_f;    
                 
             % Compute the Jacobian        
@@ -149,7 +151,7 @@ yessave = 1;
 
             % Backwards Euler
             if back == 1
-                b(jvi) = (X(jvip1) - X(jvi))/dtau - ... 
+                b(jvi) = (normalizeAngle(X(jvip1) - X(jvi)))/dtau - ... 
                     X(end)*f(X(jvip1),X(ctip1));
             end 
             
@@ -161,8 +163,8 @@ yessave = 1;
         J(endstate-(4*Q-1):endstate-2*Q,1:2*Q) = -1*eye(2*Q,2*Q);
         J(endstate-2*Q+1:endstate,endstate-(4*Q-1):endstate-2*Q) = -1*eye(2*Q,2*Q);
         jvn = (2*Q*(n-1) + 1):2*Q*n;
-        b(end-(4*Q-1):end-(2*Q)) = startState - X(1:2*Q);
-        b(end-2*Q+1:end) = finishState - X(jvn);        
+        b(end-(4*Q-1):end-(2*Q)) = normalizeAngle(startState - X(1:2*Q));
+        b(end-2*Q+1:end) = normalizeAngle(finishState - X(jvn));        
                 
         % Wrappers for fmincon
         Ceq = b;
@@ -171,7 +173,6 @@ yessave = 1;
         Coutgrad = [];
         
     end
-
 
 
     function X0 = fsolve_init(n)
@@ -195,16 +196,12 @@ yessave = 1;
         X0 = fsolve_init(n);
     end 
     
-%     if options.init == 3
-%         X0 = approx_traj(n,2)
-%     end
-    
     % Lower and upperbounds on state variables
     JointLB = -inf*ones(2*Q*n,1); %      JointLB(5:3:end) = -3;  
     JointUB =  inf*ones(2*Q*n,1);  
     lb = [JointLB; -M*ones(Q*n,1); 0];
     ub = [JointUB; M*ones(Q*n,1); inf];
-    opt = optimset('Algorithm','sqp','GradConstr','on','Display','off');
+    opt = optimset('Algorithm','sqp','GradConstr','on','display','off');
     opt.MaxFunEvals = 100000;
     opt.TolFun = 0.3; %*ones(SZ,n+2)';   % maybe increasing the tolerance would help?, size of b = F(X)
     
