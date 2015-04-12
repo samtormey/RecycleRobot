@@ -307,7 +307,9 @@ end
 function [best_id, control, shortest_time] = decisionAlgo(octos,robot,A,algo)
 
 curr_num_octo = numel(octos);
-maxiter = 120;
+maxiter = 30; % 120 earlier
+% alpha is a toggle, bigger alpha means smaller gap in search path
+alpha = 2; % 8 earlier
 best_id = 0;
 control = 0;
 time = 0;
@@ -317,8 +319,9 @@ if strcmp(algo,'SPT')
     for i = 1:curr_num_octo
 
         if octos(i).state == 1 && norm([octos(i).x octos(i).y]) < robot.l_1 + robot.l_2
+            % alpha is a toggle, bigger alpha means smaller gap in search path
             [temp_control, time] = goal2belt_picker(robot.curr_goal_index, ...
-                [octos(i).x; octos(i).y], A, maxiter);
+                [octos(i).x; octos(i).y], A, maxiter, alpha);
             
             if time < shortest_time
                 best_id = octos(i).id;
@@ -343,7 +346,7 @@ if strcmp(algo,'Right')
 
         if octos(i).state == 1
             [temp_control, time] = goal2belt_picker(robot.curr_goal_index, ...
-                [octos(i).x; octos(i).y], A, maxiter);
+                [octos(i).x; octos(i).y], A, maxiter, alpha);
             
             
             if time < Inf && X < octos(i).x
