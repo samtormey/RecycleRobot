@@ -6,3 +6,6 @@
 *.snm
 *.toc
 *.log
+*.zip
+*.swp
+*.gz
