@@ -1,0 +1,486 @@
+	% This template is taken from the following 
+%       http://www-i6.informatik.rwth-aachen.de/~dreuw/latexbeamerposter.php
+\documentclass[final]{beamer}
+
+\newcommand {\cE} {\mathcal{E}}
+\newcommand {\cD} {\mathcal{D}}
+\newcommand{\E}{\ensuremath{\mathbb{E}} } %
+\newcommand {\bxi} {\mbox{\boldmath $\xi$}}%
+\newcommand{\bl}{\ensuremath{\mathbf{l}}} %
+\newcommand{\bi}{\ensuremath{\mathbf{i}}} %
+\newcommand{\bn}{\ensuremath{\mathbf{n}}} %
+\newcommand{\bx}{\ensuremath{\mathbf{x}}} %
+
+%\usepackage[absolute,overlay]{textpos}
+%
+%\setbeamercolor{framesource}{fg=gray}
+%\setbeamerfont{framesource}{size=\tiny}
+%\newcommand{\source}[1]{\begin{textblock*}{12cm}(1cm,8.6cm)
+%    \begin{beamercolorbox}[ht=0.5cm,left]{framesource}
+%        \usebeamerfont{framesource}\usebeamercolor[fg]{framesource} Source: {#1}
+%    \end{beamercolorbox}
+%\end{textblock*}}
+
+
+\mode<presentation> {
+        % you can chose your theme here:
+        %  \usetheme{Aachen}
+         \usetheme{I6dv}        % the one in use (custom)
+		%  \usetheme{I6pd2}
+        %  \usetheme{I6pd}
+        %            \usetheme{Berlin}
+        %               \usetheme[height=10cm]{Rochester}
+        %               \usetheme{Madrid}
+        %  \usetheme{I6pd2}
+        %  \usetheme{I6td}
+        %  \usetheme{Oldi6}
+}
+
+\graphicspath{{figures/}}
+
+\usepackage{ragged2e, times, wrapfig}
+\usepackage{amsmath, amssymb, amsfonts, mathrsfs}
+\usepackage{graphics,xcolor}
+\usepackage[english]{babel}
+\usepackage[latin1]{inputenc}
+\usepackage[orientation=landscape,size=custom,width=121,height=91,scale=2,debug]{beamerposter}  % e.g. custom size poster
+
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        
+        \title[Fancy Posters]{Minimum Time Control in SCARA Robot Simulation}
+        \author{Sam Tormey, Nick Link, Rick LeVan. Advisor: Matthias Heinkenschloss}
+        \institute{Department of Computational and Applied Mathematics, Rice University}
+        
+        
+        
+\begin{document} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        \begin{frame}{}
+        
+        \vfill
+        \vspace{-1cm}
+% =============================================================================
+%                                     Column 1
+% =============================================================================
+{\footnotesize
+\begin{columns}[t]
+        
+\hspace{0.7cm}
+\begin{column}{.30\linewidth}
+                
+\begin{block}{\centering Introduction}
+Improving the efficiency of recycling through automation was the inspiration for our project.    \\
+
+\centering \includegraphics[height=10cm, width = 12cm]{figures/mrf-recycling-system.jpg}\\
+
+We model the removal of objects from a conveyor belt with a MATLAB simulation of a SCARA robot.\\
+
+We solve a constrained optimization problem to find optimal (minimum-time) path between starting and
+ending robot configurations. \\
+ 
+\end{block}
+                
+%-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+                
+%\vspace{1cm}
+
+\begin{block}{\centering Stochastic Elliptic Problem} 
+
+\begin{align*}
+-\nabla\cdot(a_N(\bxi,\bx)\nabla u(\bxi,\bx)) &= f(\bx) \;\; &&\text{in} \; \cD\times\Gamma\\
+u(\bxi,\bx) &= 0 \;\; &&\text{on} \; \partial\cD\times\Gamma
+\end{align*}
+\noindent
+\hspace{1em}where\\
+\vspace{0.5em}
+\hspace{2em} $u(\bxi,\bx)$ - a state variable (e.g. pressure)\\
+\hspace{2em} $a_N(\bxi,\bx)$ - a random diffusion coefficient (e.g. permeability) \\
+\hspace{6.2em} given by
+%\vspace{1em}
+%Under the finite noise assumption $a(\bxi,\bx)\approx a_N(\bxi,\bx)$ with\\
+\begin{align*}
+\log{(a_N(\bxi,\bx))} = \sum\limits_{n=1}^N Y_n(\bxi)\zeta_n\psi_n(\bx)
+\end{align*}
+
+\begin{columns}[T]
+\begin{column}{20cm}{}
+ \raggedleft\includegraphics[height=10cm, width = 18cm]{figures/solution.png}\\
+\raggedright \hspace{2em}\scriptsize{Realization of $u(\bxi,\bx)$}
+\end{column}
+%\begin{column}{10cm}{}
+%\centering \includegraphics[height=10cm, width = 12cm]{figures/mesh}\\
+%\centering \scriptsize{Mesh and quantity of interest}
+%\end{column}
+\begin{column}{12cm}{}
+\centering \includegraphics[height=10cm, width = 12cm]{figures/diffusion.png}\\
+\centering \scriptsize{Realization of $a_N(\bxi,\bx)$}
+\end{column}
+\end{columns}
+
+\vspace{1em}
+\hspace{1em}Quantity of interest: $Q(u(\bxi,\bx))=u(\bxi,\bx^*)$.
+
+\end{block}
+
+                
+%-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+                
+%\vspace{1cm}
+
+\begin{block}{\centering Objective}
+
+Estimate uncertainty in $Q(u(\bxi,\bx))$ via
+\begin{align*}
+\centering \text{Mean value: } \;\; &\E[Q(u(\cdot,\bx))] \\
+\centering \text{Semi-deviation: } \;\; &\E[\max{\{(Q(u(\cdot,\bx)) - \E[Q(u(\cdot,\bx))]),0\}}]
+\end{align*}
+
+%Our goal is to estimate the uncertainty in some quantity of interest $Q(u(\bxi,\bx))$ that depends on the solution $u(\bxi,\bx)$ such as\\
+%\vspace{0.5em}
+%\begin{align*}
+%Q(u(\bxi,\bx)) = u(x^*)
+%\end{align*}
+% \hspace{2em} Mean value $\E[Q(u(\cdot,\bx))]$\\
+% \hspace{2em} Semideviation $\E[\max{\{(Q(u(\cdot,\bx)) - \E[Q(u(\cdot,\bx))]),0\}}]$
+\vspace{0.5em}
+
+
+
+Challenges:
+\begin{itemize}
+\item Integration over high-dimensional parameter space $\Gamma$;
+\item Each evaluation of quantity of interest requires solving a PDE (cost);
+\item The integrand is non-smooth (max function).
+\end{itemize}
+
+\vspace{0.5em}
+Need non-intrusive robust and efficient sampling methods that take into account local behavior of the integrand (quantity of interest).
+\end{block}
+
+
+%-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+                        
+
+ \end{column}
+%-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+                        
+        
+% =======================================================================
+%                                     Column 2
+% =======================================================================
+        
+\begin{column}{.30\linewidth}
+
+\begin{block}{\centering Common Sampling Methods}
+
+\begin{columns}[T]
+
+\begin{column}{10cm}{}
+\centering
+\vspace{3cm}
+$\E[f] = \frac{1}{M}  \sum\limits_{i=1}^M f(\bxi_i)$
+\end{column}
+
+\begin{column}{12cm}{\centering \scriptsize{Monte Carlo (MC)}}
+\centering\includegraphics[height=10cm, width = 10cm]{figures/MCpoints}
+\end{column}
+
+\begin{column}{12cm}{\centering \scriptsize{Quasi-Monte Carlo (QMC)}}
+\centering\includegraphics[height=10cm, width = 10cm]{figures/Sobolpoints}
+\end{column}
+\end{columns}
+
+\vspace{0.5em}
+
+\begin{columns}[T]
+
+\begin{column}{10cm}{}
+\centering
+\vspace{3em}
+$\E[f] = \sum\limits_{i=1}^M \omega_i f(\bxi_i)$
+%$f\in \text{span}\{\prod\limits_{i=1}^d \xi_i^{p_i}\}$
+\end{column}
+
+\begin{column}{12cm}{\centering \scriptsize{Tensor Product (TP)}}
+\centering\includegraphics[height=10cm, width = 10cm]{figures/tensorproductpoints}
+\end{column}
+
+\begin{column}{12cm}{\centering \scriptsize{Sparse Grid (SG)}}
+\centering\includegraphics[height=10cm, width = 10cm]{figures/smolyakpoints}
+\end{column}
+\end{columns}
+
+
+\end{block}
+                
+\begin{block}{\centering Hierarchical Basis}
+
+\vspace{1em}
+
+\begin{columns}[T]
+\begin{column}{22cm}{}
+Represent $f$ using hierarchical basis functions (with varying support):\\
+\begin{equation*}
+f(\bxi) \approx \sum\limits_{\bl} f_{\bl}(\bxi), \;\;\; f_{\bl}(\bxi) = \sum\limits_{\bi\;\;\text{odd}}  s_{\bl,\bi} \phi_{\bl,\bi}(\bxi)
+\end{equation*}
+%\noindent
+%where coefficients $s_{\bl,\bi}$ are determined from 
+%\begin{equation*}
+%s_{\bl,\bi} = ( \prod_{j=1}^d [\; -\frac{1}{2} \;\; 1 \;\; -\frac{1}{2} \;]_{\xi_{l_j,i_j},l_j} ) f
+%\end{equation*}
+\noindent
+where $d$-dimensional functions $\phi_{\bl,\bi}(\bxi)$ are defined as
+\begin{equation*}
+\phi_{\bl,\bi}(\bxi) = \prod_{j=1}^d \phi_{l_j,i_j}(\xi_j)
+\end{equation*}
+Coefficients $s_{\bl,\bi}$ are called \textit{hierarchical surpluses} as they represent hierarchichal increments between neighboring levels.
+\end{column}
+\begin{column}{12cm}{}
+\centering\includegraphics[height=16cm, width = 10cm]{figures/hierbasis_v2} \\
+\vspace{1em}
+\centering \scriptsize{1D hierarchical piecewise linear basis}
+\end{column}
+%\begin{column}{16cm}{}
+%\includegraphics[height=12cm, width = 14cm]{figures/hiersubspaces} \\
+%Scheme of hierarchical subspaces in 2D
+%\end{column}
+\end{columns}
+
+
+\end{block}
+%-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*untitled.eps-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*               
+%  \vspace{1cm}
+                
+ \begin{block}{\centering Adaptivity (hASG)}
+
+Hierarchical surpluses $s_{\bl,\bi}$ are a natural local error indicator.\\
+
+Thus, refining only points with relatively large surpluses we obtain an adaptive grid (with more points spent in non-smooth areas).\\
+%
+%The idea of adaptivity is to refine only those points $\bxi_{\bl,\bi}$ for which $|s_{\bl,\bi}|>\epsilon$ (where $\epsilon$ is prescribed tolerance).\\
+
+%1D example\\
+\begin{columns}[T]
+\begin{column}{16cm}{}
+\centering \includegraphics[height=10cm, width = 16cm]{figures/1Dadaptivefunc}\\
+\centering \scriptsize{Adaptive grid}
+%$f(\xi) = \max{\{\exp{(-10\xi^2)}-0.3,0\}}$
+\end{column}
+\begin{column}{16cm}{}
+\raggedleft \includegraphics[height=10cm, width = 16cm]{figures/1Dadaptivetree}\\
+\centering \scriptsize{Adaptivity tree}
+\end{column}
+\end{columns}
+
+%\vspace{1cm}
+%
+%Application to function $f_2(\bxi)$
+%\begin{columns}[T]
+%\begin{column}{16cm}{}
+%\includegraphics[height=10cm, width = 10cm]{figures/hierpoly1points}\\
+%Adaptive sparse grid
+%\end{column}
+%\begin{column}{16cm}{}
+%\includegraphics[height=10cm, width = 14cm]{figures/errornonsmoothH}\\
+%Error in integral
+%\end{column}
+%\end{columns}
+
+\end{block}
+
+ \end{column}
+% =============================================================================
+%                                     Column 3
+% =============================================================================
+        
+\begin{column}{.30\linewidth}
+
+\begin{block}{\centering Simple Test Problems}
+\vspace{-1em}
+\begin{columns}[T]
+\begin{column}{18cm}{}
+\centering\includegraphics[height=10cm, width = 14cm]{figures/gaussian}\\
+\centering\scriptsize{$f_1(\bxi) = \exp{(-\sum\limits_{i=1}^d \xi_i^2)}$}
+%Smooth with respect to parameters
+\end{column}
+\begin{column}{18cm}{}
+\centering\includegraphics[height=10cm, width = 14cm]{figures/maxgaussian}\\
+\centering\scriptsize{$f_2(\bxi) = 2\max{\{f_1(\bxi)-\frac{1}{2},0\}}$}
+%Non-smoothness introduced by max function
+\end{column}
+\end{columns}
+
+\vspace{0.5em}
+\begin{columns}[T]
+
+\begin{column}{12cm}{}
+\centering\includegraphics[height=10cm, width = 14cm]{figures/gaussian2errors}\\
+
+\end{column}
+\begin{column}{4cm}{}
+\vspace{2cm}
+\centering\includegraphics[height=5cm,width=5cm]{figures/legend}\\
+\end{column}
+\begin{column}{14cm}{}
+\includegraphics[height=10cm, width = 14cm]{figures/maxgaussian2errors}\\
+%Deterioration in rates of convergence for $f_2(\xi_1,\xi_2)$
+\end{column}
+\end{columns}
+\vspace{0.5em}
+\centering\scriptsize{Absolute errors in integral vs the number of samples for $d=2$}
+
+\begin{columns}[T]
+\begin{column}{12cm}{}
+\includegraphics[height=10cm, width = 14cm]{figures/gaussian5errors}\\
+%Rates of convergence for $f_1(\xi_1,\xi_2)$
+\end{column}
+\begin{column}{4cm}{}
+\vspace{2cm}
+\centering\includegraphics[height=5cm,width=5cm]{figures/legend}\\
+\end{column}
+\begin{column}{14cm}{}
+\includegraphics[height=10cm, width = 14cm]{figures/maxgaussian5errors}\\
+%Deterioration in rates of convergence for $f_2(\xi_1,\xi_2)$
+\end{column}
+\end{columns}
+\vspace{0.5em}
+\centering\scriptsize{Absolute errors in integral vs the number of samples for $d=5$}
+
+\end{block}
+
+                
+\begin{block}{\centering Results for the PDE problem}
+\vspace{-0.5em}
+\begin{columns}[T]
+\begin{column}{12cm}{}
+\includegraphics[height=10cm, width = 14cm]{figures/exp5errors}\\
+%Rates of convergence for exp
+\end{column}
+\begin{column}{4cm}{}
+\vspace{2cm}
+\centering\includegraphics[height=3cm,width=5cm]{figures/legend2}\\
+\vspace{1em}
+\centering{\footnotesize{$N=5$}}
+\end{column}
+\begin{column}{14cm}{}
+\includegraphics[height=10cm, width = 14cm]{figures/exp11errors}\\
+%Deterioration in rates of convergence for exp
+\end{column}
+\end{columns}
+\vspace{0.5em}
+\centering\scriptsize{Approximation of the mean value vs the number of samples}
+%: $\E[Q(u(\cdot,\bx))]$
+\vspace{-0.5em}
+\begin{columns}[T]
+\begin{column}{12cm}{}
+\includegraphics[height=10cm, width = 14cm]{figures/semidev5errors}\\
+%Rates of convergence for semidev
+\end{column}
+\begin{column}{4cm}{}
+\vspace{2cm}
+\centering\includegraphics[height=3cm,width=5cm]{figures/legend2}\\
+\vspace{1em}
+\raggedright{\footnotesize{$N=11$}}
+\end{column}
+\begin{column}{14cm}{}
+\includegraphics[height=10cm, width = 14cm]{figures/semidev11errors}\\
+%Deterioration in rates of convergence for semidev
+\end{column}
+\end{columns}
+\vspace{0.5em}
+\centering\scriptsize{Approximation of the semi-deviation vs the number of samples}
+%: $\E[\max{\{(Q(u(\cdot,\bx)) - \E[Q(u(\cdot,\bx))]),0\}}]$
+\end{block}
+
+
+
+                
+%-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*             
+%  \vspace{1cm}
+                
+\begin{block}{\centering Current research and future work}
+\begin{itemize}
+\item Further investigation of convergence properties of hierarchical adaptive sparse grids and quasi-Monte Carlo methods.
+\item Application in the context of PDE-constrained optimization.
+\end{itemize}
+\end{block}
+                
+%-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*                
+% \vspace{0.5cm}
+                
+%                \setbeamertemplate{
+%bibliography item}[text] % for numbering on the references
+
+%               \begin{block}{References}
+%                       \bibliographystyle{plain}
+%                       \begin{thebibliography}{99}
+                
+                        %{\scriptsize \bibliography{refs}}
+%\tiny \bibitem{SS} [1] F. Santosa and W. Symes, \textit{Linear Inversion of Band-Limited Reflection Seismograms,} 1986
+%\tiny \bibitem{GRB} [2] Gurobi Optimization, \textit{Gurobi Optimizer Reference Manual,} 2012, \\ \url{www.gurobi.com}.
+%\tiny \bibitem{RECPF} [3] J. Yang, Y. Zhang and W. Yin, \textit{A Fast Alternating Direction Method for TVL1-L2 signal reconstruction from Partial Fourier Data,} April 2010, \\
+%\url{www.caam.rice.edu/~optimization/L1/RecPF/}.
+
+                    
+   %                 \end{thebibliography}
+                       
+                    
+        %               \vspace{.05cm}
+                %\end{block}
+                
+                %-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+                
+%                \vspace{1cm}
+                
+%                \begin{block}{Aknowledgements}
+%                
+%                This work is partially funded by NSF Grant DMS-0811188 and DMS-1115950 and by CONACYT.
+%                        %{\scriptsize
+%        
+%                                %\begin{figure}
+%                                %\includegraphics{rice-logo} \hspace{1cm} 
+%                                %\includegraphics{conacyt}\hspace{1cm} \includegraphics[width=2in]{nsf}
+%                                %\end{figure}
+%
+%                                %  \center{ \tiny This work is partially funded by NSF Grant DMS-0811188 and DMS-1115950 and by CONACYT. }
+%                        %}
+%                \end{block}
+                
+\end{column}
+        
+\end{columns}
+}       % end of footnotesize
+
+\end{frame}
+        
+\end{document} %===================================================================================
+%==================================================================================================
+%%
+%% \begin{block}{\large Fontsizes}
+%%       \centering
+%%       {\tiny tiny}\par
+%%       {\scriptsize scriptsize}\par
+%%       {\footnotesize footnotesize}\par
+%%       {\normalsize normalsize}\par
+%%       {\large large}\par
+%%       {\Large Large}\par
+%%       {\LARGE LARGE}\par
+%%       {\veryHuge veryHuge}\par
+%%       {\VeryHuge VeryHuge}\par
+%%       {\VERYHuge VERYHuge}\par
+%% \end{block}
+%%
+%%====================================================
+%%
+%%      \begin{block}{Methods}
+%%              \begin{figure}[htbp]
+%%                      \begin{center}
+%%                              \includegraphics[width=7in]{lp_example2.pdf}
+%%                              \label{ fig:lp_example1.pdf}
+%%                      \end{center}
+%%              \end{figure}
+%%      \end{block}
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-PDF-mode: t

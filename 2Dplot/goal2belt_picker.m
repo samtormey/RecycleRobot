@@ -1,5 +1,5 @@
 % Given a moving belt, find the best feasible time and path
-function [bfp, bft] = goal2belt_picker(sgp_index, sol, A, maxiter)
+function [bfp, bft] = goal2belt_picker(sgp_index, sol, A, maxiter, alpha)
 % sgp_index: starting goal point index, 2x1 vector
 % sol: starting octo location, 
 % A: pre-computed time and path storage
@@ -21,8 +21,7 @@ theta_vec = -pi+dt:dt:pi;
 
 
 % heuristic for gap spaces in a row along the belt
-% alpha just a toggle
-alpha = 8;
+
 gap_size = 2*pi*len2/disc/alpha;
 
 % loop through forward solutions in a row until we find 

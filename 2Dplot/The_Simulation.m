@@ -23,18 +23,7 @@ len2 = robot.l_2;
 num_rec = belt.num_rec;
 rec_width = belt.rec_width;
 h = zeros(num_rec,1);
-
-% generate goal region points
-gps = 5;
-goal_width = 2*sqrt((len1+len2)^2 - goal_y^2);
-goal_points_x = linspace(-goal_width/2,goal_width/2,gps);
-goal_points_y = goal_y*ones(1,gps);
-points = [goal_points_x; goal_points_y];
-
-% Inverse Kinematics
-[the1p, the2p, the1n, the2n] = inverseThe(points,len1,len2);
-goal_configs = [the1p the1n(2:end-1); the2p the2n(2:end-1)]'; % note this!
-
+d_fart = .1;
 
 checkk = 0;
 cntt = 0;
@@ -116,12 +105,13 @@ goal_width = 2*sqrt((len1+len2)^2 - goal_y^2);
 goal_points_x = linspace(-goal_width/2,goal_width/2,gps);
 goal_points_y = goal_y*ones(1,gps);
 points = [goal_points_x; goal_points_y];
+goal_octos = zeros(5,1);
 
 % Inverse Kinematics
 [the1p, the2p, the1n, the2n] = inverseThe1_2(points,len1,len2);
 goal_configs = [the1p the1n(2:end-1); the2p the2n(2:end-1)]'; % note this!
-
-
+    
+    
 num_theta = 80;
 dtheta = 2*pi/num_theta;
 theta_vec = -pi+dtheta:dtheta:pi;
@@ -136,7 +126,9 @@ test_octo = 0;
 
 sim_counter = 1;
 
-while 1
+while real_time < 250
+        real_time;
+        tic
         
     % This if statement updates the robot state and what step it is on for
     % the current path. If the path is complete it finds a new path.
@@ -146,12 +138,7 @@ while 1
 
             start = [robot.path(n,1) robot.path(n,2) 0 0]';
             [control,closest_goal_ind,time] = belt2goal_picker(A,start,num_goal_pts); 
-            robot.path = control_to_position(control, n, start, time);
-           
-            options.init = 2;
-            X0 = 0;
-%           [X control T exitflag comp_time statePath] =  RealOptimalPathFind(start,[goal_configs(1,:) 0 0]',options,X0,n)
-           %
+            robot.path = control_to_position(control, n, start, time);           
            
            robot.time = time;
            robot.pathCounter = 1;
@@ -167,6 +154,17 @@ while 1
        if robot.pathCounter == n
            robot.state = 'waiting'; 
            octos(id).state = 3;
+           
+           % store the goal to be plotted
+            [xx,yy,zz] = fkSCARA(robot.path(robot.pathCounter,1),robot.path(robot.pathCounter,2),len1,len2);
+           
+            [val, ind] = min(abs(points(1,:) - xx));
+            if val < 0.1;
+               goal_octos(ind) = 1; 
+            else
+               fprintf('Something aint right!')
+               keyboard
+            end
        else
            robot.pathCounter = robot.pathCounter + 1;
   
@@ -176,7 +174,7 @@ while 1
     
     if strcmp(robot.state, 'waiting') 
            
-            algo = 'Right';
+           algo = 'SPT';
        
            [id, control, time] = decisionAlgo(octos,robot,A,algo);    
            
@@ -191,7 +189,7 @@ while 1
            end
     end
     
-    dt_real = robot.time/(n-1);
+    dt = robot.time/(n-1);
     
     % octos on the belt move right
     
@@ -199,7 +197,7 @@ while 1
     grid on
     patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
    
-    
+    octos_plotted = 0;
     for k = 1:numel(octos)
         if octos(k).state == 0 || octos(k).state == 1
             octos(k).x = octos(k).x + v*dt;
@@ -215,19 +213,36 @@ while 1
             octos(k).x = xx;
             octos(k).y = yy;            
         end
+        if octos(k).state == 3
+%             [xx,yy,zz] = fkSCARA(robot.path(robot.pathCounter,1),robot.path(robot.pathCounter,2),len1,len2);
+%            
+%             [val, ind] = min(points(1,:) - xx);
+%             if val < 0.1;
+%                goal_octos(ind) = 1; 
+%                keyboard
+%             else
+%                fprintf('Something aint right!')
+%                keyboard
+%             end
+           
+        end
         % if octo has not fallen off (fall off == state 4)
-        if octos(k).state < 4
+        if octos(k).state < 3
             plot3D_OCTO(octos(k).x,octos(k).y,octos(k).z,octos(k).theta);
+            octos_plotted = octos_plotted + 1;
         end
 
     end
     
+    % plot goal region
+    for i = 1:5
+        if goal_octos(i) == 1
+            plot3D_OCTO(points(1,i),points(2,i),0,0);
+            octos_plotted = octos_plotted + 1;
+        end
+    end
+    
     patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
-    
-    pause(dt)
-    
-    real_time = real_time + dt_real;
-    
     
     % Update octoprism struct
     if real_time > new_octo
@@ -250,12 +265,12 @@ while 1
         
     end
    
-    if real_time > 10
-        profile viewer
-%         fprintf('T_robot = %f \n T_octo = %f \n T_plot = %f \n T_extra = %f \n', ...
-%             T_robot, T_octo, T_plot, extra_time)
-       keyboard 
-    end
+%     if real_time > 10
+%         profile viewer
+% %         fprintf('T_robot = %f \n T_octo = %f \n T_plot = %f \n T_extra = %f \n', ...
+% %             T_robot, T_octo, T_plot, extra_time)
+%        keyboard 
+%     end
     
     % code below print-logs the states of the octos
     if mod(sim_counter,10) == 0
@@ -274,19 +289,31 @@ while 1
                 octo_n - nnz(state_array - (j-1)*ones(octo_n,1));
         end
         
-        disp(['Real time is:  ' num2str(real_time)]);
-        disp('');
-        disp(['# Invisibles:        ' num2str(numPerState(1))]);
-        disp(['# Visible on belt:   ' num2str(numPerState(2))]);
-        disp(['# Attached to robot: ' num2str(numPerState(3))]);
-        disp(['# In goal region:    ' num2str(numPerState(4))]);
-        disp(['# Fallen off belt:   ' num2str(numPerState(5))]);
-        disp('***');
+%         disp(['Real time is:  ' num2str(real_time)]);
+%         disp('');
+%         disp(['# Invisibles:        ' num2str(numPerState(1))]);
+%         disp(['# Visible on belt:   ' num2str(numPerState(2))]);
+%         disp(['# Attached to robot: ' num2str(numPerState(3))]);
+%         disp(['# In goal region:    ' num2str(numPerState(4))]);
+%         disp(['# Fallen off belt:   ' num2str(numPerState(5))]);
+%         disp('***');
         
-    end
+        
+        
+    end        
     
     sim_counter = sim_counter + 1;
     
+    comptime = toc;     
+    if (dt - comptime) < 0
+        disp('pause is neg')
+        pause(.01)
+    else
+        pause(dt/2 - comptime) 
+    end
+   
+    real_time = real_time + dt;
+    fprintf('\noctos plotted = %d\n', octos_plotted)
 
 end
     
@@ -299,7 +326,9 @@ end
 function [best_id, control, shortest_time] = decisionAlgo(octos,robot,A,algo)
 
 curr_num_octo = numel(octos);
-maxiter = 120;
+maxiter = 30; % 120 earlier
+% alpha is a toggle, bigger alpha means smaller gap in search path
+alpha = 2; % 8 earlier
 best_id = 0;
 control = 0;
 time = 0;
@@ -309,9 +338,11 @@ if strcmp(algo,'SPT')
     for i = 1:curr_num_octo
 
         if octos(i).state == 1 && norm([octos(i).x octos(i).y]) < robot.l_1 + robot.l_2
+            % alpha is a toggle, bigger alpha means smaller gap in search path
+            
             [temp_control, time] = goal2belt_picker(robot.curr_goal_index, ...
-                [octos(i).x; octos(i).y], A, maxiter);
-            keyboard
+                [octos(i).x; octos(i).y], A, maxiter, alpha);
+
             if time < shortest_time
                 best_id = octos(i).id;
                 control = temp_control;
@@ -321,9 +352,6 @@ if strcmp(algo,'SPT')
 
 
     end
-if size(time_vec,1) > 0
-    %
-end
 end
 
 
@@ -335,7 +363,7 @@ if strcmp(algo,'Right')
 
         if octos(i).state == 1
             [temp_control, time] = goal2belt_picker(robot.curr_goal_index, ...
-                [octos(i).x; octos(i).y], A, maxiter);
+                [octos(i).x; octos(i).y], A, maxiter, alpha);
             
             
             if time < Inf && X < octos(i).x

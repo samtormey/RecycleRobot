@@ -61,8 +61,7 @@ draw_arm_3;
         side_faces(n,5:n) = ones(1,n-4)*n;
         
         faces = [top_face; bottom_face; side_faces];
-        
-%         figure(1);
+
         clf;
         view([45 45])
         axis([-2 2 -2 2 0 3])
@@ -70,8 +69,6 @@ draw_arm_3;
         g = patch('Vertices',vertices,'Faces',faces,'facecolor','b');
         
 %         save(['./draw/base'],'faces','vertices')
-        
-
         
     end
 
