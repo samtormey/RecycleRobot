@@ -1,4 +1,4 @@
-function [ time ] = controllers_Approx ( startState, finishState, n, plot_eh, err, Kp, Kv, M, robot)
+function [ time, control ] = controllers_Approx ( startState, finishState, n, err, robot)
 
  
 
@@ -8,7 +8,7 @@ close all;
 
 % Initialize robot
 
-% M = 10;
+M = 10;
 
 n = 20;
 dt = 1/n;
@@ -22,9 +22,12 @@ state(:,1) = startState;
 torque = zeros(2,1);
 u = zeros(2,1);
 Q = 2;
+plot_eh = 0;
 
-% Kp = -25;
-% Kv = Kp;
+Kp = -50;
+Kv = Kp/2;
+M = 10;
+
 i = 0;
 
 
@@ -81,6 +84,8 @@ i = 0;
         end   
 
         time = steps*dt;
+        
+        control = torque';
       
            
 end
