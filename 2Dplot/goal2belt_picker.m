@@ -33,10 +33,11 @@ bft = Inf;
 % best feasible path 
 bfp = Inf;
 
+figure(2)
 while bfp == Inf && count <= maxiter
     count = count + 1;
-    
     temp = sol + [count*gap_size; 0];
+    plot(temp(1),temp(2),'ro')
     
     if norm(temp) > len1 + len2
         % if the object is too far to the left, so it will 

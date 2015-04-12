@@ -311,7 +311,7 @@ if strcmp(algo,'SPT')
         if octos(i).state == 1 && norm([octos(i).x octos(i).y]) < robot.l_1 + robot.l_2
             [temp_control, time] = goal2belt_picker(robot.curr_goal_index, ...
                 [octos(i).x; octos(i).y], A, maxiter);
-            
+            keyboard
             if time < shortest_time
                 best_id = octos(i).id;
                 control = temp_control;
