@@ -1,7 +1,7 @@
 function The_Simulation 
 
 close all
-rng(4);
+rng(5);
 belt = ConvBelt;
 goal_y = belt.robo2goal;
 belt_bottom = belt.robo2bottom;
@@ -25,7 +25,7 @@ rec_width = belt.rec_width;
 h = zeros(num_rec,1);
 d_fart = .1;
 
-<<<<<<< HEAD
+
 % generate goal region points
 gps = 5;
 goal_width = 2*sqrt((len1+len2)^2 - goal_y^2);
@@ -36,12 +36,7 @@ points = [goal_points_x; goal_points_y];
 % Inverse Kinematics
 [the1p, the2p, the1n, the2n] = inverseThe(points,len1,len2);
 goal_configs = [the1p the1n(2:end-1); the2p the2n(2:end-1)]'; % note this!
-=======
-checkk = 0;
-cntt = 0;
-loops = 1000;
-M(loops) = struct('cdata',[],'colormap',[]);
->>>>>>> 7e064ba97e946af418ba743403c8e03abe0d50ed
+
 
 
 real_time = 0;
@@ -105,14 +100,15 @@ new_octo = min_time; % time check for adding octoprisms
 
 
 % 
-%  pit = load('Precompute/UnitedFriendMatrix.mat');
-%  A = pit.UnitedA;
+ pit = load('Precompute/UnitedFriendMatrix.mat');
+ A = pit.UnitedA;
 % pit = load('Precompute/Controls_n=20_numThe=80_gps=5.mat');
 
-pit = load('Precompute/Controllers_3_Controls_n=20_numThe=80.mat');
+% pit = load('Precompute/Controllers_3_Controls_n=20_numThe=80.mat');
 
-A = pit.A;
+% A = pit.A;
 n = pit.n;
+n = 20;
 [num_goal_pts,~] = size(pit.goal_configs);
 rng(1);
 % generate goal region points
@@ -143,7 +139,7 @@ test_octo = 0;
 
 sim_counter = 1;
 
-while real_time < 250
+while 1
         real_time;
         tic
         
@@ -157,8 +153,15 @@ while real_time < 250
             [control,closest_goal_ind,time] = belt2goal_picker(A,start,num_goal_pts);   
             robot.path = control_to_position(control, size(control,1), start, time);  
             if size(robot.path,1) > n
-                 temp = interp1(linspace(0,time,size(control,1)),robot.path,linspace(0,time,n)');               
-                 robot.path = [temp(1:end-1,:); robot.path(end,:)];                   
+                 temp = interp1(linspace(0,time,size(control,1)),robot.path,linspace(0,time,n)');                              
+                 robot.path = [temp(1:end,:)]; %robot.path(end,:)];   
+                 [x,y] = fkSCARA(robot.path(end,1),robot.path(end,2),len1,len2);
+%                  if y < belt_bottom
+%                      y = belt_bottom + .01;
+%                  end
+%                  if y > belt_top
+%                      y = belt_top - .01;
+%                  end
             end
            
            robot.time = time;
@@ -184,7 +187,7 @@ while real_time < 250
                goal_octos(ind) = 1; 
             else
                fprintf('Something aint right!')
-               keyboard
+%                keyboard
             end
        else
            robot.pathCounter = robot.pathCounter + 1;
@@ -194,23 +197,19 @@ while real_time < 250
     
     
     if strcmp(robot.state, 'waiting') 
-<<<<<<< HEAD
-         
-            algo = 'Right';
-=======
+
            
            algo = 'SPT';
->>>>>>> 7e064ba97e946af418ba743403c8e03abe0d50ed
        
            [id, control, time] = decisionAlgo (octos,robot,A,algo);    
 
            if id ~= 0 % there is a reachable octoprism
                start = [pit.goal_configs(robot.curr_goal_index,:) 0 0]';
                robot.path = control_to_position(control, size(control,1), start, time);
-               if size(robot.path,1) > n
-                   temp = interp1(linspace(0,time,size(control,1)),robot.path,linspace(0,time,n)');               
-                   robot.path = [temp(1:end-1,:); robot.path(end,:)];                   
-               end
+%                if size(robot.path,1) > n
+%                    temp = interp1(linspace(0,time,size(control,1)),robot.path,linspace(0,time,n)');               
+%                    robot.path = [temp(1:end,:)];  %-1,:); robot.path(end,:)];                   
+%                end
                robot.pathCounter = 1;
                robot.time = time;
 
