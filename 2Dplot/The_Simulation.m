@@ -1,7 +1,7 @@
 function The_Simulation 
 
 close all
-rng(2);
+rng(4);
 belt = ConvBelt;
 goal_y = belt.robo2goal;
 belt_bottom = belt.robo2bottom;
@@ -25,10 +25,23 @@ rec_width = belt.rec_width;
 h = zeros(num_rec,1);
 d_fart = .1;
 
+<<<<<<< HEAD
+% generate goal region points
+gps = 5;
+goal_width = 2*sqrt((len1+len2)^2 - goal_y^2);
+goal_points_x = linspace(-goal_width/2,goal_width/2,gps);
+goal_points_y = goal_y*ones(1,gps);
+points = [goal_points_x; goal_points_y];
+
+% Inverse Kinematics
+[the1p, the2p, the1n, the2n] = inverseThe(points,len1,len2);
+goal_configs = [the1p the1n(2:end-1); the2p the2n(2:end-1)]'; % note this!
+=======
 checkk = 0;
 cntt = 0;
 loops = 1000;
 M(loops) = struct('cdata',[],'colormap',[]);
+>>>>>>> 7e064ba97e946af418ba743403c8e03abe0d50ed
 
 
 real_time = 0;
@@ -91,10 +104,13 @@ new_octo = min_time; % time check for adding octoprisms
 
 
 
+% 
+%  pit = load('Precompute/UnitedFriendMatrix.mat');
+%  A = pit.UnitedA;
+% pit = load('Precompute/Controls_n=20_numThe=80_gps=5.mat');
 
-% pit = load('Precompute/UnitedFriendMatrix.mat');
-% A = pit.UnitedA;
-pit = load('Precompute/Controls_n=20_numThe=80_gps=5.mat');
+pit = load('Precompute/Controllers_3_Controls_n=20_numThe=80.mat');
+
 A = pit.A;
 n = pit.n;
 [num_goal_pts,~] = size(pit.goal_configs);
@@ -115,6 +131,7 @@ goal_configs = [the1p the1n(2:end-1); the2p the2n(2:end-1)]'; % note this!
 num_theta = 80;
 dtheta = 2*pi/num_theta;
 theta_vec = -pi+dtheta:dtheta:pi;
+
 
 control_b2g = A{1,18,1,1,2};
 time_b2g =  A{1,18,1,1,1};
@@ -137,8 +154,12 @@ while real_time < 250
        if robot.pathCounter == n
 
             start = [robot.path(n,1) robot.path(n,2) 0 0]';
-            [control,closest_goal_ind,time] = belt2goal_picker(A,start,num_goal_pts); 
-            robot.path = control_to_position(control, n, start, time);           
+            [control,closest_goal_ind,time] = belt2goal_picker(A,start,num_goal_pts);   
+            robot.path = control_to_position(control, size(control,1), start, time);  
+            if size(robot.path,1) > n
+                 temp = interp1(linspace(0,time,size(control,1)),robot.path,linspace(0,time,n)');               
+                 robot.path = [temp(1:end-1,:); robot.path(end,:)];                   
+            end
            
            robot.time = time;
            robot.pathCounter = 1;
@@ -173,19 +194,27 @@ while real_time < 250
     
     
     if strcmp(robot.state, 'waiting') 
+<<<<<<< HEAD
+         
+            algo = 'Right';
+=======
            
            algo = 'SPT';
+>>>>>>> 7e064ba97e946af418ba743403c8e03abe0d50ed
        
-           [id, control, time] = decisionAlgo(octos,robot,A,algo);    
-           
+           [id, control, time] = decisionAlgo (octos,robot,A,algo);    
+
            if id ~= 0 % there is a reachable octoprism
                start = [pit.goal_configs(robot.curr_goal_index,:) 0 0]';
-               robot.path = control_to_position(control, n, start, time);
+               robot.path = control_to_position(control, size(control,1), start, time);
+               if size(robot.path,1) > n
+                   temp = interp1(linspace(0,time,size(control,1)),robot.path,linspace(0,time,n)');               
+                   robot.path = [temp(1:end-1,:); robot.path(end,:)];                   
+               end
                robot.pathCounter = 1;
                robot.time = time;
 
-               robot.state = 'goalToBelt';               
-
+               robot.state = 'goalToBelt';          
            end
     end
     
@@ -360,12 +389,11 @@ if strcmp(algo,'Right')
     X = -1000;
 
     for i = 1:curr_num_octo
-
+      
         if octos(i).state == 1
             [temp_control, time] = goal2belt_picker(robot.curr_goal_index, ...
-                [octos(i).x; octos(i).y], A, maxiter, alpha);
-            
-            
+                [octos(i).x; octos(i).y], A, maxiter, alpha);     
+           
             if time < Inf && X < octos(i).x
                 best_id = octos(i).id;
                 control = temp_control;
