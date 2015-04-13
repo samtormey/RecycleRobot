@@ -57,7 +57,8 @@
         \begin{frame}{}
         
         \vfill
-        \vspace{-1cm}
+        %\vspace{-1cm}
+		\vspace{0cm}
 % =============================================================================
 %                                     Column 1
 % =============================================================================
@@ -70,12 +71,28 @@
 \begin{block}{\centering Introduction}
 Improving the efficiency of recycling through automation was the inspiration for our project.    \\
 
-\centering \includegraphics[height=10cm, width = 12cm]{figures/mrf-recycling-system.jpg}\\
+%\vspace{0.8cm}
+
+\begin{columns}[T]
+\begin{column}{16cm}{}
+	\vspace{0.5cm}
+	\centering \includegraphics[height=10cm, width = 12cm]{figures/mrf-recycling-system.jpg}\\
+\end{column}
+\begin{column}{16cm}{}
+	\centering \includegraphics[height=12cm, width = 14cm]{figures/scara.jpg}\\
+\end{column}
+
+
+\end{columns}
+
+\vspace{0.3cm}
+
+
 
 We model the removal of objects from a conveyor belt with a MATLAB simulation of a SCARA robot.\\
 
-We solve a constrained optimization problem to find optimal (minimum-time) path between starting and
-ending robot configurations. \\
+We solve a constrained optimization problem to find the optimal path between starting and
+ending configurations. \\
  
 \end{block}
                 
@@ -106,7 +123,7 @@ only to the kinetic energy above:
 \end{align*}
 \end{column}
 \begin{column}{16cm}{}
-\centering\includegraphics[height=12cm, width = 12cm]{figures/double-pendulum.png}\\
+\centering\includegraphics[height=10cm, width = 10cm]{figures/double-pendulum.png}\\
 \end{column}
 
 \end{columns}
@@ -125,12 +142,13 @@ only to the kinetic energy above:
 
 \begin{column}{10cm}{}
 
+	\underline{Original Problem}
 \begin{align*}
 \min  & \: \:T \\
 \mbox{s.t. } & \frac{dx(t)}{dt} = f(x(t),u(t)) \\
 & x(0) = x_0 \\
 & x(T) = x_T \\
-& 0 \leq t \leq T
+& t \in [0, T]
 \end{align*}
 
 
@@ -139,6 +157,7 @@ only to the kinetic energy above:
 
 \begin{column}{12cm}{}
 
+	\underline{Discretized Problem}
 \begin{align*}
 \min  & \: \:T \\
 	\mbox{s.t. } & \frac{x_{j+1}-x_j}{\Delta\tau} = Tf(x_j,u_j) \\
