@@ -25,6 +25,7 @@ rec_width = belt.rec_width;
 h = zeros(num_rec,1);
 d_fart = .1;
 
+<<<<<<< HEAD
 % generate goal region points
 gps = 5;
 goal_width = 2*sqrt((len1+len2)^2 - goal_y^2);
@@ -35,6 +36,12 @@ points = [goal_points_x; goal_points_y];
 % Inverse Kinematics
 [the1p, the2p, the1n, the2n] = inverseThe(points,len1,len2);
 goal_configs = [the1p the1n(2:end-1); the2p the2n(2:end-1)]'; % note this!
+=======
+checkk = 0;
+cntt = 0;
+loops = 1000;
+M(loops) = struct('cdata',[],'colormap',[]);
+>>>>>>> 7e064ba97e946af418ba743403c8e03abe0d50ed
 
 
 real_time = 0;
@@ -114,12 +121,13 @@ goal_width = 2*sqrt((len1+len2)^2 - goal_y^2);
 goal_points_x = linspace(-goal_width/2,goal_width/2,gps);
 goal_points_y = goal_y*ones(1,gps);
 points = [goal_points_x; goal_points_y];
+goal_octos = zeros(5,1);
 
 % Inverse Kinematics
 [the1p, the2p, the1n, the2n] = inverseThe1_2(points,len1,len2);
 goal_configs = [the1p the1n(2:end-1); the2p the2n(2:end-1)]'; % note this!
-
-
+    
+    
 num_theta = 80;
 dtheta = 2*pi/num_theta;
 theta_vec = -pi+dtheta:dtheta:pi;
@@ -167,6 +175,17 @@ while real_time < 250
        if robot.pathCounter == n
            robot.state = 'waiting'; 
            octos(id).state = 3;
+           
+           % store the goal to be plotted
+            [xx,yy,zz] = fkSCARA(robot.path(robot.pathCounter,1),robot.path(robot.pathCounter,2),len1,len2);
+           
+            [val, ind] = min(abs(points(1,:) - xx));
+            if val < 0.1;
+               goal_octos(ind) = 1; 
+            else
+               fprintf('Something aint right!')
+               keyboard
+            end
        else
            robot.pathCounter = robot.pathCounter + 1;
   
@@ -175,8 +194,13 @@ while real_time < 250
     
     
     if strcmp(robot.state, 'waiting') 
+<<<<<<< HEAD
          
             algo = 'Right';
+=======
+           
+           algo = 'SPT';
+>>>>>>> 7e064ba97e946af418ba743403c8e03abe0d50ed
        
            [id, control, time] = decisionAlgo (octos,robot,A,algo);    
 
@@ -202,7 +226,7 @@ while real_time < 250
     grid on
     patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
    
-    
+    octos_plotted = 0;
     for k = 1:numel(octos)
         if octos(k).state == 0 || octos(k).state == 1
             octos(k).x = octos(k).x + v*dt;
@@ -218,17 +242,36 @@ while real_time < 250
             octos(k).x = xx;
             octos(k).y = yy;            
         end
+        if octos(k).state == 3
+%             [xx,yy,zz] = fkSCARA(robot.path(robot.pathCounter,1),robot.path(robot.pathCounter,2),len1,len2);
+%            
+%             [val, ind] = min(points(1,:) - xx);
+%             if val < 0.1;
+%                goal_octos(ind) = 1; 
+%                keyboard
+%             else
+%                fprintf('Something aint right!')
+%                keyboard
+%             end
+           
+        end
         % if octo has not fallen off (fall off == state 4)
-        if octos(k).state < 4
+        if octos(k).state < 3
             plot3D_OCTO(octos(k).x,octos(k).y,octos(k).z,octos(k).theta);
+            octos_plotted = octos_plotted + 1;
         end
 
     end
-   
+    
+    % plot goal region
+    for i = 1:5
+        if goal_octos(i) == 1
+            plot3D_OCTO(points(1,i),points(2,i),0,0);
+            octos_plotted = octos_plotted + 1;
+        end
+    end
     
     patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
-
-    
     
     % Update octoprism struct
     if real_time > new_octo
@@ -299,7 +342,7 @@ while real_time < 250
     end
    
     real_time = real_time + dt;
-    
+    fprintf('\noctos plotted = %d\n', octos_plotted)
 
 end
     
@@ -325,9 +368,10 @@ if strcmp(algo,'SPT')
 
         if octos(i).state == 1 && norm([octos(i).x octos(i).y]) < robot.l_1 + robot.l_2
             % alpha is a toggle, bigger alpha means smaller gap in search path
+            
             [temp_control, time] = goal2belt_picker(robot.curr_goal_index, ...
                 [octos(i).x; octos(i).y], A, maxiter, alpha);
-            
+
             if time < shortest_time
                 best_id = octos(i).id;
                 control = temp_control;
@@ -337,9 +381,6 @@ if strcmp(algo,'SPT')
 
 
     end
-if size(time_vec,1) > 0
-    %
-end
 end
 
 

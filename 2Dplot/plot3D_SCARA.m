@@ -4,6 +4,7 @@ function plot3D_SCARA (the1,the2,d3)
 % the1: The angle of the first scara arm
 % the2: The angle of the second scara arm
 % d3: The distance of the third scara arm.
+% tic;
 robot = ScaraInit;
 
 n = 10;
@@ -14,10 +15,11 @@ len1 = robot.l_1;
 len2 = robot.l_2;
 len3 = robot.l_3;
 
-draw_base;
+base = draw_base;
 draw_arm_1;
 draw_arm_2;
 draw_arm_3;
+
 
 % hand(1) = gcf;
 % set(hand(1),'Position',[100 200 560 420])
@@ -28,9 +30,7 @@ draw_arm_3;
 % view([46 14])
 
 
-
-
-    function draw_base
+    function g = draw_base
         steel_grey = [0.7 0.7 0.7];
         r = base_radius;
         
@@ -61,15 +61,19 @@ draw_arm_3;
         side_faces(n,5:n) = ones(1,n-4)*n;
         
         faces = [top_face; bottom_face; side_faces];
+
         clf;
-        
-        patch('Vertices',vertices,'Faces',faces,'facecolor','b');
         view([45 45])
         axis([-2 2 -2 2 0 3])
+        
+        g = patch('Vertices',vertices,'Faces',faces,'facecolor','b');
+        
+%         save(['./draw/base'],'faces','vertices')
         
     end
 
     function draw_arm_1
+        %tic
         steel_grey = [0.7 0.7 0.7];
         % h = height of base
         % t = thickness of arm
@@ -128,8 +132,12 @@ draw_arm_3;
             0        , 0        , 1];
         vertices2 = (R*vertices')';
         
+        disp('computation = ')
+        %toc
+        %tic
         patch('Vertices',vertices2,'Faces',faces,'facecolor',steel_grey)
-        
+        disp('patch1 = ')
+%         toc
         
     end
 

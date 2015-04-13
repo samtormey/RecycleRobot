@@ -34,7 +34,6 @@ bfp = Inf;
 
 while bfp == Inf && count <= maxiter
     count = count + 1;
-    
     temp = sol + [count*gap_size; 0];
     
     if norm(temp) > len1 + len2
