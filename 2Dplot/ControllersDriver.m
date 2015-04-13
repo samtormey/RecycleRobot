@@ -20,7 +20,7 @@ addpath /Users/samtormey/matlab/RecycleRobot/2DPlot/
 robot = ScaraInit;
 len1 = robot.l_1;
 len2 = robot.l_2;
-err = .05;
+err = .01;
 
 belt = ConvBelt;
 goal_y = belt.robo2goal;
@@ -33,8 +33,6 @@ dt = 2*pi/num_theta;
 theta_vec = -pi+dt:dt:pi;
 
 n = 20; % number of time steps
-options.init = 1;
-X0 = zeros(9*n+1,1);
 cnt = 0;
 error = 0;
 
@@ -51,13 +49,8 @@ points = [goal_points_x; goal_points_y];
 [the1p, the2p, the1n, the2n] = inverseThe1_2(points,len1,len2);
 goal_configs = [the1p the1n(2:end-1); the2p the2n(2:end-1)]'; % note this!
 
-% create 0 to 2pi thetas adn goals
-theta_vec2pi = theta_vec;
-theta_vec2pi(1:num_theta/2 - 1) = theta_vec2pi(1:num_theta/2 - 1) + 2*pi;
-goal_configs2pi = goal_configs;
-goal_configs2pi(6:8,2) = goal_configs2pi(6:8,2) + 2*pi;
+A = cell(num_theta,num_theta,8,2,2);
 
-A = cell(num_theta,num_theta,gps,2,2);
 
 
 for k = 1: size(goal_configs,1)
@@ -101,9 +94,9 @@ for k = 1: size(goal_configs,1)
     end % th2
 end % k (goal goal_configs)
 
-ControllerA = A;
 
-save(['./Precompute/Controllers_Controls_n=',num2str(n),'_numThe=',num2str(num_theta),'_gps=',num2str(gps)],'ControllerA',...
+
+save(['./Precompute/Controllers_3_Controls_n=',num2str(n),'_numThe=',num2str(num_theta)],'A',...
         'goal_configs','belt','n','robot','num_theta')
 
 end

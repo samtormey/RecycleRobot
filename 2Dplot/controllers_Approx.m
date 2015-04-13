@@ -59,12 +59,17 @@ i = 0;
                 torque(k,i) = M*sign(torque(k,i));
             end
         end
-        u = torque(:,i);
+         u = torque(:,i);
+         
         k1 = f(state(:,i),u);            
         k2 = f(state(:,i)+.5*dt*k1,u);                
         k3 = f(state(:,i)+.5*dt*k2,u);        
         k4 = f(state(:,i)+dt*k3,u);     
         state(:,i+1) = state(:,i) + (1/6)*dt*(k1+2*k2+2*k3+k4);   
+
+%             stateDer = f(state(:,i),u); 
+%             state(:,i+1) = state(:,i) + dt*stateDer; 
+
         if norm(normalizeAngle(state(:,i+1) - finishState)) < err
             break
         end
