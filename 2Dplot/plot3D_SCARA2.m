@@ -61,8 +61,8 @@ draw_arm_3;
         faces = [top_face; bottom_face; side_faces];
         
         patch('Vertices',vertices,'Faces',faces,'facecolor','b');
-        view([45 45])
-        axis([-2 2 -2 2 0 3])
+%         view([45 45])
+%         axis([-2 2 -2 2 0 3])
         
     end
 
