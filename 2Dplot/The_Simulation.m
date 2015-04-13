@@ -37,12 +37,6 @@ points = [goal_points_x; goal_points_y];
 goal_configs = [the1p the1n(2:end-1); the2p the2n(2:end-1)]'; % note this!
 
 
-checkk = 0;
-cntt = 0;
-loops = 1000;
-M(loops) = struct('cdata',[],'colormap',[]);
-
-
 real_time = 0;
 
 start_rec = linspace(-blr,blr,num_rec);
@@ -103,15 +97,14 @@ new_octo = min_time; % time check for adding octoprisms
 
 
 
-
-% pit = load('Precompute/UnitedFriendMatrix.mat');
-% A = pit.UnitedA;
+% 
+%  pit = load('Precompute/UnitedFriendMatrix.mat');
+%  A = pit.UnitedA;
 % pit = load('Precompute/Controls_n=20_numThe=80_gps=5.mat');
-keyboard
-pit = load('Precompute/Controllers_2_Controls_n=20_numThe=80_err=0.05');
 
-A = pit.ControllerA;
-keyboard
+pit = load('Precompute/Controllers_3_Controls_n=20_numThe=80.mat');
+
+A = pit.A;
 n = pit.n;
 [num_goal_pts,~] = size(pit.goal_configs);
 rng(1);
@@ -182,11 +175,11 @@ while real_time < 250
     
     
     if strcmp(robot.state, 'waiting') 
-           
+         
             algo = 'Right';
        
-           [id, control, time] = decisionAlgo(octos,robot,A,algo);    
-           
+           [id, control, time] = decisionAlgo (octos,robot,A,algo);    
+
            if id ~= 0 % there is a reachable octoprism
                start = [pit.goal_configs(robot.curr_goal_index,:) 0 0]';
                robot.path = control_to_position(control, size(control,1), start, time);
@@ -355,11 +348,11 @@ if strcmp(algo,'Right')
     X = -1000;
 
     for i = 1:curr_num_octo
-
+      
         if octos(i).state == 1
             [temp_control, time] = goal2belt_picker(robot.curr_goal_index, ...
                 [octos(i).x; octos(i).y], A, maxiter, alpha);     
-            
+           
             if time < Inf && X < octos(i).x
                 best_id = octos(i).id;
                 control = temp_control;
