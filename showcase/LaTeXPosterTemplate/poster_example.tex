@@ -38,13 +38,8 @@
 
 \graphicspath{{figures/}}
 
-<<<<<<< HEAD
-\usepackage{ragged2e, times, wrapfig}
-\usepackage{amsmath, amssymb, amsfonts, mathrsfs} 
-=======
 \usepackage{ragged2e, times, wrapfig, graphicx}
 \usepackage{amsmath, amssymb, amsfonts, mathrsfs}
->>>>>>> 7e064ba97e946af418ba743403c8e03abe0d50ed
 \usepackage{graphics,xcolor}
 \usepackage[english]{babel}
 \usepackage[latin1]{inputenc}
@@ -204,77 +199,30 @@ where
 
 \begin{block}{\centering Discretized Precomputation}
 
-\begin{columns}[T]
+\centering\includegraphics[height=16cm, width = 20cm]{figures/SCARA_coverage.eps}\\
 
-\begin{column}{10cm}{}
-\centering
-\vspace{3cm}
-$\E[f] = \frac{1}{M}  \sum\limits_{i=1}^M f(\bxi_i)$
-\end{column}
-
-\begin{column}{12cm}{\centering \scriptsize{Monte Carlo (MC)}}
-\centering\includegraphics[height=10cm, width = 10cm]{figures/MCpoints}
-\end{column}
-
-\begin{column}{12cm}{\centering \scriptsize{Quasi-Monte Carlo (QMC)}}
-\centering\includegraphics[height=10cm, width = 10cm]{figures/Sobolpoints}
-\end{column}
-\end{columns}
-
-\vspace{0.5em}
-
-\begin{columns}[T]
-
-\begin{column}{10cm}{}
-\centering
-\vspace{3em}
-$\E[f] = \sum\limits_{i=1}^M \omega_i f(\bxi_i)$
-%$f\in \text{span}\{\prod\limits_{i=1}^d \xi_i^{p_i}\}$
-\end{column}
-
-\begin{column}{12cm}{\centering \scriptsize{Tensor Product (TP)}}
-\centering\includegraphics[height=10cm, width = 10cm]{figures/tensorproductpoints}
-\end{column}
-
-\begin{column}{12cm}{\centering \scriptsize{Sparse Grid (SG)}}
-\centering\includegraphics[height=10cm, width = 10cm]{figures/smolyakpoints}
-\end{column}
-\end{columns}
+In order to run the simulation efficiently in real time, we precompute the optimal paths between a 
+finite number of goal regions and points on the belt. 
 
 
 \end{block}
                 
 \begin{block}{\centering Optimizing the Optimizer}
 
-\vspace{1em}
-
 \begin{columns}[T]
-\begin{column}{22cm}{}
-Represent $f$ using hierarchical basis functions (with varying support):\\
-\begin{equation*}
-f(\bxi) \approx \sum\limits_{\bl} f_{\bl}(\bxi), \;\;\; f_{\bl}(\bxi) = \sum\limits_{\bi\;\;\text{odd}}  s_{\bl,\bi} \phi_{\bl,\bi}(\bxi)
-\end{equation*}
-%\noindent
-%where coefficients $s_{\bl,\bi}$ are determined from 
-%\begin{equation*}
-%s_{\bl,\bi} = ( \prod_{j=1}^d [\; -\frac{1}{2} \;\; 1 \;\; -\frac{1}{2} \;]_{\xi_{l_j,i_j},l_j} ) f
-%\end{equation*}
-\noindent
-where $d$-dimensional functions $\phi_{\bl,\bi}(\bxi)$ are defined as
-\begin{equation*}
-\phi_{\bl,\bi}(\bxi) = \prod_{j=1}^d \phi_{l_j,i_j}(\xi_j)
-\end{equation*}
-Coefficients $s_{\bl,\bi}$ are called \textit{hierarchical surpluses} as they represent hierarchichal increments between neighboring levels.
+
+\begin{column}{16cm}{}
+
+\centering\includegraphics[height=20cm, width=20cm]{figures/Spy_Jacobian.jpg} \\
+
 \end{column}
-\begin{column}{12cm}{}
-\centering\includegraphics[height=16cm, width = 10cm]{figures/Spy_Jacobian.jpg} \\
-\vspace{1em}
-\centering \scriptsize{1D hierarchical piecewise linear basis}
+
+\begin{column}{16cm}{}
+
+To accelerate MATLAB's fmincon solver for our discretized optimization problem, we precompute the
+Jacobian matrix
+
 \end{column}
-%\begin{column}{16cm}{}
-%\includegraphics[height=12cm, width = 14cm]{figures/hiersubspaces} \\
-%Scheme of hierarchical subspaces in 2D
-%\end{column}
 \end{columns}
 
 
