@@ -38,7 +38,7 @@
 
 \graphicspath{{figures/}}
 
-\usepackage{ragged2e, times, wrapfig}
+\usepackage{ragged2e, times, wrapfig, graphicx}
 \usepackage{amsmath, amssymb, amsfonts, mathrsfs}
 \usepackage{graphics,xcolor}
 \usepackage[english]{babel}
@@ -103,6 +103,8 @@ ending configurations. \\
 \begin{block}{\centering Double Pendulum Physics} 
 
 We calculate the kinetic energy of our system as
+
+\vspace{-0.5cm}
 	
 \begin{align*}
 	E = \frac{1}{2}\dot\theta_1^2(I_4 + 2I_5\cos\theta_2)
@@ -117,10 +119,8 @@ only to the kinetic energy above:
 
 \begin{columns}[T]
 \begin{column}{16cm}{}
-\begin{align*}
-\frac{\partial E}{\partial \theta_j} - 
-\frac{d}{dt}\frac{\partial E}{\partial \dot{\theta_j}} = 0
-\end{align*}
+	\vspace{2cm}
+\[ \scalebox{2.3}{$\frac{\partial E}{\partial \theta_j} = \frac{d}{dt}\frac{\partial E}{\partial \dot{\theta_j}}$} \]
 \end{column}
 \begin{column}{16cm}{}
 \centering\includegraphics[height=10cm, width = 10cm]{figures/double-pendulum.png}\\
