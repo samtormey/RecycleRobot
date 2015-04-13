@@ -25,7 +25,6 @@ rec_width = belt.rec_width;
 h = zeros(num_rec,1);
 d_fart = .1;
 
-<<<<<<< HEAD
 % generate goal region points
 gps = 5;
 goal_width = 2*sqrt((len1+len2)^2 - goal_y^2);
@@ -36,13 +35,8 @@ points = [goal_points_x; goal_points_y];
 % Inverse Kinematics
 [the1p, the2p, the1n, the2n] = inverseThe(points,len1,len2);
 goal_configs = [the1p the1n(2:end-1); the2p the2n(2:end-1)]'; % note this!
-=======
-checkk = 0;
-cntt = 0;
-loops = 1000;
-M(loops) = struct('cdata',[],'colormap',[]);
->>>>>>> 7e064ba97e946af418ba743403c8e03abe0d50ed
 
+algo = 'Right';
 
 real_time = 0;
 
@@ -107,9 +101,9 @@ new_octo = min_time; % time check for adding octoprisms
 % 
 %  pit = load('Precompute/UnitedFriendMatrix.mat');
 %  A = pit.UnitedA;
-% pit = load('Precompute/Controls_n=20_numThe=80_gps=5.mat');
+pit = load('Precompute/Controls_n=20_numThe=80_gps=5.mat');
 
-pit = load('Precompute/Controllers_3_Controls_n=20_numThe=80.mat');
+% pit = load('Precompute/Controllers_3_Controls_n=20_numThe=80.mat');
 
 A = pit.A;
 n = pit.n;
@@ -194,13 +188,6 @@ while real_time < 250
     
     
     if strcmp(robot.state, 'waiting') 
-<<<<<<< HEAD
-         
-            algo = 'Right';
-=======
-           
-           algo = 'SPT';
->>>>>>> 7e064ba97e946af418ba743403c8e03abe0d50ed
        
            [id, control, time] = decisionAlgo (octos,robot,A,algo);    
 
