@@ -1,7 +1,8 @@
 function sexyplot
 
-pit = load('Precompute/Controls_n=20_numThe=80_gps=5');
+% pit = load('Precompute/ModUnitedFriendMatrix.mat');
 % pit = load('Precompute/UnitedFriendMatrix.mat');
+pit = load('Precompute/Controls_n=20_numThe=80_gps=5.mat') 
 A = pit.A;
 n = pit.n;
 
@@ -45,7 +46,7 @@ tally = 0;
 tally2 = 0;
 
 for th1_i = 1:length(theta_vec)
-    th1_i
+
     th1 = theta_vec(th1_i);
     for th2_i = 1:length(theta_vec)
         th2 = theta_vec(th2_i);    
@@ -74,30 +75,34 @@ for th1_i = 1:length(theta_vec)
                 min_time_controllers = Inf;
             for k = 1: size(goal_configs,1)
                 time_pos = A{th1_i_pos,th2_i_pos,k,1,1};
+
                 time_neg = A{th1_i_neg,th2_i_neg,k,1,1}; 
                 keyboard
                 time_pos_controllers = controllers_Approx ( [the1p; the2p; 0; 0], [goal_configs(k,:)'; 0; 0], n, plot_eh, err, Kp, Kv, M, robot);     
                 time_neg_controllers = controllers_Approx ( [the1n; the2n; 0; 0], [goal_configs(k,:)'; 0; 0], n, plot_eh, err, Kp, Kv, M, robot);
                 B(th1_i,th2_i,k,1) = time_pos_controllers;
                 B(th1_i,th2_i,k,2) = time_neg_controllers;
+                
                 if time_pos < min_time 
+
                     min_time = time_pos;
                 end
-                if time_pos_controllers < min_time_controllers
-                    min_time_controllers = time_pos_controllers;
-                end  
-                if time_neg_controllers < min_time_controllers
-                    min_time_controllers = time_neg_controllers;
-                end  
+%                 if time_pos_controllers < min_time_controllers
+%                     min_time_controllers = time_pos_controllers;
+%                 end  
+%                 if time_neg_controllers < min_time_controllers
+%                     min_time_controllers = time_neg_controllers;
+%                 end  
                 if time_neg < min_time
                     min_time = time_neg;
                 end
-                if min_time < 0
-                    keyboard
-                end
+%                 if min_time < 0
+%                     keyboard
+%                 end
             end
             if min_time < Inf
                 x_y_time = [x_y_time;x,y,min_time];
+
                 x_y_time_controllers = [x_y_time_controllers;x,y,min_time_controllers];
                 min_time_controllers
             end
@@ -113,7 +118,7 @@ Y = x_y_time(:,2);
 Z = x_y_time(:,3);
 [XI YI ZI] = griddata(X,Y,Z,linspace(-2,2),linspace(0,2)');
 
-figure(1)
+figure(3)
 trisurf(delaunay(X,Y),X,Y,Z)
 % surf(XI,YI,ZI)
 % plot_belt
@@ -122,11 +127,10 @@ view([0 0 90])
 
 hold on
 
-
-[XIC YIC ZIC] = griddata(x_y_time_controllers(:,1),x_y_time_controllers(:,2),...
-    x_y_time_controllers(:,3),linspace(-2,2),linspace(0,2)');
-trisurf(delaunay(x_y_time_controllers(:,1),x_y_time_controllers(:,2)),...
-    x_y_time_controllers(:,1),x_y_time_controllers(:,2),x_y_time_controllers(:,3))
+% [XIC YIC ZIC] = griddata(x_y_time_controllers(:,1),x_y_time_controllers(:,2),...
+%     x_y_time_controllers(:,3),linspace(-2,2),linspace(0,2)');
+% trisurf(delaunay(x_y_time_controllers(:,1),x_y_time_controllers(:,2)),...
+%     x_y_time_controllers(:,1),x_y_time_controllers(:,2),x_y_time_controllers(:,3))
 
 
 

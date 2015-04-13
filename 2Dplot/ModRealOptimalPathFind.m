@@ -18,7 +18,7 @@ SZ = 3*Q*n+1;
 
 dtau = 1/(n-1);   
 dt = 1e-8;  % for finite difference in Jacobian
-M = 50;
+M = 10;
 J = sparse((n+1)*2*Q,SZ);  % pre-allocation for own Jacobian
 
 I = computeMoments;  % compute moments to be used in F and f, all constants

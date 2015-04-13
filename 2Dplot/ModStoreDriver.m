@@ -10,7 +10,7 @@ function ModStoreDriver
 %     Direction = 1 for belt to goal, 2 for goal to belt
 %     ToP = 1 for time, 2 for control
 clc;
-SingleMod(0,1);
+SingleMod(1,1);
 
 end
 
@@ -89,7 +89,7 @@ for k = 1: size(goal_configs,1)
             
             if (((isequal(goal_configs_old(k,:),goal_configs(k,:))) && ...
                     (th1 == theta_vec(th1_i))) && (th2 == theta_vec(th2_i)))
-                fprintf('No Compute!')
+                fprintf('No Compute!\n')
                 A{th1_i,th2_i,k,1,1} = NaN;
                 A{th1_i,th2_i,k,1,2} = NaN;
                 A{th1_i,th2_i,k,2,1} = NaN;
@@ -103,7 +103,7 @@ for k = 1: size(goal_configs,1)
                 
                 if belt_bottom <= yB && yB <= belt_top
                     cnt = cnt + 1;
-                    %                 fprintf('\niter %d: ', cnt)
+                    fprintf('\niter %d: ', cnt)
                     start = [th1; th2; 0; 0];
                     finish = [goal_th1; goal_th2; 0; 0];
                     [X0 control_b2g T_b2g exitflag1 comp_time] = ...

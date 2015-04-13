@@ -1,6 +1,6 @@
 function g = plot3D_OCTO(x,y,z,theta)
 
-
+tic
 n = 8;
 % shift the angle space input by theta
 t = linspace(0,2*pi,n)' + theta;
@@ -26,6 +26,10 @@ side_faces = ...
      8 1 9 16 8 8 8 8];
 faces = cat(1,top_bottom_faces,side_faces);
 [num_faces, ~] = size(faces);
+
+% pit = load('./draw/octos');
+% [num_faces, ~] = size(faces);
+
 
 g = patch('Vertices',vertices,'Faces',faces,...
         'FaceVertexCData',hsv(num_faces),'FaceColor','flat');
