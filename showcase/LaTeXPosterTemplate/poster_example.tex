@@ -118,34 +118,49 @@ only to the kinetic energy above:
                 
 %\vspace{1cm}
 
-\begin{block}{\centering Objective}
+\begin{block}{\centering The Optimization Problem}
 
-Estimate uncertainty in $Q(u(\bxi,\bx))$ via
+
+\begin{columns}[T]
+
+\begin{column}{10cm}{}
+
 \begin{align*}
-\centering \text{Mean value: } \;\; &\E[Q(u(\cdot,\bx))] \\
-\centering \text{Semi-deviation: } \;\; &\E[\max{\{(Q(u(\cdot,\bx)) - \E[Q(u(\cdot,\bx))]),0\}}]
+\min  & \: \:T \\
+\mbox{s.t. } & \frac{dx(t)}{dt} = f(x(t),u(t)) \\
+& x(0) = x_0 \\
+& x(T) = x_T \\
+& 0 \leq t \leq T
 \end{align*}
 
-%Our goal is to estimate the uncertainty in some quantity of interest $Q(u(\bxi,\bx))$ that depends on the solution $u(\bxi,\bx)$ such as\\
-%\vspace{0.5em}
-%\begin{align*}
-%Q(u(\bxi,\bx)) = u(x^*)
-%\end{align*}
-% \hspace{2em} Mean value $\E[Q(u(\cdot,\bx))]$\\
-% \hspace{2em} Semideviation $\E[\max{\{(Q(u(\cdot,\bx)) - \E[Q(u(\cdot,\bx))]),0\}}]$
-\vspace{0.5em}
 
 
+\end{column}
 
-Challenges:
+\begin{column}{12cm}{}
+
+\begin{align*}
+\min  & \: \:T \\
+	\mbox{s.t. } & \frac{x_{j+1}-x_j}{\Delta\tau} = Tf(x_j,u_j) \\
+& x_1 = x_0 \\
+& x_n = x_T \\
+& 1 \leq j \leq n
+\end{align*}
+\end{column}
+
+\end{columns}
+
+
+where 
 \begin{itemize}
-\item Integration over high-dimensional parameter space $\Gamma$;
-\item Each evaluation of quantity of interest requires solving a PDE (cost);
-\item The integrand is non-smooth (max function).
-\end{itemize}
+\item $T$ = total time taken by path 
+\item $t$ = time 
+\item $x(t)$ = state at time $t$ 
+\item $u(t)$ = control at time $t$ 
+\item $x_0$ = initial state
+\item $x_{\scriptsize\mbox{T}}$ = end state
+\end{itemize} 
 
-\vspace{0.5em}
-Need non-intrusive robust and efficient sampling methods that take into account local behavior of the integrand (quantity of interest).
 \end{block}
 
 
@@ -162,7 +177,7 @@ Need non-intrusive robust and efficient sampling methods that take into account 
         
 \begin{column}{.30\linewidth}
 
-\begin{block}{\centering Common Sampling Methods}
+\begin{block}{\centering Discretized Precomputation}
 
 \begin{columns}[T]
 
@@ -204,7 +219,7 @@ $\E[f] = \sum\limits_{i=1}^M \omega_i f(\bxi_i)$
 
 \end{block}
                 
-\begin{block}{\centering Hierarchical Basis}
+\begin{block}{\centering Optimizing the Optimizer}
 
 \vspace{1em}
 
@@ -227,7 +242,7 @@ where $d$-dimensional functions $\phi_{\bl,\bi}(\bxi)$ are defined as
 Coefficients $s_{\bl,\bi}$ are called \textit{hierarchical surpluses} as they represent hierarchichal increments between neighboring levels.
 \end{column}
 \begin{column}{12cm}{}
-\centering\includegraphics[height=16cm, width = 10cm]{figures/hierbasis_v2} \\
+\centering\includegraphics[height=16cm, width = 10cm]{figures/Spy_Jacobian.jpg} \\
 \vspace{1em}
 \centering \scriptsize{1D hierarchical piecewise linear basis}
 \end{column}
@@ -242,7 +257,7 @@ Coefficients $s_{\bl,\bi}$ are called \textit{hierarchical surpluses} as they re
 %-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*untitled.eps-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*               
 %  \vspace{1cm}
                 
- \begin{block}{\centering Adaptivity (hASG)}
+ \begin{block}{\centering Optimality}
 
 Hierarchical surpluses $s_{\bl,\bi}$ are a natural local error indicator.\\
 
@@ -286,7 +301,7 @@ Thus, refining only points with relatively large surpluses we obtain an adaptive
         
 \begin{column}{.30\linewidth}
 
-\begin{block}{\centering Simple Test Problems}
+\begin{block}{\centering Dog Pics} 
 \vspace{-1em}
 \begin{columns}[T]
 \begin{column}{18cm}{}
@@ -340,7 +355,7 @@ Thus, refining only points with relatively large surpluses we obtain an adaptive
 \end{block}
 
                 
-\begin{block}{\centering Results for the PDE problem}
+\begin{block}{\centering Results}
 \vspace{-0.5em}
 \begin{columns}[T]
 \begin{column}{12cm}{}
@@ -389,10 +404,10 @@ Thus, refining only points with relatively large surpluses we obtain an adaptive
 %-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*             
 %  \vspace{1cm}
                 
-\begin{block}{\centering Current research and future work}
+\begin{block}{\centering Future work}
 \begin{itemize}
-\item Further investigation of convergence properties of hierarchical adaptive sparse grids and quasi-Monte Carlo methods.
-\item Application in the context of PDE-constrained optimization.
+	\item Finding the reason for occasional failure of optimizing with MATLAB's fmincon
+	\item Investigating why the minimum time path is asymmetric from belt to goal and vice versa
 \end{itemize}
 \end{block}
                 
