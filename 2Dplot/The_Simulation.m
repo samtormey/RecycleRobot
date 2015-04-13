@@ -1,7 +1,7 @@
 function The_Simulation 
 
 close all
-rng(5);
+rng(7)
 belt = ConvBelt;
 goal_y = belt.robo2goal;
 belt_bottom = belt.robo2bottom;
@@ -100,17 +100,18 @@ new_octo = min_time; % time check for adding octoprisms
 
 
 % 
- pit = load('Precompute/UnitedFriendMatrix.mat');
+ pit = load('Precompute/ModUnitedFriendMatrix.mat');
  A = pit.UnitedA;
-% pit = load('Precompute/Controls_n=20_numThe=80_gps=5.mat');
+ 
+%  pit = load('Precompute/Controls_n=20_numThe=80_gps=5.mat');
+% A = pit.A;
 
 % pit = load('Precompute/Controllers_3_Controls_n=20_numThe=80.mat');
-
 % A = pit.A;
+
 n = pit.n;
-n = 20;
 [num_goal_pts,~] = size(pit.goal_configs);
-rng(1);
+% rng(1);
 % generate goal region points
 gps = 5;
 goal_width = 2*sqrt((len1+len2)^2 - goal_y^2);
@@ -152,17 +153,7 @@ while 1
             start = [robot.path(n,1) robot.path(n,2) 0 0]';
             [control,closest_goal_ind,time] = belt2goal_picker(A,start,num_goal_pts);   
             robot.path = control_to_position(control, size(control,1), start, time);  
-            if size(robot.path,1) > n
-                 temp = interp1(linspace(0,time,size(control,1)),robot.path,linspace(0,time,n)');                              
-                 robot.path = [temp(1:end,:)]; %robot.path(end,:)];   
-                 [x,y] = fkSCARA(robot.path(end,1),robot.path(end,2),len1,len2);
-%                  if y < belt_bottom
-%                      y = belt_bottom + .01;
-%                  end
-%                  if y > belt_top
-%                      y = belt_top - .01;
-%                  end
-            end
+          
            
            robot.time = time;
            robot.pathCounter = 1;
@@ -201,19 +192,22 @@ while 1
            
            algo = 'SPT';
        
-           [id, control, time] = decisionAlgo (octos,robot,A,algo);    
-
+           [id, control, time] = decisionAlgo (octos,robot,A,algo);  
+      
            if id ~= 0 % there is a reachable octoprism
                start = [pit.goal_configs(robot.curr_goal_index,:) 0 0]';
-               robot.path = control_to_position(control, size(control,1), start, time);
-%                if size(robot.path,1) > n
-%                    temp = interp1(linspace(0,time,size(control,1)),robot.path,linspace(0,time,n)');               
-%                    robot.path = [temp(1:end,:)];  %-1,:); robot.path(end,:)];                   
-%                end
+               robot.path = control_to_position(control, n, start, time);
+              
+                [xx,yy,zz] = fkSCARA(robot.path(:,1),robot.path(:,2),len1,len2);           
+                                                   
                robot.pathCounter = 1;
                robot.time = time;
 
-               robot.state = 'goalToBelt';          
+               robot.state = 'goalToBelt';   
+                if min(yy - belt_bottom) < 0
+                    robot.state = 'waiting';
+                    disp('sent rob off belt')
+                end
            end
     end
     
@@ -333,15 +327,15 @@ while 1
     sim_counter = sim_counter + 1;
     
     comptime = toc;     
-    if (dt - comptime) < 0
-        disp('pause is neg')
-        pause(.01)
-    else
-        pause(dt/2 - comptime) 
-    end
-   
+%     if (dt - comptime) < 0
+%         disp('pause is neg')
+%         pause(.01)
+%     else
+%         pause(dt/2 - comptime) 
+%     end
+    pause(.01)
     real_time = real_time + dt;
-    fprintf('\noctos plotted = %d\n', octos_plotted)
+%     fprintf('\noctos plotted = %d\n', octos_plotted)
 
 end
     
@@ -354,9 +348,9 @@ end
 function [best_id, control, shortest_time] = decisionAlgo(octos,robot,A,algo)
 
 curr_num_octo = numel(octos);
-maxiter = 30; % 120 earlier
+maxiter = 120; % 120 earlier
 % alpha is a toggle, bigger alpha means smaller gap in search path
-alpha = 2; % 8 earlier
+alpha = 4; % 8 earlier
 best_id = 0;
 control = 0;
 time = 0;
@@ -370,6 +364,7 @@ if strcmp(algo,'SPT')
             
             [temp_control, time] = goal2belt_picker(robot.curr_goal_index, ...
                 [octos(i).x; octos(i).y], A, maxiter, alpha);
+         
 
             if time < shortest_time
                 best_id = octos(i).id;
