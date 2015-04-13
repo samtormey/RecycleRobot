@@ -125,12 +125,13 @@ only to the kinetic energy above:
 
 \begin{column}{10cm}{}
 
+	\underline{Original Problem}
 \begin{align*}
 \min  & \: \:T \\
 \mbox{s.t. } & \frac{dx(t)}{dt} = f(x(t),u(t)) \\
 & x(0) = x_0 \\
 & x(T) = x_T \\
-& 0 \leq t \leq T
+& t \in [0, T]
 \end{align*}
 
 
@@ -139,6 +140,7 @@ only to the kinetic energy above:
 
 \begin{column}{12cm}{}
 
+	\underline{Discretized Problem}
 \begin{align*}
 \min  & \: \:T \\
 	\mbox{s.t. } & \frac{x_{j+1}-x_j}{\Delta\tau} = Tf(x_j,u_j) \\
