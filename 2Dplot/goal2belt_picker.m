@@ -32,22 +32,24 @@ bft = Inf;
 % best feasible path 
 bfp = Inf;
 
+
 while bfp == Inf && count <= maxiter
     count = count + 1;
+    
     temp = sol + [count*gap_size; 0];
     
     if norm(temp) > len1 + len2
-        % if the object is too far to the left, so it will 
+        % if the object is too far to the left, so it will
         % potentially be grabbable later
         if temp(1) < 0
             continue
-        % if the object has fallen to far to the right, and is 
-        % now impossible to get
+            % if the object has fallen to far to the right, and is
+            % now impossible to get
         else
             break
         end
     end
-       
+    
     [the1p, the2p, the1n, the2n] = inverseThe(sol + [count*gap_size; 0], ...
         len1, len2);
     
@@ -56,7 +58,7 @@ while bfp == Inf && count <= maxiter
     
     maybe_best_time_p = A{index1p, index2p, sgp_index, 2, 1};
     maybe_best_time_n = A{index1n, index2n, sgp_index, 2, 1};
-   
+    
     if maybe_best_time_p < maybe_best_time_n
         maybe_best_time = maybe_best_time_p;
         n_or_p_better = 'p';
@@ -66,7 +68,7 @@ while bfp == Inf && count <= maxiter
     end
     
     if maybe_best_time < (gap_size*count)/v
-
+        
         % best feasible time
         bft = maybe_best_time;
         % best feasible path
@@ -78,13 +80,12 @@ while bfp == Inf && count <= maxiter
             disp('Uh-oh')
         end
         
-       
+        %             norm(temp)
+        %             keyboard
         break
     end
-    
- 
 end
-
+ 
 
 return
             

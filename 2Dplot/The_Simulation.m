@@ -25,8 +25,6 @@ rec_width = belt.rec_width;
 h = zeros(num_rec,1);
 d_fart = .1;
 
-
-% generate goal region points
 gps = 5;
 goal_width = 2*sqrt((len1+len2)^2 - goal_y^2);
 goal_points_x = linspace(-goal_width/2,goal_width/2,gps);
@@ -39,19 +37,31 @@ goal_configs = [the1p the1n(2:end-1); the2p the2n(2:end-1)]'; % note this!
 
 
 
+algo = 'Right';
+
 real_time = 0;
 
 start_rec = linspace(-blr,blr,num_rec);
 
+% top_corners = [-blr belt_bottom 0;
+%                -blr belt_top 0;
+%                 blr belt_top 0;
+%                 blr belt_bottom 0];
+            
+% bottom_corners =  [-blr belt_bottom -height;
+%                -blr belt_top -height;
+%                 blr belt_top -height;
+%                 blr belt_bottom -height];
+
 top_corners = [-blr belt_bottom 0;
                -blr belt_top 0;
-                blr belt_top 0;
-                blr belt_bottom 0];
+                2 belt_top 0;
+                2 belt_bottom 0];   
             
 bottom_corners =  [-blr belt_bottom -height;
                -blr belt_top -height;
-                blr belt_top -height;
-                blr belt_bottom -height];
+                2 belt_top -height;
+                2 belt_bottom -height];  
             
 verts = [top_corners; bottom_corners];
 
@@ -99,7 +109,7 @@ new_octo = min_time; % time check for adding octoprisms
 
 
 
-% 
+
  pit = load('Precompute/ModUnitedFriendMatrix.mat');
  A = pit.UnitedA;
  
@@ -108,6 +118,7 @@ new_octo = min_time; % time check for adding octoprisms
 
 % pit = load('Precompute/Controllers_3_Controls_n=20_numThe=80.mat');
 % A = pit.A;
+
 
 n = pit.n;
 [num_goal_pts,~] = size(pit.goal_configs);
@@ -123,12 +134,10 @@ goal_octos = zeros(5,1);
 % Inverse Kinematics
 [the1p, the2p, the1n, the2n] = inverseThe1_2(points,len1,len2);
 goal_configs = [the1p the1n(2:end-1); the2p the2n(2:end-1)]'; % note this!
-    
-    
+
 num_theta = 80;
 dtheta = 2*pi/num_theta;
 theta_vec = -pi+dtheta:dtheta:pi;
-
 
 control_b2g = A{1,18,1,1,2};
 time_b2g =  A{1,18,1,1,1};
@@ -160,10 +169,21 @@ while 1
            robot.state = 'beltToGoal';           
            robot.curr_goal_index = closest_goal_ind;
            octos(id).state = 2;
+
        else
            robot.pathCounter = robot.pathCounter + 1;
 
        end
+%     elseif strcmp(robot.state, 'beltToGoal')
+%        % Robot is moving from the belt to the goal
+%        if robot.pathCounter == n
+%            robot.state = 'waiting'; 
+%            octos(id).state = 3;
+%        else
+%            robot.pathCounter = robot.pathCounter + 1;
+%   
+%        end
+%     end
     elseif strcmp(robot.state, 'beltToGoal')
        % Robot is moving from the belt to the goal
        if robot.pathCounter == n
@@ -172,21 +192,23 @@ while 1
            
            % store the goal to be plotted
             [xx,yy,zz] = fkSCARA(robot.path(robot.pathCounter,1),robot.path(robot.pathCounter,2),len1,len2);
-           
+            % find the goal region that the octo is in
             [val, ind] = min(abs(points(1,:) - xx));
+
             if val < 0.1;
                goal_octos(ind) = 1; 
             else
+
                fprintf('Something aint right!')
 %                keyboard
             end
        else
            robot.pathCounter = robot.pathCounter + 1;
-  
        end
+
     end
     
-    
+
     if strcmp(robot.state, 'waiting') 
 
            
@@ -208,6 +230,7 @@ while 1
                     robot.state = 'waiting';
                     disp('sent rob off belt')
                 end
+
            end
     end
     
@@ -219,11 +242,32 @@ while 1
     grid on
     patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
    
-    octos_plotted = 0;
-    for k = 1:numel(octos)
+    
+%     for k = 1:numel(octos)
+%         if octos(k).state == 0 || octos(k).state == 1
+%             octos(k).x = octos(k).x + v*dt;
+%             if octos(k).x > blr + 1;
+%                 octos(k).state = 4;
+%             end
+%         end
+%         if octos(k).state == 0 && octos(k).x > -blr
+%             octos(k).state = 1;
+%         end
+%         if octos(k).state == 2
+%             [xx,yy,zz] = fkSCARA(robot.path(robot.pathCounter,1),robot.path(robot.pathCounter,2),len1,len2);
+%             octos(k).x = xx;
+%             octos(k).y = yy;            
+%         end
+%         % if octo has not fallen off (fall off == state 4)
+%         if octos(k).state < 4
+%             plot3D_OCTO(octos(k).x,octos(k).y,octos(k).z,octos(k).theta);
+%         end
+% 
+%     end
+   for k = 1:numel(octos)
         if octos(k).state == 0 || octos(k).state == 1
             octos(k).x = octos(k).x + v*dt;
-            if octos(k).x > blr + 1;
+            if octos(k).x > blr;
                 octos(k).state = 4;
             end
         end
@@ -235,37 +279,21 @@ while 1
             octos(k).x = xx;
             octos(k).y = yy;            
         end
-        if octos(k).state == 3
-%             [xx,yy,zz] = fkSCARA(robot.path(robot.pathCounter,1),robot.path(robot.pathCounter,2),len1,len2);
-%            
-%             [val, ind] = min(points(1,:) - xx);
-%             if val < 0.1;
-%                goal_octos(ind) = 1; 
-%                keyboard
-%             else
-%                fprintf('Something aint right!')
-%                keyboard
-%             end
-           
-        end
-        % if octo has not fallen off (fall off == state 4)
+ 
+       % if octo has not fallen off (fall off == state 4)
         if octos(k).state < 3
             plot3D_OCTO(octos(k).x,octos(k).y,octos(k).z,octos(k).theta);
-            octos_plotted = octos_plotted + 1;
         end
+   end
 
-    end
-    
     % plot goal region
     for i = 1:5
         if goal_octos(i) == 1
             plot3D_OCTO(points(1,i),points(2,i),0,0);
-            octos_plotted = octos_plotted + 1;
         end
     end
-    
     patch('Vertices',verts,'Faces',faces,'facecolor',[.5 .5 .5]);
-    
+
     % Update octoprism struct
     if real_time > new_octo
         % add octo to struct
@@ -335,7 +363,9 @@ while 1
 %     end
     pause(.01)
     real_time = real_time + dt;
+
 %     fprintf('\noctos plotted = %d\n', octos_plotted)
+
 
 end
     
@@ -361,10 +391,8 @@ if strcmp(algo,'SPT')
 
         if octos(i).state == 1 && norm([octos(i).x octos(i).y]) < robot.l_1 + robot.l_2
             % alpha is a toggle, bigger alpha means smaller gap in search path
-            
             [temp_control, time] = goal2belt_picker(robot.curr_goal_index, ...
                 [octos(i).x; octos(i).y], A, maxiter, alpha);
-         
 
             if time < shortest_time
                 best_id = octos(i).id;
@@ -375,7 +403,9 @@ if strcmp(algo,'SPT')
 
 
     end
+    
 end
+
 
 
 if strcmp(algo,'Right')
@@ -383,11 +413,12 @@ if strcmp(algo,'Right')
     X = -1000;
 
     for i = 1:curr_num_octo
-      
+
         if octos(i).state == 1
             [temp_control, time] = goal2belt_picker(robot.curr_goal_index, ...
-                [octos(i).x; octos(i).y], A, maxiter, alpha);     
-           
+                [octos(i).x; octos(i).y], A, maxiter, alpha);
+            
+            
             if time < Inf && X < octos(i).x
                 best_id = octos(i).id;
                 control = temp_control;
