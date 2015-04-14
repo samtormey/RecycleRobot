@@ -1,7 +1,6 @@
 function The_Simulation 
 
 close all
-rng(4);
 belt = ConvBelt;
 goal_y = belt.robo2goal;
 belt_bottom = belt.robo2bottom;
@@ -109,16 +108,15 @@ new_octo = min_time; % time check for adding octoprisms
 
 
 % 
-% pit = load('Precompute/UnitedFriendMatrix.mat');
-% A = pit.UnitedA;
-pit = load('Precompute/Controls_n=20_numThe=80_gps=5.mat');
+pit = load('Precompute/ModUnitedFriendMatrix.mat');
+A = pit.UnitedA;
+% pit = load('Precompute/Controls_n=20_numThe=80_gps=5.mat');
 
 % pit = load('Precompute/Controllers_3_Controls_n=20_numThe=80.mat');
 
-A = pit.A;
+% A = pit.A;
 n = pit.n;
 [num_goal_pts,~] = size(pit.goal_configs);
-rng(1);
 % generate goal region points
 gps = 5;
 goal_width = 2*sqrt((len1+len2)^2 - goal_y^2);
