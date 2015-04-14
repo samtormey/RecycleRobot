@@ -2,6 +2,24 @@ function The_Simulation
 
 close all
 rng(7)
+
+controllers = 1;
+
+%  pit = load('Precompute/ModUnitedFriendMatrix.mat');
+%  A = pit.UnitedA;
+ 
+%  pit = load('Precompute/Controls_n=20_numThe=80_gps=5.mat');
+% A = pit.A;
+
+pit = load('Precompute/Controllers_3_Controls_n=20_numThe=80.mat');
+A = pit.A;
+
+
+n = pit.n;
+
+[num_goal_pts,~] = size(pit.goal_configs);
+
+
 belt = ConvBelt;
 goal_y = belt.robo2goal;
 belt_bottom = belt.robo2bottom;
@@ -12,7 +30,7 @@ v = belt.velocity;
 robot = ScaraInit;
 %robot.path = zeros(20,2);
 starting_angles = [2.1256 0.0];
-robot.path = [starting_angles(1)*ones(20,1), starting_angles(2)*ones(20,1)];
+robot.path = [starting_angles(1)*ones(n,1), starting_angles(2)*ones(n,1)];
 robot.pathCounter = 1;
 robot.state = 'waiting';
 robot.time = 1;
@@ -43,16 +61,6 @@ real_time = 0;
 
 start_rec = linspace(-blr,blr,num_rec);
 
-% top_corners = [-blr belt_bottom 0;
-%                -blr belt_top 0;
-%                 blr belt_top 0;
-%                 blr belt_bottom 0];
-            
-% bottom_corners =  [-blr belt_bottom -height;
-%                -blr belt_top -height;
-%                 blr belt_top -height;
-%                 blr belt_bottom -height];
-
 top_corners = [-blr belt_bottom 0;
                -blr belt_top 0;
                 2 belt_top 0;
@@ -70,10 +78,6 @@ faces = [1 2 3 4 4 4 4 4; 5 6 7 8 8 8 8 8; 2 1 5 6 6 6 6 6; ...
 
 figure(1); clf;
 plot3D_SCARA(0,0,0);
-
-% axis([-blr blr -blr blr 0 blr])
-% grid on
-% rectangle('Position',[-blr,belt_bottom,2*blr,belt_top],'FaceColor',[.5 .5 .5])
 
 for i = 1:num_rec
     rec_vert(:,:,i) = [start_rec(i),belt_bottom,.1;
@@ -99,29 +103,8 @@ min_time = 0.3/v;
 
 new_octo = min_time; % time check for adding octoprisms
 
-% num_octos = 500;
-% for i = 2:num_octos
-%     octo.x = octos(i-1).x - rand*max_space;
-%     octo.y = (belt_top - belt_bottom - 0.5)*rand + belt_bottom;
-%     octos = [octos octo];
-%     octos(end).id = i;
-% end
 
 
-
-
- pit = load('Precompute/ModUnitedFriendMatrix.mat');
- A = pit.UnitedA;
- 
-%  pit = load('Precompute/Controls_n=20_numThe=80_gps=5.mat');
-% A = pit.A;
-
-% pit = load('Precompute/Controllers_3_Controls_n=20_numThe=80.mat');
-% A = pit.A;
-
-
-n = pit.n;
-[num_goal_pts,~] = size(pit.goal_configs);
 % rng(1);
 % generate goal region points
 gps = 5;
@@ -161,7 +144,10 @@ while 1
 
             start = [robot.path(n,1) robot.path(n,2) 0 0]';
             [control,closest_goal_ind,time] = belt2goal_picker(A,start,num_goal_pts);   
-            robot.path = control_to_position(control, size(control,1), start, time);  
+            robot.path = control_to_position(control, size(control,1), start, time); 
+            if controllers == 1
+                robot.path = InterpolatePath(robot.path,time,n);
+            end
           
            
            robot.time = time;
@@ -210,7 +196,7 @@ while 1
     
 
     if strcmp(robot.state, 'waiting') 
-
+%%
            
            algo = 'SPT';
        
@@ -218,7 +204,11 @@ while 1
       
            if id ~= 0 % there is a reachable octoprism
                start = [pit.goal_configs(robot.curr_goal_index,:) 0 0]';
-               robot.path = control_to_position(control, n, start, time);
+               robot.path = control_to_position(control, size(control,1), start, time);
+              
+               if controllers == 1
+                robot.path = InterpolatePath(robot.path,time,n);
+               end
               
                 [xx,yy,zz] = fkSCARA(robot.path(:,1),robot.path(:,2),len1,len2);           
                                                    
@@ -355,13 +345,13 @@ while 1
     sim_counter = sim_counter + 1;
     
     comptime = toc;     
-%     if (dt - comptime) < 0
-%         disp('pause is neg')
-%         pause(.01)
-%     else
-%         pause(dt/2 - comptime) 
-%     end
-    pause(.01)
+    if (dt - comptime) < 0
+        disp('pause is neg')
+        pause(.01)
+    else
+        pause(dt/2 - comptime) 
+    end
+%     pause(.01)
     real_time = real_time + dt;
 
 %     fprintf('\noctos plotted = %d\n', octos_plotted)
@@ -470,6 +460,18 @@ function [the1p, the2p, the1n, the2n] = inverseThe1_2(points,len1,len2)
 
 end
 
+
+function path = InterpolatePath(path,time,n)
+
+% m is size of current path, n is what we want to shrink it to
+
+temp = interp1(linspace(0,time,size(path,1)),path,linspace(0,time,n),'linear');
+
+
+
+
+
+end
 
 
 % sol = [octo.x; octo.y];
