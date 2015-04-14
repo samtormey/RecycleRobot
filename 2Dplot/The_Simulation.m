@@ -106,14 +106,13 @@ new_octo = min_time; % time check for adding octoprisms
 %     octos(end).id = i;
 % end
 
-
-
 % 
-pit = load('Precompute/ModUnitedFriendMatrix.mat');
-A = pit.UnitedA;
+% pit = load('Precompute/ModUnitedFriendMatrix.mat');
+% A = pit.UnitedA;
+
 % pit = load('Precompute/Controls_n=20_numThe=80_gps=5.mat');
-% pit = load('Precompute/Controllers_3_Controls_n=20_numThe=80.mat');
-% A = pit.A;
+pit = load('Precompute/Controllers_3_Controls_n=20_numThe=80.mat');
+A = pit.A;
 
 n = pit.n;
 [num_goal_pts,~] = size(pit.goal_configs);
