@@ -132,12 +132,8 @@ draw_arm_3;
             0        , 0        , 1];
         vertices2 = (R*vertices')';
         
-       
-        %toc
-        %tic
         patch('Vertices',vertices2,'Faces',faces,'facecolor',steel_grey)
-      
-%         toc
+
         
     end
 

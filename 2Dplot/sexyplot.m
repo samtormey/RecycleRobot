@@ -1,12 +1,11 @@
 function sexyplot
 
-%  plot3D_SCARA(pi,-pi/2,0)
 
-%    pit = load('Precompute/ModUnitedFriendMatrix.mat');
-%   A = pit.UnitedA;
+pit = load('Precompute/ModUnitedFriendMatrix.mat');
+% pit = load('Precompute/UnitedFriendMatrix.mat');
+% pit = load('Precompute/Controls_n=20_numThe=80_gps=5.mat') 
+A = pit.UnitedA;
 
-pit = load('Precompute/Controllers_3_Controls_n=20_numThe=80.mat');
- A = pit.A;
 n = pit.n;
 
 B = zeros(80,80,8,2);
@@ -80,7 +79,7 @@ for th1_i = 1:length(theta_vec)
                 time_pos = A{th1_i_pos,th2_i_pos,k,1,1};
 
                 time_neg = A{th1_i_neg,th2_i_neg,k,1,1}; 
-                
+
 %                 time_pos_controllers = controllers_Approx ( [the1p; the2p; 0; 0], [goal_configs(k,:)'; 0; 0], n, plot_eh, err, Kp, Kv, M, robot);     
 %                 time_neg_controllers = controllers_Approx ( [the1n; the2n; 0; 0], [goal_configs(k,:)'; 0; 0], n, plot_eh, err, Kp, Kv, M, robot);
 %                 B(th1_i,th2_i,k,1) = time_pos_controllers;
@@ -106,8 +105,8 @@ for th1_i = 1:length(theta_vec)
             if min_time < Inf
                 x_y_time = [x_y_time;x,y,min_time];
 
-                x_y_time_controllers = [x_y_time_controllers;x,y,min_time_controllers];
-                min_time_controllers
+%                 x_y_time_controllers = [x_y_time_controllers;x,y,min_time_controllers];
+%                 min_time_controllers
             end
         end
         
@@ -120,8 +119,9 @@ X = x_y_time(:,1);
 Y = x_y_time(:,2);
 Z = x_y_time(:,3);
 [XI YI ZI] = griddata(X,Y,Z,linspace(-2,2),linspace(0,2)');
-hold on
-% figure(3)
+
+figure(1)
+
 trisurf(delaunay(X,Y),X,Y,Z)
 % surf(XI,YI,ZI)
 % plot_belt
@@ -137,12 +137,12 @@ view([0 0 90])
 
 
 
-% title('Optimal Path Time','interpreter','latex','Fontsize',19,'FontWeight','bold')
-
+title('\textbf{Optimal Path Time}','interpreter','latex','Fontsize',19)
 xlabel('x','Fontsize',20)
 ylabel('y','Fontsize',20)
 h = colorbar;
-ylabel(h, 'Time (seconds) ','interpreter','latex','Fontsize',20)
+ylabel(h, '{Time (seconds)}','Fontsize',20)
+% 
 
 % figure(2)
 % surf(XI,YI,ZI)
@@ -150,12 +150,21 @@ ylabel(h, 'Time (seconds) ','interpreter','latex','Fontsize',20)
 % % plot3D_SCARA2(0,0,0);
 % view([0 0 90])
 
+% 
+% title('Optimal Path Time','Fontsize',19)
+% xlabel('x','Fontsize',20)
+% ylabel('y','Fontsize',20)
+% h = colorbar;
+% ylabel(h, 'Time (seconds) ','Fontsize',20)
+
+
 % title('Optimal Path Time','Fontsize',19)
 axis equal
 xlabel('x','Fontsize',20)
 ylabel('y','Fontsize',20)
 h = colorbar;
 ylabel(h, 'Time (seconds) ','Fontsize',20)
+
 % 
 % figure(2)
 % surf(XI,YI,ZI)
@@ -163,6 +172,7 @@ ylabel(h, 'Time (seconds) ','Fontsize',20)
 % colorbar
 
 keyboard
+print('Optimal_Path_Time','-depsc2')
 
 end
     
