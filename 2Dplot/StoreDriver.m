@@ -78,7 +78,7 @@ for k = 1: size(goal_configs,1)
                 start = [th1; th2; 0; 0];
                 finish = [goal_th1; goal_th2; 0; 0];
                 
-                keyboard
+                %keyboard
                 startState = [-pi, theta_vec(18), 0, 0]';
                 finishState = [goal_configs(1,:), 0, 0]';
                 t_f = 4;

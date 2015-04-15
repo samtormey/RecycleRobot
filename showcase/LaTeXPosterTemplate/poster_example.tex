@@ -103,7 +103,7 @@ ending configurations.
                 
 %\vspace{1cm}
 
-\begin{block}{\centering Double Pendulum Physics} 
+\begin{block}{\centering Operating Principle} 
 
 
 \begin{columns}[T]
@@ -115,11 +115,12 @@ ending configurations.
 
 \begin{itemize}
 	\item where $u_j$ is the torque at joint $j$.
-	\item This constraint on kinetic energy gives us $f$ in the optimization problem below.
+	\item The Euler-Lagrange equation constrains kinetic energy and thus the possible system states.
 \end{itemize}
 \end{column}
 \begin{column}{16cm}{}
-\centering\includegraphics[height=17cm, width = 17cm]{figures/double-pendulum.png}\\
+Double Pendulum
+\centering\includegraphics[height=15cm, width = 15cm]{figures/double-pendulum.png}\\
 \end{column}
 
 \end{columns}
@@ -138,7 +139,7 @@ ending configurations.
 
 \begin{column}{10cm}{}
 
-	\underline{Original Problem}
+	\underline{Continuous Form}
 \begin{align*}
 \min  & \: \:T \\
 \mbox{s.t. } & \frac{dx(t)}{dt} = f(x(t),u(t)) \\
@@ -154,10 +155,10 @@ ending configurations.
 
 \begin{column}{12cm}{}
 
-	\underline{Discretized Problem}
+	\underline{Discrete Form}
 \begin{align*}
 \min  & \: \:T \\
-	\mbox{s.t. } & \frac{x_{i+1}-x_j}{\Delta\tau} = Tf(x_i,u_i) \\
+	\mbox{s.t. } & \frac{x_{i+1}-x_i}{\Delta\tau} = Tf(x_i,u_i) \\
 & x_1 = x_0 \\
 & x_n = x_T \\
 & 1 \leq i \leq n \\
@@ -209,26 +210,6 @@ ending configurations.
         
 \begin{column}{.30\linewidth}
 
-\begin{block}{\centering Optimizing the Optimization}
-
-
-
-	%\vspace{-1cm}
-\centering\includegraphics[height=30cm, width=30cm]{figures/Better6_Spy_Jacobian.eps} 
-
-
-
-	\begin{itemize}
-		\item We precompute the Jacobian matrix, where 2.67\% of entries are nonzero.
-		\item This accelerates the fmincon solver
-	\end{itemize}
-%To accelerate MATLAB's fmincon solver for our discretized optimization problem, we compute the
-%Jacobian matrix
-
-
-
-\end{block}
-
 \begin{block}{\centering Discretized Precomputation}
 
 \centering\includegraphics[height=22cm, width = 26cm]{figures/SCARA_coverage.eps}\\
@@ -246,7 +227,29 @@ ending configurations.
 
 
 \end{block}
-                
+             
+
+\begin{block}{\centering Optimizing the Optimization}
+
+
+
+	%\vspace{-1cm}
+\centering\includegraphics[height=30cm, width=30cm]{figures/Better6_Spy_Jacobian.eps} 
+
+
+
+	\begin{itemize}
+		\item We precompute the Jacobian matrix, where 2.67\% of entries are nonzero.
+		\item This accelerates the fmincon solver.
+	\end{itemize}
+%To accelerate MATLAB's fmincon solver for our discretized optimization problem, we compute the
+%Jacobian matrix
+
+
+
+\end{block}
+
+   
 
 %-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*untitled.eps-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*               
 %  \vspace{1cm}
@@ -284,8 +287,8 @@ Variation in optimal time to reach a goal point given a starting robot configura
                 
 \begin{block}{\centering Future work}
 \begin{itemize}
-	\item Finding the reason for occasional failure of optimizing with MATLAB's fmincon
-	\item Investigating better ways of incorporating mod $2\pi$ arithmetic
+	\item Finding the reason for occasional failure of optimizing with MATLAB's fmincon.
+	\item Investigating better ways of incorporating mod $2\pi$ arithmetic.
 \end{itemize}
 \end{block}
                 
