@@ -21,131 +21,131 @@
 \definecolor{i6colorschemeFootline}{HTML}{100D09}  % for headline bg
 
 % headline colors and fonts
-\setbeamercolor{headline}			{fg=i6colorschemeHeadline,bg=white}
-\setbeamercolor{title in headline}		{fg=i6colorschemeHeadline}
-\setbeamercolor{author in headline}	{fg=darkgray}
-\setbeamercolor{institute in headline}	{fg=darkgray}
-\setbeamercolor{logo in headline}		{fg=black,bg=lightgray}
-\setbeamercolor{separation line}		{bg=i6colorscheme1}
-
-
-% % % \setbeamercolor{headline}			{fg=white,bg=i6colorschemeHeadline}
-% % % \setbeamercolor{title in headline}		{fg=white}
-% % % \setbeamercolor{author in headline}	{fg=lightgray}
-% % % \setbeamercolor{institute in headline}	{fg=lightgray}
-% % % \setbeamercolor{logo in headline}		{fg=black,bg=lightgray}
-% % % \setbeamercolor{separation line}		{bg=i6colorscheme1}
-
-
-
+\setbeamercolor{headline}{fg=white,bg=i6colorschemeHeadline}
+\setbeamercolor{title in headline}{fg=white}
+\setbeamercolor{author in headline}{fg=lightgray}
+\setbeamercolor{institute in headline}{fg=lightgray}
+\setbeamercolor{logo in headline}{fg=black,bg=lightgray}
+\setbeamercolor{separation line}{bg=i6colorscheme1}
 
 % footline colors and fonts
-\setbeamercolor{footline}	{fg=i6colorschemeHeadline,bg=white}
-%\setbeamerfont{footline}		{fg=black, size=\normalsize}
+\setbeamercolor{footline}{fg=white,bg=i6colorschemeHeadline}
+%\setbeamerfont{footline}{fg=white, size=\normalsize}
 
 % body colors and fonts
 \setbeamercolor*{normal text}{fg=black,bg=i6colorscheme3}
 
 % block environment
-\setbeamercolor*{block body}	{bg=white,fg=black}
-\setbeamercolor*{block title}	{fg=i6colorblockfg,bg=i6colorblockbg}
-%\setbeamerfont{block title}	{size=\large,series=\bf}
+\setbeamercolor*{block body}{bg=white,fg=black}
+\setbeamercolor*{block title}{fg=i6colorblockfg,bg=i6colorblockbg}
+%\setbeamerfont{block title}{size=\large,series=\bf}
 
 % example environment
-\setbeamercolor*{example title}	{fg=white,bg=i6colorscheme1}
-%\setbeamerfont{example title}		{size=\large,series=\bf,bg=i6colorscheme1,fg=white}
+\setbeamercolor*{example title}{fg=white,bg=i6colorscheme1}
+%\setbeamerfont{example title}{size=\large,series=\bf,bg=i6colorscheme1,fg=white}
+
+
+%\setbeamercolor*{example body}{fg=white,bg=i6colorscheme4}
+%\setbeamercolor*{example title}{fg=white,bg=i6colorscheme1}
+
+
+%  \setbeamercolor{framesubtitle}{fg=ta3orange, bg=ta2gray}
+%  \setbeamercolor{author in head/foot}{fg=tabutter, bg=black}
+%  \setbeamercolor{title in head/foot}{bg=tabutter, fg=black}
+
 
 \setbeamercolor{alerted text}{fg=i6colorscheme1}
+%\setbeamercolor{structure}{fg=i6blue}
+
+%  \setbeamertemplate{itemize/enumerate body begin}{
+%  }
+%  \setbeamertemplate{itemize/enumerate body end}{
+%  }
 
 \setbeamertemplate{itemize items}[triangle]
 \setbeamertemplate{navigation symbols}{}  % no navigation on a poster
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \setbeamertemplate{block begin}{
-	\vskip.6ex
-	
-	\begin{beamercolorbox}[leftskip=1cm,colsep*=.75ex]{block title}%
-		\usebeamerfont*{block title}\insertblocktitle
-	\end{beamercolorbox}%
-	
-	{\ifbeamercolorempty[bg]{block body}{}{\nointerlineskip\vskip-0.5pt}}%
-	
-	\usebeamerfont{block body}%
-	
-	\begin{beamercolorbox}[colsep*=.75ex,sep=.75ex,vmode]{block body}%
-	
-	\ifbeamercolorempty[bg]{block body}{\vskip-.25ex}{\vskip-.75ex}\vbox{}%
+  \vskip.75ex
+  \begin{beamercolorbox}[leftskip=1cm,colsep*=.75ex]{block title}%
+    \usebeamerfont*{block title}\insertblocktitle
+  \end{beamercolorbox}%
+  {\ifbeamercolorempty[bg]{block body}{}{\nointerlineskip\vskip-0.5pt}}%
+  \usebeamerfont{block body}%
+  \begin{beamercolorbox}[colsep*=.75ex,sep=.75ex,vmode]{block body}%
+    \ifbeamercolorempty[bg]{block body}{\vskip-.25ex}{\vskip-.75ex}\vbox{}%
+  }
+  \setbeamertemplate{block end}{
+  \end{beamercolorbox}
 }
-	
-\setbeamertemplate{block end}{\end{beamercolorbox}}
-	
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \setbeamertemplate{headline}{  
   \leavevmode
+
+  \begin{beamercolorbox}[wd=\paperwidth]{headline}
+    \begin{columns}[T]
+      \begin{column}{.02\paperwidth}
+      \end{column}
+      \begin{column}{.07\paperwidth}
+        \begin{center}
+          %\includegraphics[width=.6\linewidth]{logos/i6-hks44}
+        \end{center}
+        \vskip1ex
+      \end{column}
+      \begin{column}{.675\paperwidth}
+        \vskip4ex
+        \raggedleft
+        \usebeamercolor{title in headline}{\color{fg}\textbf{\LARGE{\inserttitle}}\\[1ex]}
+        \usebeamercolor{author in headline}{\color{fg}\large{\insertauthor}\\[1ex]}
+        \usebeamercolor{institute in headline}{\color{fg}\large{\insertinstitute}\\[1ex]}     
+      \end{column}
+      \begin{column}{.25\paperwidth}
+        \vskip1cm
+        \begin{center}
+          \includegraphics[width=.7\linewidth]{/u/figures/deselaers/logos/rwthaachenuniversity-whitegray}
+        \end{center}
+        \vskip1.5cm
+      \end{column}
+      \begin{column}{.03\paperwidth}
+      \end{column}
+    \end{columns}
+  \end{beamercolorbox}
   
-\begin{beamercolorbox}[wd=\paperwidth]{headline}
-	\begin{columns}[T]
-		\begin{column}{.02\paperwidth}
-		\end{column}
-		
-		\begin{column}{.07\paperwidth}
-%				\vskip 1cm
-			\begin{center}
-%				\includegraphics[width=.7\linewidth]{RiceLogo_TMCMYK300DPI}
-			\end{center}
-%				\vskip 1.5cm
-		\end{column}
-		
-		\begin{column}{.675\paperwidth}
-			\vskip4ex
-			\raggedleft
-			\usebeamercolor{title in headline}{\color{fg}\textbf{\LARGE{\inserttitle}}\\[1ex]}
-			\usebeamercolor{author in headline}{\color{fg}\large{\insertauthor}\\[1ex]}
-			\usebeamercolor{institute in headline}{\color{fg}\large{\insertinstitute}\\[1ex]}     
-		\end{column}
-		
-		\begin{column}{.25\paperwidth}
-			\vskip 1cm
-			\begin{center}
-				\includegraphics[width=.7\linewidth]{RiceLogo_TMCMYK300DPI}
-			\end{center}
-			\vskip 1.5cm
-		\end{column}
-		
-		\begin{column}{.03\paperwidth}
-		\end{column}
-	\end{columns}
-\end{beamercolorbox}
-
-\begin{beamercolorbox}[wd=\paperwidth]{lower separation line head}
-	\rule{0pt}{2pt}
-\end{beamercolorbox}
-
-\vspace{-2cm}
-
+%%      \begin{beamercolorbox}[sep=0.1cm,wd=.1\paperwidth,center]{logo in headline}
+%%        \vskip2ex
+%%      \end{beamercolorbox}  
+%%      \begin{beamercolorbox}[sep=1cm,wd=.7\paperwidth]{headline}
+%%        \usebeamercolor{title in headline}{\raggedright\color{fg}\textbf{\LARGE{\inserttitle}}\\[1ex]}
+%%        \usebeamercolor{author in headline}{\raggedright\color{fg}\large{\insertauthor}\\[1ex]}
+%%        \usebeamercolor{institute in headline}{\raggedright\color{fg}\large{\insertinstitute}\\[1ex]}     
+%%      \end{beamercolorbox}%
+%%      \begin{beamercolorbox}[sep=0.1cm,wd=.18\paperwidth,center]{logo in headline}
+%%        \includegraphics[height=5cm]{logos/rwth-hks44}
+%%        \vskip2ex
+%%      \end{beamercolorbox}  
+%%    \end{beamercolorbox}
+  
+  \begin{beamercolorbox}[wd=\paperwidth]{lower separation line head}
+    \rule{0pt}{2pt}
+  \end{beamercolorbox}
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \setbeamertemplate{footline}{
-	
-	% added to compensate for slided hitting bottom
-	\begin{beamercolorbox}[wd=\paperwidth]{i6colorblockbg}
-		\rule{0pt}{5pt}
-	\end{beamercolorbox}
-	
-	\begin{beamercolorbox}[wd=\paperwidth]{upper separation line foot}
-		\rule{0pt}{2.5pt}
-	\end{beamercolorbox}
-	
-	\begin{beamercolorbox}[ht=2ex,leftskip=1cm,rightskip=1cm]{footline}%
-		{\footnotesize \quad Department of Computational and Applied Mathematics \hfill \hfill 
-			\hfill \hfill Contact: \texttt{tat3@rice.edu}}
-		\vskip 0.25ex
-	\end{beamercolorbox}
-	
-	\begin{beamercolorbox}[wd=\paperwidth]{lower separation line foot}
-		\rule{0pt}{1pt}
-	\end{beamercolorbox}
+  \begin{beamercolorbox}[wd=\paperwidth]{upper separation line foot}
+    \rule{0pt}{2pt}
+  \end{beamercolorbox}
+  
+  \begin{beamercolorbox}[ht=4ex,leftskip=1cm,rightskip=1cm]{footline}%
+    Lehrstuhl f\"ur Informatik 6 - Computer Science Department - RWTH Aachen University - Aachen, Germany \hfill Mail: \texttt{<surname>@cs.rwth-aachen.de} \hfill WWW: \texttt{http://www-i6.informatik.rwth-aachen.de}
+    \vskip1ex
+  \end{beamercolorbox}
+
+  \begin{beamercolorbox}[wd=\paperwidth]{lower separation line foot}
+    \rule{0pt}{2pt}
+  \end{beamercolorbox}
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -158,4 +158,4 @@
 %%% mode: latex
 %%% TeX-master: "poster"
 %%% TeX-PDF-mode: t
-%%% End:
+%%% End: 

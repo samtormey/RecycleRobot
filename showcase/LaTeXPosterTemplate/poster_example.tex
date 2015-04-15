@@ -75,15 +75,15 @@
 
 %\vspace{0.8cm}
 
-\vspace{0.3cm}
+%\vspace{0.3cm}
 
 
 \begin{itemize}
-		\item Improving the efficiency of recycling through automation was the inspiration for our project.
-	\item We model the removal of objects from a conveyor belt with a MATLAB simulation of a SCARA robot.
-
-	\item We solve a constrained optimization problem to find the optimal path between starting and
-ending configurations. 
+	\setlength{\itemindent}{0.32in}
+	\item Motivation: Improve the efficiency of recycling through computer automation.
+	\item Goal: Model the optimal removal of objects from a conveyor belt with a MATLAB simulation of a SCARA robot.
+	\item Implementation: Solve a constrained optimization problem to find the optimal path between starting and
+ending robot configurations. 
 \end{itemize}
 
 \begin{columns}[T]
@@ -103,19 +103,24 @@ ending configurations.
                 
 %\vspace{1cm}
 
-\begin{block}{\centering Operating Principle} 
+\begin{block}{\centering SCARA Robot: Operating Principle} 
 
 
 \begin{columns}[T]
 \begin{column}{16cm}{}
-	\vspace{0.7cm}
-\[ \scalebox{2.3}{$\frac{\partial E}{\partial \theta_j} - \frac{d}{dt}\frac{\partial E}{\partial \dot{\theta_j}} = u_j$}\]
-
-\vspace{0.3cm}
 
 \begin{itemize}
-	\item where $u_j$ is the torque at joint $j$.
-	\item The Euler-Lagrange equation constrains kinetic energy and thus the possible system states.
+	%\vspace{0.1cm}
+	\item The Euler-Lagrange equation constrains kinetic energy and thus the possible system states:
+		%\vspace{0.2cm}
+\end{itemize}
+	
+\[ \scalebox{2.3}{$\frac{\partial E}{\partial \theta_j} - \frac{d}{dt}\frac{\partial E}{\partial \dot{\theta_j}} = u_j$}\]
+
+%\vspace{0.3cm}
+
+\begin{itemize}
+	\item $u_j$ is the torque at joint $j$ and $E$ is the kinetic energy.
 \end{itemize}
 \end{column}
 \begin{column}{16cm}{}
@@ -174,9 +179,10 @@ Double Pendulum
 \begin{column}{10cm}{}
 
 \begin{itemize}
+		\setlength{\itemindent}{-0.52in}
 \item $T$ = total time taken by path 
 \item $t$ = time 
-\item $x(t)$ = state at time $t$ 
+\item $f(t)$ = Lagrangian dynamics
 \end{itemize}
 
 \end{column}
@@ -184,10 +190,12 @@ Double Pendulum
 \begin{column}{10cm}{}
 
 \begin{itemize}
-\item $u(t)$ = control at time $t$ 
+		\setlength{\itemindent}{-0.52in}
+		\item $x(t)$ = $[{\theta_1}, \dot{\theta_1}, {\theta_2}, \dot{\theta_2}]$
+\item $u(t)$ = control  
 \item $x_0$ = initial state
 \item $x_{\scriptsize\mbox{T}}$ = end state
-\item $M$ = bound on torque
+\item $M$ = torque bound
 \end{itemize} 
 
 \end{column}
@@ -212,15 +220,21 @@ Double Pendulum
 
 \begin{block}{\centering Discretized Precomputation}
 
-\centering\includegraphics[height=22cm, width = 26cm]{figures/SCARA_coverage.eps}\\
+	\vspace{0.5cm}
+\centering\includegraphics[height=25cm, width = 29cm]{figures/SCARA_coverage.eps}\\
+
+\vspace{0.5cm}
 
 \begin{itemize}
+	\setlength{\itemindent}{0.32in}
 
-	\item The simulation needs to run efficiently in real time.
-	\item Calls to fmincon are costly, however.
-	\item To get around this, we precompute optimal paths between a fixed number of points.
+	\item Problem: The robot needs to make decisions in real time, but calls to fmincon for nonlinear
+		optimization are expensive. 
+	\item Solution: Precompute and store optimal paths between a fixed number of radially spaced points. 
 
 \end{itemize}
+
+\vspace{0.3cm}
 
 %In order to run the simulation efficiently in real time, we precompute the optimal paths between a 
 %finite number of goal regions and points on the belt. 
@@ -231,28 +245,30 @@ Double Pendulum
 
 \begin{block}{\centering Optimizing the Optimization}
 
+	\vspace{0.5cm}
+
 
 
 	%\vspace{-1cm}
-\centering\includegraphics[height=30cm, width=30cm]{figures/Better6_Spy_Jacobian.eps} 
+\centering\includegraphics[height=26cm, width=26cm]{figures/Spy_Jacobian.eps} 
 
 
 
 	\begin{itemize}
-		\item We precompute the Jacobian matrix, where 2.67\% of entries are nonzero.
-		\item This accelerates the fmincon solver.
+		\setlength{\itemindent}{0.32in}
+		\item Problem: fmincon assumes the Jacobian matrix of our system is dense, but it is actually
+			sparse, with 2.67\% of entries are nonzero.
+		\item Solution: Only process nonzero entries in the matrix, giving a tenfold increase in speed. 
 	\end{itemize}
 %To accelerate MATLAB's fmincon solver for our discretized optimization problem, we compute the
 %Jacobian matrix
 
-
+	\vspace{0.8cm}
 
 \end{block}
 
    
 
-%-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*untitled.eps-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*               
-%  \vspace{1cm}
                 
 
  \end{column}
@@ -268,9 +284,15 @@ Double Pendulum
 \begin{block}{\centering Results}
 
 	%\centering\includegraphics[height=30cm, width=30cm]{figures/Optimal_Path_Time.eps}
-	\centering\includegraphics[height=25cm, width=25cm]{figures/MinTime_Controllers_vs_Optimal_Final.eps}
+	\centering\includegraphics[height=28cm, width=28cm]{figures/Controller_vs_Optimal_Time.eps}
 
-Variation in optimal time to reach a goal point given a starting robot configuration
+\begin{itemize}
+		\setlength{\itemindent}{0.32in}
+	\item The plots above represent the time required for the robot to move from a location on the
+		belt to a goal region. 
+	\item Above is the suboptimal path times with PD controllers. 
+	\item Below are the optimal path times with fmincon. 
+\end{itemize}
 
 \vspace{2cm}
 
@@ -285,8 +307,9 @@ Variation in optimal time to reach a goal point given a starting robot configura
 %-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*             
 %  \vspace{1cm}
                 
-\begin{block}{\centering Future work}
+\begin{block}{\centering Future Work}
 \begin{itemize}
+		\setlength{\itemindent}{0.32in}
 	\item Finding the reason for occasional failure of optimizing with MATLAB's fmincon.
 	\item Investigating better ways of incorporating mod $2\pi$ arithmetic.
 \end{itemize}
