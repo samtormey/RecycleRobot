@@ -24,22 +24,24 @@
 
 \mode<presentation> {
         % you can chose your theme here:
-        %  \usetheme{Aachen}
-         \usetheme{I6dv}        % the one in use (custom)
-		%  \usetheme{I6pd2}
+	 %	\usetheme{Aachen} % black, orange, & ugly
+		%  \usetheme{I6ac}
+        % \usetheme{I6dv}        % the original
+		 %  \usetheme{I6pd2}
         %  \usetheme{I6pd}
         %            \usetheme{Berlin}
         %               \usetheme[height=10cm]{Rochester}
         %               \usetheme{Madrid}
         %  \usetheme{I6pd2}
         %  \usetheme{I6td}
-        %  \usetheme{Oldi6}
+         \usetheme{Oldi6} % nice shade of blue in background
 }
 
 \graphicspath{{figures/}}
 
 \usepackage{ragged2e, times, wrapfig, graphicx}
 \usepackage{amsmath, amssymb, amsfonts, mathrsfs}
+\usepackage{commath}
 \usepackage{graphics,xcolor}
 \usepackage[english]{babel}
 \usepackage[latin1]{inputenc}
@@ -57,8 +59,8 @@
         \begin{frame}{}
         
         \vfill
-        %\vspace{-1cm}
-		\vspace{0cm}
+        \vspace{-1.5cm}
+		%\vspace{0.5cm}
 % =============================================================================
 %                                     Column 1
 % =============================================================================
@@ -69,30 +71,31 @@
 \begin{column}{.30\linewidth}
                 
 \begin{block}{\centering Introduction}
-Improving the efficiency of recycling through automation was the inspiration for our project.    \\
+		
 
 %\vspace{0.8cm}
+
+\vspace{0.3cm}
+
+
+\begin{itemize}
+		\item Improving the efficiency of recycling through automation was the inspiration for our project.
+	\item We model the removal of objects from a conveyor belt with a MATLAB simulation of a SCARA robot.
+
+	\item We solve a constrained optimization problem to find the optimal path between starting and
+ending configurations. 
+\end{itemize}
 
 \begin{columns}[T]
 \begin{column}{16cm}{}
 	\vspace{0.5cm}
-	\centering \includegraphics[height=10cm, width = 12cm]{figures/mrf-recycling-system.jpg}\\
+	\centering \includegraphics[height=12cm, width = 14cm]{figures/mrf-recycling-system.jpg}\\
 \end{column}
 \begin{column}{16cm}{}
 	\centering \includegraphics[height=12cm, width = 14cm]{figures/scara.jpg}\\
 \end{column}
 
-
 \end{columns}
-
-\vspace{0.3cm}
-
-
-
-We model the removal of objects from a conveyor belt with a MATLAB simulation of a SCARA robot.\\
-
-We solve a constrained optimization problem to find the optimal path between starting and
-ending configurations. \\
  
 \end{block}
                 
@@ -102,29 +105,21 @@ ending configurations. \\
 
 \begin{block}{\centering Double Pendulum Physics} 
 
-We calculate the kinetic energy of our system as
-
-\vspace{-0.5cm}
-	
-\begin{align*}
-	E = \frac{1}{2}\dot\theta_1^2(I_4 + 2I_5\cos\theta_2)
-	+ \frac{1}{2}\dot\theta_2^2I_6
-	+ \dot\theta_1\dot\theta_2(I_3 + I_5 \cos\theta_2)
-\end{align*}
-
-where the $I_j$ terms represent moments of inertia. 
-
-We ignore gravity and thus potential energy. The Euler-Lagrange equation then applies
-only to the kinetic energy above:
 
 \begin{columns}[T]
 \begin{column}{16cm}{}
 	\vspace{0.7cm}
-\[ \scalebox{2.3}{$\frac{\partial E}{\partial \theta_j} - \frac{d}{dt}\frac{\partial E}{\partial \dot{\theta_j}} = u$}\]
-where $u$ is the vector of torque at the actuators
+\[ \scalebox{2.3}{$\frac{\partial E}{\partial \theta_j} - \frac{d}{dt}\frac{\partial E}{\partial \dot{\theta_j}} = u_j$}\]
+
+\vspace{0.3cm}
+
+\begin{itemize}
+	\item where $u_j$ is the torque at joint $j$.
+	\item This constraint on kinetic energy gives us $f$ in the optimization problem below.
+\end{itemize}
 \end{column}
 \begin{column}{16cm}{}
-\centering\includegraphics[height=10cm, width = 10cm]{figures/double-pendulum.png}\\
+\centering\includegraphics[height=17cm, width = 17cm]{figures/double-pendulum.png}\\
 \end{column}
 
 \end{columns}
@@ -149,7 +144,8 @@ where $u$ is the vector of torque at the actuators
 \mbox{s.t. } & \frac{dx(t)}{dt} = f(x(t),u(t)) \\
 & x(0) = x_0 \\
 & x(T) = x_T \\
-& t \in [0, T]
+& t \in [0, T] \\
+& \norm{u(t)}_{\infty} \leq M \\
 \end{align*}
 
 
@@ -161,25 +157,41 @@ where $u$ is the vector of torque at the actuators
 	\underline{Discretized Problem}
 \begin{align*}
 \min  & \: \:T \\
-	\mbox{s.t. } & \frac{x_{j+1}-x_j}{\Delta\tau} = Tf(x_j,u_j) \\
+	\mbox{s.t. } & \frac{x_{i+1}-x_j}{\Delta\tau} = Tf(x_i,u_i) \\
 & x_1 = x_0 \\
 & x_n = x_T \\
-& 1 \leq j \leq n
+& 1 \leq i \leq n \\
+& \norm{u_i}_{\infty} \leq M \\
 \end{align*}
 \end{column}
 
 \end{columns}
 
 
-where 
+\begin{columns}[T]
+
+\begin{column}{10cm}{}
+
 \begin{itemize}
 \item $T$ = total time taken by path 
 \item $t$ = time 
 \item $x(t)$ = state at time $t$ 
+\end{itemize}
+
+\end{column}
+
+\begin{column}{10cm}{}
+
+\begin{itemize}
 \item $u(t)$ = control at time $t$ 
 \item $x_0$ = initial state
 \item $x_{\scriptsize\mbox{T}}$ = end state
+\item $M$ = bound on torque
 \end{itemize} 
+
+\end{column}
+
+\end{columns}
 
 \end{block}
 
@@ -197,33 +209,40 @@ where
         
 \begin{column}{.30\linewidth}
 
-\begin{block}{\centering Optimizing the Optimizer}
+\begin{block}{\centering Optimizing the Optimization}
 
-\begin{columns}[T]
 
-\begin{column}{16cm}{}
 
-\centering\includegraphics[height=15cm, width=20cm]{figures/Spy_Jacobian.jpg} \\
+	%\vspace{-1cm}
+\centering\includegraphics[height=30cm, width=30cm]{figures/Better6_Spy_Jacobian.eps} 
 
-\end{column}
 
-\begin{column}{16cm}{}
 
-To accelerate MATLAB's fmincon solver for our discretized optimization problem, we compute the
-Jacobian matrix
+	\begin{itemize}
+		\item We precompute the Jacobian matrix, where 2.67\% of entries are nonzero.
+		\item This accelerates the fmincon solver
+	\end{itemize}
+%To accelerate MATLAB's fmincon solver for our discretized optimization problem, we compute the
+%Jacobian matrix
 
-\end{column}
-\end{columns}
 
 
 \end{block}
 
 \begin{block}{\centering Discretized Precomputation}
 
-\centering\includegraphics[height=16cm, width = 20cm]{figures/SCARA_coverage.eps}\\
+\centering\includegraphics[height=22cm, width = 26cm]{figures/SCARA_coverage.eps}\\
 
-In order to run the simulation efficiently in real time, we precompute the optimal paths between a 
-finite number of goal regions and points on the belt. 
+\begin{itemize}
+
+	\item The simulation needs to run efficiently in real time.
+	\item Calls to fmincon are costly, however.
+	\item To get around this, we precompute optimal paths between a fixed number of points.
+
+\end{itemize}
+
+%In order to run the simulation efficiently in real time, we precompute the optimal paths between a 
+%finite number of goal regions and points on the belt. 
 
 
 \end{block}
@@ -232,19 +251,6 @@ finite number of goal regions and points on the belt.
 %-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*untitled.eps-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*               
 %  \vspace{1cm}
                 
- \begin{block}{\centering Optimality}
-
-	 \centering\includegraphics[height=20cm, width=20cm]{figures/PDvsOptimal.eps} \\
-
-	 Above are the suboptimal times achieved with PD (proportional derivative) controllers, below are the superior
-MinTimeControl results. 
-
-At each point on the belt, it takes less time to travel to a given goal region with
-an optimal path than with a corresponding PD controller
-
-
-
-\end{block}
 
  \end{column}
 % =============================================================================
@@ -258,14 +264,15 @@ an optimal path than with a corresponding PD controller
                 
 \begin{block}{\centering Results}
 
-	\centering\includegraphics[height=30cm, width=30cm]{figures/Optimal_Path_Time.eps}
+	%\centering\includegraphics[height=30cm, width=30cm]{figures/Optimal_Path_Time.eps}
+	\centering\includegraphics[height=25cm, width=25cm]{figures/MinTime_Controllers_vs_Optimal_Final.eps}
 
 Variation in optimal time to reach a goal point given a starting robot configuration
 
 \vspace{2cm}
 
 
-\centering\includegraphics[height=30cm, width=30cm]{figures/image1.jpeg}
+\centering\includegraphics[height=28cm, width=30cm]{figures/bar_graph.eps}
 
 \end{block}
 
@@ -278,7 +285,7 @@ Variation in optimal time to reach a goal point given a starting robot configura
 \begin{block}{\centering Future work}
 \begin{itemize}
 	\item Finding the reason for occasional failure of optimizing with MATLAB's fmincon
-	\item Investigating why the minimum time path is asymmetric from belt to goal and vice versa
+	\item Investigating better ways of incorporating mod $2\pi$ arithmetic
 \end{itemize}
 \end{block}
                 

@@ -338,13 +338,15 @@ while 1
     sim_counter = sim_counter + 1;
     
     comptime = toc;     
-    if (dt - comptime) < 0
-        disp('pause is neg')
-        pause(.01)
-    else
-        pause(dt/2 - comptime) 
-    end
-%     pause(.01)
+
+     if (dt - comptime) < 0
+         disp('pause is neg')
+         pause(.01)
+     else
+         pause(dt/2 - comptime) 
+     end
+    % pause(.01)
+
     real_time = real_time + dt;
 
 %     fprintf('\noctos plotted = %d\n', octos_plotted)
