@@ -14,6 +14,7 @@ controllers = 1;
 pit = load('Precompute/Controllers_3_Controls_n=20_numThe=80.mat');
 A = pit.A;
 n = pit.n;
+n
 [num_goal_pts,~] = size(pit.goal_configs);
 
 belt = ConvBelt;
